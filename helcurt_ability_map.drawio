@@ -1,72 +1,35 @@
-<mxfile host="app.diagrams.net" modified="2023-12-14T21:27:07.419Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:121.0) Gecko/20100101 Firefox/121.0" etag="-Optm9L4bsznsKRr6wfS" version="22.1.9" type="github">
+<mxfile host="app.diagrams.net" modified="2023-12-14T23:17:47.988Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:121.0) Gecko/20100101 Firefox/121.0" etag="M0m43XGVSvRjadvqw1QA" version="22.1.9" type="github">
   <diagram name="Page-1" id="2YBvvXClWsGukQMizWep">
-    <mxGraphModel dx="1706" dy="989" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="2333" dy="1358" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-1" value="&lt;div&gt;GAMEPLAY LOOP&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Kill enemies to gain horizontal speed&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;html=1;fontSize=16;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1">
-          <mxGeometry x="680" y="30" width="310" height="80" as="geometry" />
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-1" value="&lt;div&gt;GAMEPLAY LOOP&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Kill enemies to gain&amp;nbsp;&lt;/div&gt;&lt;div&gt;horizontal &amp;amp; vertical velocity&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;html=1;fontSize=16;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="20" y="100" width="230" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-50" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=0;exitDx=0;exitDy=0;fontSize=12;startSize=8;endSize=8;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="IQvJlNmxwXKHrSr8fV7O-3" target="IQvJlNmxwXKHrSr8fV7O-55">
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-8" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;startSize=8;endSize=8;shape=flexArrow;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="IQvJlNmxwXKHrSr8fV7O-9" target="IQvJlNmxwXKHrSr8fV7O-81">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="560" y="250" as="targetPoint" />
-            <mxPoint x="630" y="420" as="sourcePoint" />
+            <mxPoint x="1220" y="-40" as="targetPoint" />
+            <Array as="points" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-51" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;exitX=0;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="IQvJlNmxwXKHrSr8fV7O-3" target="IQvJlNmxwXKHrSr8fV7O-42">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="660" y="330" as="sourcePoint" />
-          </mxGeometry>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-106" value="" style="swimlane;startSize=0;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="380" y="960" width="1330" height="570" as="geometry" />
         </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-3" value="&lt;div&gt;Passive&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;(defense)&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="580" y="420" width="120" height="80" as="geometry" />
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-126" value="&lt;div&gt;SECONDARY GIMIC&lt;/div&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-106">
+          <mxGeometry x="350" y="80" width="255" height="220" as="geometry" />
         </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-7" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="1" source="IQvJlNmxwXKHrSr8fV7O-6" target="IQvJlNmxwXKHrSr8fV7O-3">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-136" value="&lt;ul&gt;&lt;li&gt;DEFENSE AND BUFFS&lt;/li&gt;&lt;li&gt;Passive provides defense &amp;amp; night vision in the shadow&lt;/li&gt;&lt;li&gt;Ultimate temporarily: grants passive to you &amp;amp; your teamates, increases your speed, and brings the night to blind enemies&lt;br&gt;&lt;/li&gt;&lt;/ul&gt;" style="text;strokeColor=none;fillColor=none;html=1;whiteSpace=wrap;verticalAlign=middle;overflow=hidden;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-126">
+          <mxGeometry y="30" width="255" height="190" as="geometry" />
         </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-8" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;startSize=8;endSize=8;" edge="1" parent="1" source="IQvJlNmxwXKHrSr8fV7O-6" target="IQvJlNmxwXKHrSr8fV7O-9">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="910" y="440" as="targetPoint" />
-          </mxGeometry>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-3" value="&lt;div&gt;Passive&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;(defense)&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-106">
+          <mxGeometry x="210" y="350" width="120" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-6" value="&lt;div&gt;Ultimate&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;(Team buffs &amp;amp; Enemy debuffs)&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="950" y="420" width="120" height="90" as="geometry" />
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-6" value="&lt;div&gt;Ultimate&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;(Team buffs &amp;amp; Enemy debuffs)&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-106">
+          <mxGeometry x="760" y="355" width="120" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-14" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.25;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="1" source="IQvJlNmxwXKHrSr8fV7O-9" target="IQvJlNmxwXKHrSr8fV7O-11">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-53" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="1" source="IQvJlNmxwXKHrSr8fV7O-9" target="IQvJlNmxwXKHrSr8fV7O-25">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-9" value="&lt;div&gt;Teleport&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;(Horizontal traversal)&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;arcSize=13;" vertex="1" parent="1">
-          <mxGeometry x="950" y="620" width="120" height="100" as="geometry" />
-        </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-15" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="1" source="IQvJlNmxwXKHrSr8fV7O-11" target="IQvJlNmxwXKHrSr8fV7O-9">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-52" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="1" source="IQvJlNmxwXKHrSr8fV7O-11" target="IQvJlNmxwXKHrSr8fV7O-34">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-11" value="&lt;div&gt;Blade Attack&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;(Damage)&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="580" y="625" width="120" height="95" as="geometry" />
-        </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-22" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="1070" y="425" width="60" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-25" value="in-air + jump" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="1120" y="620" width="140" height="190" as="geometry" />
-        </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-31" value="&lt;ul&gt;&lt;li&gt;Hold a tiny bit to teleport&lt;br&gt;&lt;/li&gt;&lt;li&gt;&lt;div&gt;Slows down player after teleportation&lt;/div&gt;&lt;/li&gt;&lt;/ul&gt;" style="text;strokeColor=none;fillColor=none;html=1;whiteSpace=wrap;verticalAlign=middle;overflow=hidden;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-25">
-          <mxGeometry y="30" width="140" height="160" as="geometry" />
-        </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-34" value="in-air + spin" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="400" y="625" width="140" height="180" as="geometry" />
-        </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-39" value="&lt;ul&gt;&lt;li&gt;Homing attack on close-by-in-front enemy &lt;br&gt;&lt;/li&gt;&lt;/ul&gt;" style="text;strokeColor=none;fillColor=none;html=1;whiteSpace=wrap;verticalAlign=middle;overflow=hidden;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-34">
-          <mxGeometry y="30" width="140" height="150" as="geometry" />
-        </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-42" value="in the dark" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="410" y="380" width="140" height="170" as="geometry" />
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-42" value="in the dark" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-106">
+          <mxGeometry y="340" width="140" height="170" as="geometry" />
         </mxCell>
         <mxCell id="IQvJlNmxwXKHrSr8fV7O-60" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-42" source="IQvJlNmxwXKHrSr8fV7O-46" target="IQvJlNmxwXKHrSr8fV7O-46">
           <mxGeometry relative="1" as="geometry" />
@@ -74,25 +37,144 @@
         <mxCell id="IQvJlNmxwXKHrSr8fV7O-46" value="&lt;ul&gt;&lt;li&gt;Partial Translucency (as a visual)&lt;br&gt;&lt;/li&gt;&lt;li&gt;Partial or full Immunity to range attacks&lt;br&gt;&lt;/li&gt;&lt;/ul&gt;" style="text;strokeColor=none;fillColor=none;html=1;whiteSpace=wrap;verticalAlign=middle;overflow=hidden;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-42">
           <mxGeometry y="30" width="140" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-48" value="teleport + jump" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="1090" y="220" width="250" height="290" as="geometry" />
-        </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-49" value="&lt;ul&gt;&lt;li&gt;Speed increase&lt;/li&gt;&lt;li&gt;Brings the night&lt;/li&gt;&lt;ul&gt;&lt;li&gt;Activates passive for you and your teamates&lt;/li&gt;&lt;li&gt;Blinds enemies&lt;br&gt;&lt;/li&gt;&lt;li&gt;Changes world background&lt;/li&gt;&lt;/ul&gt;&lt;/ul&gt;" style="text;strokeColor=none;fillColor=none;html=1;whiteSpace=wrap;verticalAlign=middle;overflow=hidden;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-48">
-          <mxGeometry y="30" width="250" height="260" as="geometry" />
-        </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-54" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0;exitDx=0;exitDy=0;fontSize=12;startSize=8;endSize=8;entryX=0;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="IQvJlNmxwXKHrSr8fV7O-6" target="IQvJlNmxwXKHrSr8fV7O-48">
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-51" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;exitX=0;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-106" source="IQvJlNmxwXKHrSr8fV7O-3" target="IQvJlNmxwXKHrSr8fV7O-42">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1020" y="210" as="targetPoint" />
+            <mxPoint x="500" y="390" as="sourcePoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-55" value="&lt;div&gt;anytime&lt;/div&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="410" y="160" width="140" height="180" as="geometry" />
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-48" value="in-teleport + jump" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-106">
+          <mxGeometry x="1030" y="240" width="200" height="320" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-49" value="&lt;ul&gt;&lt;li&gt;Activation requires 10 kills in the row without taking damage&lt;/li&gt;&lt;li&gt;Regular activation lasts for 5 seconds&lt;/li&gt;&lt;li&gt;&quot;Super form&quot;  drains your rings &lt;br&gt;&lt;/li&gt;&lt;li&gt;Speed increase&lt;/li&gt;&lt;li&gt;Brings the night&lt;/li&gt;&lt;ul&gt;&lt;li&gt;Blinds enemies&lt;br&gt;&lt;/li&gt;&lt;li&gt;Changes world background temporarily&lt;br&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/ul&gt;" style="text;strokeColor=none;fillColor=none;html=1;whiteSpace=wrap;verticalAlign=middle;overflow=hidden;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-48">
+          <mxGeometry y="30" width="200" height="290" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-54" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0;exitDx=0;exitDy=0;fontSize=12;startSize=8;endSize=8;entryX=0;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-106" source="IQvJlNmxwXKHrSr8fV7O-6" target="IQvJlNmxwXKHrSr8fV7O-48">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1140" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-55" value="&lt;div&gt;anytime&lt;/div&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-106">
+          <mxGeometry y="140" width="140" height="180" as="geometry" />
         </mxCell>
         <mxCell id="IQvJlNmxwXKHrSr8fV7O-59" value="&lt;ul&gt;&lt;li&gt;particles in dark enough areas that can activate passive&lt;/li&gt;&lt;li&gt;Night vision&lt;/li&gt;&lt;/ul&gt;" style="text;strokeColor=none;fillColor=none;html=1;whiteSpace=wrap;verticalAlign=middle;overflow=hidden;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-55">
           <mxGeometry y="30" width="140" height="150" as="geometry" />
         </mxCell>
-        <mxCell id="IQvJlNmxwXKHrSr8fV7O-62" value="&lt;div&gt;Stinger&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;(Damage &amp;amp; horizontal traversal)&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="757.5" y="830" width="155" height="120" as="geometry" />
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-50" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=0;exitDy=0;fontSize=12;startSize=8;endSize=8;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-106" source="IQvJlNmxwXKHrSr8fV7O-3" target="IQvJlNmxwXKHrSr8fV7O-55">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="400" y="310" as="targetPoint" />
+            <mxPoint x="470" y="480" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-77" value="Activates passive for you and your teamates" style="ellipse;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-106">
+          <mxGeometry x="440" y="360" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-78" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;shape=flexArrow;exitX=-0.002;exitY=0.3;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-106" source="IQvJlNmxwXKHrSr8fV7O-77" target="IQvJlNmxwXKHrSr8fV7O-3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="430" y="295" as="sourcePoint" />
+            <mxPoint x="357.5" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-82" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;shape=flexArrow;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-106" source="IQvJlNmxwXKHrSr8fV7O-81" target="IQvJlNmxwXKHrSr8fV7O-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-81" value="Activates ultimate through teleportation" style="ellipse;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-106">
+          <mxGeometry x="775" y="180" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-7" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;shape=flexArrow;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-106" source="IQvJlNmxwXKHrSr8fV7O-6" target="IQvJlNmxwXKHrSr8fV7O-77">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-108" value="" style="swimlane;startSize=0;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="300" y="30" width="1410" height="850" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-14" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.25;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;shape=flexArrow;exitX=0.014;exitY=0.618;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-108" source="IQvJlNmxwXKHrSr8fV7O-97" target="IQvJlNmxwXKHrSr8fV7O-11">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="650" y="100" as="sourcePoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-9" value="&lt;div&gt;Teleport&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;(Horizontal traversal)&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;arcSize=13;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-108">
+          <mxGeometry x="1190" y="687.5" width="120" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-15" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;shape=flexArrow;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-108" source="IQvJlNmxwXKHrSr8fV7O-95" target="IQvJlNmxwXKHrSr8fV7O-9">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="810" y="265" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-11" value="&lt;div&gt;Blade Attack&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;(Damage)&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-108">
+          <mxGeometry x="540" y="640" width="120" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-34" value="in-air + spin" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-108">
+          <mxGeometry x="530" y="190" width="140" height="290" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-39" value="&lt;ul&gt;&lt;li&gt;Homing attack on close-by-in-front enemy/springs/objects&lt;/li&gt;&lt;li&gt;Empowers springs&lt;/li&gt;&lt;li&gt;Busts through floor &amp;amp; walls (optional)&lt;br&gt;&lt;/li&gt;&lt;/ul&gt;" style="text;strokeColor=none;fillColor=none;html=1;whiteSpace=wrap;verticalAlign=middle;overflow=hidden;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-34">
+          <mxGeometry y="30" width="140" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-52" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-108" source="IQvJlNmxwXKHrSr8fV7O-11" target="IQvJlNmxwXKHrSr8fV7O-39">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-62" value="&lt;div&gt;Stinger&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;(Damage &amp;amp; horizontal traversal)&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-108">
+          <mxGeometry x="82.5" y="720" width="155" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-66" value="in-blade-attack recovery (posing)+ spin" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=70;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-108">
+          <mxGeometry x="40" y="7.5" width="240" height="680" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-67" value="&lt;ul&gt;&lt;li&gt;Each hit grants 1 stinger (up to 3), this including kills from this ability&lt;/li&gt;&lt;li&gt;Activation releases all stingers to damage enemies via homing attack&lt;br&gt;&lt;/li&gt;&lt;ul&gt;&lt;li&gt;Stingers travel 45* forward-down a bit before homing&lt;/li&gt;&lt;li&gt;Stingers bust through walls &amp;amp; floors&lt;br&gt;&lt;/li&gt;&lt;/ul&gt;&lt;li&gt;Activation grants vertical boost that increases in height with more stingers (think double jump with increasing heights)&lt;/li&gt;&lt;li&gt;Jump height is adjusted so that its repeated use in-air (with successful stinger hits) produces 3 different results:&lt;/li&gt;&lt;ul&gt;&lt;li&gt;1 stinger will slowly lead you to the ground&lt;/li&gt;&lt;li&gt;2 stingers maintain same verticallity&lt;/li&gt;&lt;li&gt;3 stingers will boost your higher and higher&lt;br&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/ul&gt;" style="text;strokeColor=none;fillColor=none;html=1;whiteSpace=wrap;verticalAlign=middle;overflow=hidden;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-66">
+          <mxGeometry y="70" width="240" height="610" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-68" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-108" source="IQvJlNmxwXKHrSr8fV7O-62" target="IQvJlNmxwXKHrSr8fV7O-67">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-85" value="" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.25;exitDx=0;exitDy=0;fontSize=12;startSize=8;endSize=8;shape=flexArrow;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-108" source="IQvJlNmxwXKHrSr8fV7O-9" target="IQvJlNmxwXKHrSr8fV7O-97">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="940" y="160" as="sourcePoint" />
+            <mxPoint x="790" y="100" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-88" value="" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;shape=flexArrow;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-108" source="IQvJlNmxwXKHrSr8fV7O-11" target="IQvJlNmxwXKHrSr8fV7O-95">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="520" y="209" as="sourcePoint" />
+            <mxPoint x="650" y="265" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-95" value="Fast teleport refill in the air" style="ellipse;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-108">
+          <mxGeometry x="840" y="730" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-97" value="&lt;br&gt;&lt;div&gt;Maintains mid-air hit chain horizontally&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-108">
+          <mxGeometry x="835" y="540" width="140" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-99" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-108" source="IQvJlNmxwXKHrSr8fV7O-95" target="IQvJlNmxwXKHrSr8fV7O-95">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-101" value="" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;shape=flexArrow;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-108" source="IQvJlNmxwXKHrSr8fV7O-11" target="IQvJlNmxwXKHrSr8fV7O-102">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="460" y="235" as="sourcePoint" />
+            <mxPoint x="460" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-102" value="&lt;br&gt;&lt;div&gt;Maintains mid-air hit chain vertically&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-108">
+          <mxGeometry x="330" y="720" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-65" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;shape=flexArrow;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-108" source="IQvJlNmxwXKHrSr8fV7O-102" target="IQvJlNmxwXKHrSr8fV7O-62">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-132" value="&lt;div&gt;MAIN GIMIC&lt;/div&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-108">
+          <mxGeometry x="720" y="50" width="390" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-134" value="&lt;ul&gt;&lt;li&gt;SPEED AND DAMAGE&lt;/li&gt;&lt;li&gt;Damage the enemy with the blade attack to refill your horizontal teleport or gain 1  stinger (up to 3) for vertical boost and damage to continue the chain &lt;br&gt;&lt;/li&gt;&lt;ul&gt;&lt;li&gt;Teleport forward to continue the chain horizontally by letting you reach the targets&lt;br&gt;&lt;/li&gt;&lt;li&gt;Jump vertically &amp;amp; unleash gained homing stingers to continue the chain vertically by keeping you in the air&lt;br&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/ul&gt;" style="text;strokeColor=none;fillColor=none;html=1;whiteSpace=wrap;verticalAlign=middle;overflow=hidden;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-132">
+          <mxGeometry y="30" width="390" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-25" value="in-air + jump" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="1480" y="380" width="140" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-31" value="&lt;ul&gt;&lt;li&gt;Hold a tiny bit to teleport&lt;br&gt;&lt;/li&gt;&lt;li&gt;&lt;div&gt;Slows down player after teleportation&lt;/div&gt;&lt;/li&gt;&lt;li&gt;Invincible &amp;amp; phases through some obstacles during teleportation&lt;/li&gt;&lt;/ul&gt;" style="text;strokeColor=none;fillColor=none;html=1;whiteSpace=wrap;verticalAlign=middle;overflow=hidden;fontSize=16;" vertex="1" parent="IQvJlNmxwXKHrSr8fV7O-25">
+          <mxGeometry y="30" width="140" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-130" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="IQvJlNmxwXKHrSr8fV7O-25" source="IQvJlNmxwXKHrSr8fV7O-31" target="IQvJlNmxwXKHrSr8fV7O-31">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="IQvJlNmxwXKHrSr8fV7O-53" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="1" source="IQvJlNmxwXKHrSr8fV7O-9" target="IQvJlNmxwXKHrSr8fV7O-31">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
