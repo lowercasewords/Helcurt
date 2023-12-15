@@ -26,6 +26,7 @@ mobjinfo[MT_SHDW] = {
 	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY
 }
 
+/*
 addHook("PlayerThink", function(player)
 -- 	if(player.valid and player.mo and player.mo.valid and player.mo.skin and player.mo.skin.valid
 -- 	and player.mo.skin == "helcurt")
@@ -38,3 +39,4 @@ addHook("PlayerThink", function(player)
 		P_SetObjectMomZ(particle, 2*FRACUNIT, false)
 	end
 end)
+*/
