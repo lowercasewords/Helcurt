@@ -86,8 +86,8 @@ end)
 
 --Handle needed variables on spawn
 addHook("PlayerSpawn", function(player)
-	player.spinheld = 0 --Increments each tic it's held
-	player.jumpheld = 0 --Increments each tic it's held
+	player.spinheld = 0 --Increments each tic it's held IN POST THINK, use BT_SPIN to get current update
+	player.jumpheld = 0 --Increments each tic it's held IN POST THINK, use BT_JUMP to get current update
 	player.killcount = 0
 	player.can_teleport = 1
 	player.can_bladeattack = true
@@ -126,16 +126,6 @@ addHook("PreThinkFrame", function()
 			
 	-- 		print("D: "..debug_timer)
 
-		if(player.cmd.buttons & BT_SPIN) then
-			player.spinheld = $+1
-		elseif(player.spinheld ~= 0 and player.cmd.buttons ~= BT_SPIN) then
-			player.spinheld = 0
-		end
-		if(player.cmd.buttons & BT_JUMP) then
-			player.jumpheld = $+1
-		elseif(player.jumpheld ~= 0 and player.cmd.buttons ~= BT_JUMP) then
-			player.jumpheld = 0
-		end
 		
 		--Gets the horizontal direction of inputs
 		player.inputangle = player.cmd.angleturn*FRACUNIT + R_PointToAngle2(0, 0, player.cmd.forwardmove*FRACUNIT, -player.cmd.sidemove*FRACUNIT)
@@ -151,6 +141,18 @@ addHook("PostThinkFrame", function()
 		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt")
 			continue
 		end
+
+		if(player.cmd.buttons & BT_SPIN) then
+			player.spinheld = $+1
+		elseif(player.spinheld ~= 0 and player.cmd.buttons ~= BT_SPIN) then
+			player.spinheld = 0
+		end
+		if(player.cmd.buttons & BT_JUMP) then
+			player.jumpheld = $+1
+		elseif(player.jumpheld ~= 0 and player.cmd.buttons ~= BT_JUMP) then
+			player.jumpheld = 0
+		end
+
 		player.mo.prevstate = player.mo.state
 	end
 end)
@@ -291,7 +293,7 @@ states[S_LOCK] = {
 states[S_BLADE_HIT] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_BLDE,
-	tics = 20,
+	tics = 200,
 	action = A_BladeHit,
 	nextstate = SPR2_FALL
 }
