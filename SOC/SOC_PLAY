@@ -1,10 +1,12 @@
 Character
 SkinName = helcurt
 DisplayName = Helcurt
-PlayerText = ^5Helcurt^0 has gone through rehab
+PlayerText = ^5Helcurt^0 has seen better days
 
-^5Ability:^0 Shadow Transition. Press and hold jump to Teleport forward, 
-canceling all vertical momentum!
+^5Ability:^0 Shadow Transition. Press and hold jump to Teleport forward!
 
+^5Ability:^0 Press spin in the air to perform a homing attack,
+ giving you a stack of Deadly Stinger (up to five), hold on land to unleash them!
+ 
 ^5Tip:^0 Yell at the mod author to make it come out faster, it is very effective!
 #
