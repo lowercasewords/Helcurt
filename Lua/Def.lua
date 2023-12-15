@@ -189,7 +189,7 @@ local function A_Start_Transition(actor, par1, par2)
 -- 	actor.player.can_teleport = false
 -- 	actor.player.can_bladeattack = true
 	
-	P_InstaThrust(actor, actor.player.inputangle, TELEPORT_SPEED)
+	P_InstaThrust(actor, actor.angle, TELEPORT_SPEED)
 	P_SetObjectMomZ(actor, 0, false)
 end
 
