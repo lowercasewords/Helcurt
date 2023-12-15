@@ -309,7 +309,7 @@ states[S_BLADE_ATTACK] = {
 states[S_PRE_TRANSITION] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_JUMP|FF_FULLDARK,
-	tics = 5,
+	tics = 6,
 	action = A_Pre_Transition,
 	nextstate = S_START_TRANSITION
 }

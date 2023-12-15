@@ -12,7 +12,23 @@ local STINGER_ANGLE_ADJ = 10*FRACUNIT
 --DEPRECATED
 local STINGER_SPAWN_DISTANCE = -100	
 
+addHook("PlayerThink", function(player)
+	-- print(not (player.cmd.buttons&BT_SPIN) and player.spinheld ~= 0)
+end)
 
+addHook("JumpSpinSpecial", function(player)
+	if(not player or not player.mo or player.mo.skin ~= "helcurt") then
+		return
+	end
+	
+	--Using Deadly Stinger 
+	if(player.mo.state == "S_BLADE_HIT" and player.spinheld)-- and player.stingers > 0)
+	{
+		P_SetObjectMomZ(player.mo, 10*FRACUNIT, false)
+		-- print("Stinger!")
+	}
+	
+end)
 
 --[[
 --Handle the Stinger Projectile
@@ -38,6 +54,7 @@ addHook("SpinSpecial", function(player)
 		return
 	end
 
+	--[[
 	--Perform Deadly Stinger Attack!
 	if(player.spinheld >= 10 and player.can_stinger and player.stingers > 0 and P_IsObjectOnGround(player.mo)) then
  		player.can_bladeattack = false
@@ -55,6 +72,7 @@ addHook("SpinSpecial", function(player)
 		end
 		player.stingers = 0
 	end
+	]]--
 end)
 
 
@@ -68,5 +86,6 @@ addHook("MobjDeath", function(target, inflictor, source, dmgtype)
 	if(not source or not source.valid or not source.skin or not source.skin == "helcurt" or not source.player) then
 		return nil
 	end
-	source.player.killcount = $+1
+	
+	source.player.killcount = $+1;
 end)
