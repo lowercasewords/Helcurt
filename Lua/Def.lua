@@ -23,7 +23,7 @@ rawset(_G, "TARGET_NONDMG_RANGE", MF_SPRING)
 rawset(_G, "TARGET_RANGE", TARGET_DMG_RANGE|TARGET_NONDMG_RANGE)
 rawset(_G, "MAX_STINGERS", 5)
 rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
-rawset(_G, "TELEPORT_STOP_SPEED", 2)
+rawset(_G, "TELEPORT_STOP_SPEED", 3)
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "X_BLADE_ATTACK_MOMENTUM", 5*FRACUNIT)
 rawset(_G, "Z_BLADE_ATTACK_MOMENTUM", 8*FRACUNIT)
@@ -203,8 +203,9 @@ end
 local function A_End_Transition(actor, par1, par2)
 	S_StartSound(actor, sfx_trns2)
 -- 	if(actor.player and actor.player.valid) then
-		actor.player.can_bladeattack = true
+		-- actor.player.can_bladeattack = true
 -- 	end
+	print("end!")
 	actor.flags = $&~MF_NOCLIPTHING
 	actor.momy = $/TELEPORT_STOP_SPEED
 	actor.momx = $/TELEPORT_STOP_SPEED

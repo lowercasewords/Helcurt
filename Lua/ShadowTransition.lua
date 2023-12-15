@@ -5,8 +5,6 @@
 --On Jump while jumping
 ------------------------------------
 
---Speed is divided by this int when the teleportation is canceled
-local CANCEL_DIVIDEND_SPEED = 2
 addHook("AbilitySpecial",
 		function(player)
 			if(not player or
@@ -47,8 +45,7 @@ addHook("PlayerThink",
 				if(player.jumpheld == 0) then
 					player.mo.prevstate = player.mo.state
 					player.mo.state = S_END_TRANSITION
-					player.mo.momy = $/CANCEL_DIVIDEND_SPEED
-					player.mo.momx = $/CANCEL_DIVIDEND_SPEED
+					
 				end
 			end
 
