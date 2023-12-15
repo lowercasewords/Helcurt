@@ -1,12 +1,13 @@
 OUTPK3 = out.pk3
 EXECUTABLE = /Applications/Games/Sonic\ Robo\ Blast\ 2.app/Contents/MacOS/Sonic\ Robo\ Blast\ 2
 DIRS = Skins Lua Sounds Soc Sprites
-PRIORITY_FILES = Skins/S_SKIN.txt Lua/Def.lua
+PRIORITY_FILES = Skins/S_SKIN Lua/Def.lua
 
 SKIN = skin helcurt
 MAP = map01
 CHEATS = "godmode 1" "devmode 1"
 
+# Sometimes LUA are not loaded so they need to be refreshed by going into slade and saving any file
 all: build launch
 	echo "done!"
 
