@@ -16,26 +16,53 @@ addHook("PlayerThink", function(player)
 	if(not player or not player.mo or player.mo.skin ~= "helcurt") then
 		return
 	end
-	
+
 	--Using Deadly Stinger 
-	if(player.mo.state == S_BLADE_HIT and (not (player.cmd.buttons & BT_SPIN)) and player.spinheld > 20)-- and player.stingers > 0)
-	
-		P_SetObjectMomZ(player.mo, 10*FRACUNIT, false)
-		print("Stinger!")
+	if(player.mo.state == S_BLADE_HIT and (not (player.cmd.buttons & BT_SPIN)) and player.spinheld > 10)-- and player.stingers > 0)
+		
+		print("Release "..player.stingers.." stingers!")
+		
+		--Player's vertical boost
+		local momz = player.stingers*5*FRACUNIT
+		P_SetObjectMomZ(player.mo, momz, false)
+		print("z:"..momz/FRACUNIT)
+		print("s:"..FixedHypot(player.mo.momx, player.mo.momy)/FRACUNIT)
+		
+		--Releasing damaging stingers
+		local angle = player.mo.angle - FixedAngle((player.stingers-1)*STINGER_ANGLE_ADJ/2)
+		for i = 1, player.stingers, 1 do
+			if(i ~= 1) then
+				angle = $+FixedAngle(STINGER_ANGLE_ADJ)
+			end
+			local stinger = SpawnDistance(player.mo.x, player.mo.y, player.mo.z, STINGER_SPAWN_DISTANCE, angle, MT_STGP)
+			stinger.target = player.mo
+			-- P_InstaThrust(stinger, stinger.angle, FixedHypot(player.mo.momx, player.mo.momy) + stinger.info.speed)
+			P_SetObjectMomZ(stinger, -momz/3, false)
+		end
+
+		--Reset stingers after usage
 		player.stingers = 0
 	end
 	
+	
+	--Loose a stinger when the chain is broken (hit the floor)
+	--[[
+	if(player.stingers > 0 and player.mo.eflags & MFE_JUSTHITFLOOR) then
+		player.stingers = $-1
+	end
+	]]--
 end)
 
---[[
+
 --Handle the Stinger Projectile
 addHook("MobjThinker", function(mo)
 	if(not mo or not mo.valid) then
 		return
 	end
 	SpawnAfterImage(mo)
+	
 end, MT_STGP)
-]]--
+
 
 --[[
 --Handle the Stinger Projectile

@@ -231,7 +231,7 @@ mobjinfo[MT_STGP] = {
 	-- followitem = MT_PLAYER,
 	deathstate = S_NULL,
 	-- xdeathstate = S_NULL,
-	speed = 50*FRACUNIT,
+	speed = 25*FRACUNIT,
 	flags = MF_MISSILE|MF2_SUPERFIRE|MF_NOGRAVITY
 }
 
