@@ -21,7 +21,7 @@ rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MO
 rawset(_G, "TARGET_NONDMG_RANGE", MF_SPRING)
 --The targets that the blade attack should register (not necessarily try to kill)
 rawset(_G, "TARGET_RANGE", TARGET_DMG_RANGE|TARGET_NONDMG_RANGE)
-rawset(_G, "MAX_STINGERS", 5)
+rawset(_G, "MAX_STINGERS", 3)
 rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
 rawset(_G, "TELEPORT_STOP_SPEED", 3)
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)

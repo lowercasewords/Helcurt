@@ -13,20 +13,17 @@ local STINGER_ANGLE_ADJ = 10*FRACUNIT
 local STINGER_SPAWN_DISTANCE = -100	
 
 addHook("PlayerThink", function(player)
-	-- print(not (player.cmd.buttons&BT_SPIN) and player.spinheld ~= 0)
-end)
-
-addHook("JumpSpinSpecial", function(player)
 	if(not player or not player.mo or player.mo.skin ~= "helcurt") then
 		return
 	end
 	
 	--Using Deadly Stinger 
-	if(player.mo.state == "S_BLADE_HIT" and player.spinheld)-- and player.stingers > 0)
-	{
+	if(player.mo.state == S_BLADE_HIT and (not (player.cmd.buttons & BT_SPIN)) and player.spinheld > 20)-- and player.stingers > 0)
+	
 		P_SetObjectMomZ(player.mo, 10*FRACUNIT, false)
-		-- print("Stinger!")
-	}
+		print("Stinger!")
+		player.stingers = 0
+	end
 	
 end)
 
