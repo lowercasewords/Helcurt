@@ -207,7 +207,7 @@ local function A_End_Transition(actor, par1, par2)
 -- 	if(actor.player and actor.player.valid) then
 		-- actor.player.can_bladeattack = true
 -- 	end
-	print("end!")
+	-- print("end!")
 	actor.flags = $&~MF_NOCLIPTHING
 	actor.momy = $/TELEPORT_STOP_SPEED
 	actor.momx = $/TELEPORT_STOP_SPEED

@@ -143,7 +143,7 @@ addHook("SpinSpecial", function(player)
 // 		player.powers[pw_strong] = STR_FLOOR|STR_SPRING
  			--allow to break walls and boost springs
  		if(player.mo.state == S_BLADE_ATTACK or player.mo.state == S_BLADE_HIT) then
- 			print("allow")
+ 			-- print("allow")
  			player.powers[pw_strong] = STR_FLOOR|STR_SPRING
  		end
 

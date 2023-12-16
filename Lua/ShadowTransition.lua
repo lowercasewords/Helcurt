@@ -48,12 +48,10 @@ addHook("PlayerThink",
 					
 				end
 			end
-			print(player.jumpheld)
 			--Cancel Pre_Transition if player doesn't hold jump in specified interval
 			if(player.mo.state == S_PRE_TRANSITION and (not (player.cmd.buttons & BT_JUMP) or player.jumpheld > states[S_PRE_TRANSITION].tics)) then
 				player.mo.prevstate = player.mo.state
 				player.mo.state = S_PLAY_FALL
-				print("Cancel")
 			end
 
 --[[
