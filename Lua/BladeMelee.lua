@@ -19,17 +19,6 @@ local LOCK_HEIGHT_MUL = 2
 --/ Functinos
 --/--------------------------
 
---Function Written by clairebun and was given to use on SRB2 discord page
---mo1 (mobj_t): first mobj to check for collision
---mo2 (mobj_t): second mobj to check for collision
---returns: true if two mobjects collide vertically, false otherwise
-local function L_ZCollide(mo1, mo2)
-    if mo1.z > mo2.height+mo2.z then return false end
-    if mo2.z > mo1.height+mo1.z then return false end
-    return true
-end
-
-
 --Removes the lockon HUD from the existance
 --player (player_t): the player whose lockon HUD should be removed
 --returns: nil

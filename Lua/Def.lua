@@ -80,6 +80,16 @@ rawset(_G, "SpawnDistance", function(og_x, og_y, og_z, distance, angle, mtype)
 	return obj
 end)
 
+--Function Written by clairebun and was given to use on SRB2 discord page
+--mo1 (mobj_t): first mobj to check for collision
+--mo2 (mobj_t): second mobj to check for collision
+--returns: true if two mobjects collide vertically, false otherwise
+rawset(_G, "L_ZCollide", function(mo1, mo2)
+    if mo1.z > mo2.height+mo2.z then return false end
+    if mo2.z > mo1.height+mo1.z then return false end
+    return true
+end)
+
 --------------------------
 --/ THESE HOOKS ARE RAN FIRST
 ----------------------------/
