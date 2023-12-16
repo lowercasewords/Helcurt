@@ -21,7 +21,7 @@ rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MO
 rawset(_G, "TARGET_NONDMG_RANGE", MF_SPRING)
 --The targets that the blade attack should register (not necessarily try to kill)
 rawset(_G, "TARGET_RANGE", TARGET_DMG_RANGE|TARGET_NONDMG_RANGE)
-rawset(_G, "MAX_STINGERS", 5)
+rawset(_G, "MAX_STINGERS", 3)
 rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
 rawset(_G, "TELEPORT_STOP_SPEED", 3)
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
@@ -86,8 +86,8 @@ end)
 
 --Handle needed variables on spawn
 addHook("PlayerSpawn", function(player)
-	player.spinheld = 0 --Increments each tic it's held
-	player.jumpheld = 0 --Increments each tic it's held
+	player.spinheld = 0 --Increments each tic it's held IN POST THINK, use BT_SPIN to get current update
+	player.jumpheld = 0 --Increments each tic it's held IN POST THINK, use BT_JUMP to get current update
 	player.killcount = 0
 	player.can_teleport = 1
 	player.can_bladeattack = true
@@ -126,16 +126,6 @@ addHook("PreThinkFrame", function()
 			
 	-- 		print("D: "..debug_timer)
 
-		if(player.cmd.buttons & BT_SPIN) then
-			player.spinheld = $+1
-		elseif(player.spinheld ~= 0 and player.cmd.buttons ~= BT_SPIN) then
-			player.spinheld = 0
-		end
-		if(player.cmd.buttons & BT_JUMP) then
-			player.jumpheld = $+1
-		elseif(player.jumpheld ~= 0 and player.cmd.buttons ~= BT_JUMP) then
-			player.jumpheld = 0
-		end
 		
 		--Gets the horizontal direction of inputs
 		player.inputangle = player.cmd.angleturn*FRACUNIT + R_PointToAngle2(0, 0, player.cmd.forwardmove*FRACUNIT, -player.cmd.sidemove*FRACUNIT)
@@ -151,6 +141,18 @@ addHook("PostThinkFrame", function()
 		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt")
 			continue
 		end
+
+		if(player.cmd.buttons & BT_SPIN) then
+			player.spinheld = $+1
+		elseif(player.spinheld ~= 0 and player.cmd.buttons ~= BT_SPIN) then
+			player.spinheld = 0
+		end
+		if(player.cmd.buttons & BT_JUMP) then
+			player.jumpheld = $+1
+		elseif(player.jumpheld ~= 0 and player.cmd.buttons ~= BT_JUMP) then
+			player.jumpheld = 0
+		end
+
 		player.mo.prevstate = player.mo.state
 	end
 end)
@@ -205,7 +207,7 @@ local function A_End_Transition(actor, par1, par2)
 -- 	if(actor.player and actor.player.valid) then
 		-- actor.player.can_bladeattack = true
 -- 	end
-	print("end!")
+	-- print("end!")
 	actor.flags = $&~MF_NOCLIPTHING
 	actor.momy = $/TELEPORT_STOP_SPEED
 	actor.momx = $/TELEPORT_STOP_SPEED
@@ -229,7 +231,7 @@ mobjinfo[MT_STGP] = {
 	-- followitem = MT_PLAYER,
 	deathstate = S_NULL,
 	-- xdeathstate = S_NULL,
-	speed = 50*FRACUNIT,
+	speed = 25*FRACUNIT,
 	flags = MF_MISSILE|MF2_SUPERFIRE|MF_NOGRAVITY
 }
 
@@ -291,7 +293,7 @@ states[S_LOCK] = {
 states[S_BLADE_HIT] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_BLDE,
-	tics = 20,
+	tics = 200,
 	action = A_BladeHit,
 	nextstate = SPR2_FALL
 }
@@ -307,7 +309,7 @@ states[S_BLADE_ATTACK] = {
 states[S_PRE_TRANSITION] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_JUMP|FF_FULLDARK,
-	tics = 5,
+	tics = 6,
 	action = A_Pre_Transition,
 	nextstate = S_START_TRANSITION
 }
