@@ -14,7 +14,6 @@ local STINGER_SPAWN_DISTANCE = -100
 --Maximum distance for the stinger to lock-on and track the enemy
 local MAX_HOMING_DISTANCE = 100*FRACUNIT
 
-
 addHook("PlayerThink", function(player)
 	if(not player or not player.mo or player.mo.skin ~= "helcurt") then
 		return
@@ -28,7 +27,7 @@ addHook("PlayerThink", function(player)
 	if(player.mo.state == S_BLADE_HIT and (not (player.cmd.buttons & BT_SPIN)) and player.spinheld > 10)-- and player.mo.stingers > 0)
 		-- if(player.cmd.buttons & BT_SPIN)
 			
-		print("Release "..player.mo.stingers..".mo.stingers!")
+		print("Release "..player.mo.stingers.." deadly stingers!")
 		
 		--Player's vertical boost
 		local momz = player.mo.stingers*5*FRACUNIT
@@ -129,10 +128,8 @@ addHook("MobjDamage", function(target, inflictor, source, damage, damagetype)
 			return nil
 		end
 	print("stinger hit")
-	--add a stinger if possible5677865
-	if(source.stingers < MAX_STINGERS) then
-		source.stingers = $+1
-	end
+	AddStingers(source, 1)
+
 end)
 
 

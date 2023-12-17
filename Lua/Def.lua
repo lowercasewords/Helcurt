@@ -28,9 +28,19 @@ rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "X_BLADE_ATTACK_MOMENTUM", 5*FRACUNIT)
 rawset(_G, "Z_BLADE_ATTACK_MOMENTUM", 8*FRACUNIT)
 
-rawset(_G, "AddStinger", function(mo)
-
+--Adds a stinger to the (player's) helcurt mobject 
+--mo (mobj_t): the mobject to add stingers
+--amount (int): the number of stingers to add (won't exceed the limit)
+rawset(_G, "AddStingers", function(mo, amount)
+	--add a stinger if possible	
+	if(mo and mo.stingers ~= nil and mo.stingers < MAX_STINGERS and mo.skin == "helcurt") then
+		print("add")
+		mo.stingers = $+amount
+	else
+		print("can't add stinger")
+	end
 end)
+
 rawset(_G, "SpawnAfterImage", function(mo)
 	if(not mo or not mo.valid) then
 		return false

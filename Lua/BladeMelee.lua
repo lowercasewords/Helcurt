@@ -86,10 +86,7 @@ local function BladeDamage(target, player)
 	P_SetObjectMomZ(player.mo, BLADE_VERT_BOOST, false)
 	S_StartSound(player.mo, sfx_blde1, player)
 	
---add a stinger if possible
-	if(player.mo.stingers < MAX_STINGERS) then
-		player.mo.stingers = $+1
-	end
+	AddStingers(player.mo, 1)
 	
 	--remove the lockon
 	StopLockOn(player)
