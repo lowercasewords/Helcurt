@@ -87,8 +87,8 @@ local function BladeDamage(target, player)
 	S_StartSound(player.mo, sfx_blde1, player)
 	
 --add a stinger if possible
-	if(player.stingers < MAX_STINGERS) then
-		player.stingers = $+1
+	if(player.mo.stingers < MAX_STINGERS) then
+		player.mo.stingers = $+1
 	end
 	
 	--remove the lockon

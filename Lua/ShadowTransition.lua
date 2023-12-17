@@ -12,7 +12,7 @@ addHook("AbilitySpecial",
 			player.mo.skin ~= "helcurt") then
 				return
 			end
-			if(player.can_teleport) then
+			if(player.mo.can_teleport) then
 				player.mo.prevstate = player.mo.state
 				player.mo.state = S_PRE_TRANSITION
 			end
@@ -65,7 +65,7 @@ addHook("PlayerThink",
 			end
 ]]--
 			--Recharge when hit the floor
-			if(player.can_teleport == 0 and player.mo.eflags & MFE_JUSTHITFLOOR) then
-				player.can_teleport = 1
+			if(player.mo.can_teleport == 0 and player.mo.eflags & MFE_JUSTHITFLOOR) then
+				player.mo.can_teleport = 1
 			end
 		end)

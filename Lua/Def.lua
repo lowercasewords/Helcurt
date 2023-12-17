@@ -28,6 +28,9 @@ rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "X_BLADE_ATTACK_MOMENTUM", 5*FRACUNIT)
 rawset(_G, "Z_BLADE_ATTACK_MOMENTUM", 8*FRACUNIT)
 
+rawset(_G, "AddStinger", function(mo)
+
+end)
 rawset(_G, "SpawnAfterImage", function(mo)
 	if(not mo or not mo.valid) then
 		return false
@@ -99,11 +102,11 @@ addHook("PlayerSpawn", function(player)
 	player.spinheld = 0 --Increments each tic it's held IN POST THINK, use BT_SPIN to get current update
 	player.jumpheld = 0 --Increments each tic it's held IN POST THINK, use BT_JUMP to get current update
 	player.killcount = 0
-	player.can_teleport = 1
+	player.mo.can_teleport = 1
 	player.can_bladeattack = true
 	player.can_stinger = true
 	player.lockon = nil
-	player.stingers = 0
+	player.mo.stingers = 0
 	player.sting_timer = 0
 	
 	--DEPRECATED - Prevent changing to default particle color each time player respawns
@@ -125,7 +128,7 @@ addHook("PreThinkFrame", function()
 			if(debug_timer == 1) then
 				print("Kill count: "..player.killcount)
 				print("Can stinger: "..tostring(player.can_stinger))
-				print("Stingers: "..player.stingers)
+				print("Stingers: "..player.mo.stingers)
 				debug_timer = $+1
 			else
 				debug_timer = $+1
@@ -208,7 +211,7 @@ local function A_BladeHit(actor, par1, par2)
 end
 
 local function A_Pre_Transition(actor, par1, par2)
-	actor.player.can_teleport = 0
+	actor.can_teleport = 0
 	S_StartSound(actor, sfx_trns1)
 	actor.momz = $/10
 	actor.momy = $/2

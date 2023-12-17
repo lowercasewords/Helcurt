@@ -21,24 +21,24 @@ addHook("PlayerThink", function(player)
 	end
 
 	-- if(P_IsObjectOnGround(player.mo)) then
-	-- 	player.stingers = 2
+	-- 	player.mo.stingers = 2
 	-- end
 
 	--Using Deadly Stinger 
-	if(player.mo.state == S_BLADE_HIT and (not (player.cmd.buttons & BT_SPIN)) and player.spinheld > 10)-- and player.stingers > 0)
+	if(player.mo.state == S_BLADE_HIT and (not (player.cmd.buttons & BT_SPIN)) and player.spinheld > 10)-- and player.mo.stingers > 0)
 		-- if(player.cmd.buttons & BT_SPIN)
 			
-		print("Release "..player.stingers.." stingers!")
+		print("Release "..player.mo.stingers..".mo.stingers!")
 		
 		--Player's vertical boost
-		local momz = player.stingers*5*FRACUNIT
+		local momz = player.mo.stingers*5*FRACUNIT
 		P_SetObjectMomZ(player.mo, momz, false)
 		-- print("z:"..momz/FRACUNIT)
 		-- print("s:"..FixedHypot(player.mo.momx, player.mo.momy)/FRACUNIT)
 		
 		--Releasing damaging stingers one by one
-		local angle = player.mo.angle - FixedAngle((player.stingers-1)*STINGER_ANGLE_ADJ/2)
-		for i = 1, player.stingers, 1 do
+		local angle = player.mo.angle - FixedAngle((player.mo.stingers-1)*STINGER_ANGLE_ADJ/2)
+		for i = 1, player.mo.stingers, 1 do
 			if(i ~= 1) then
 				angle = $+FixedAngle(STINGER_ANGLE_ADJ)
 			end
@@ -50,14 +50,14 @@ addHook("PlayerThink", function(player)
 		end
 
 		--Reset stingers after usage
-		player.stingers = 0
+		player.mo.stingers = 0
 	end
 	
 	
 	--Loose a stinger when the chain is broken (hit the floor)
 	--[[
-	if(player.stingers > 0 and player.mo.eflags & MFE_JUSTHITFLOOR) then
-		player.stingers = $-1
+	if(player.mo.stingers > 0 and player.mo.eflags & MFE_JUSTHITFLOOR) then
+		player.mo.stingers = $-1
 	end
 	]]--
 end)
@@ -130,8 +130,8 @@ addHook("MobjDamage", function(target, inflictor, source, damage, damagetype)
 		end
 	print("stinger hit")
 	--add a stinger if possible5677865
-	if(source.player.stingers < MAX_STINGERS) then
-		source.player.stingers = $+1
+	if(source.stingers < MAX_STINGERS) then
+		source.stingers = $+1
 	end
 end)
 
@@ -143,13 +143,13 @@ addHook("SpinSpecial", function(player)
 
 	--[[
 	--Perform Deadly Stinger Attack!
-	if(player.spinheld >= 10 and player.can_stinger and player.stingers > 0 and P_IsObjectOnGround(player.mo)) then
+	if(player.spinheld >= 10 and player.can_stinger and player.mo.stingers > 0 and P_IsObjectOnGround(player.mo)) then
  		player.can_bladeattack = false
 		player.can_stinger = false
 		
-		local angle = player.mo.angle - FixedAngle((player.stingers-1)*STINGER_ANGLE_ADJ/2)
+		local angle = player.mo.angle - FixedAngle((player.mo.stingers-1)*STINGER_ANGLE_ADJ/2)
 		
-		for i = 1, player.stingers, 1 do
+		for i = 1, player.mo.stingers, 1 do
 			if(i ~= 1) then
 				angle = $+FixedAngle(STINGER_ANGLE_ADJ)
 			end
@@ -157,7 +157,7 @@ addHook("SpinSpecial", function(player)
 			stinger.target = player.mo
 			P_InstaThrust(stinger, stinger.angle, stinger.info.speed)
 		end
-		player.stingers = 0
+		player.mo.stingers = 0
 	end
 	]]--
 end)
