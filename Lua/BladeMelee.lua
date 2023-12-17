@@ -85,8 +85,8 @@ local function BladeDamage(target, player)
 	--after-hit boost to grand momentum for combos or traversal
 	P_SetObjectMomZ(player.mo, BLADE_VERT_BOOST, false)
 	S_StartSound(player.mo, sfx_blde1, player)
-		
-	--add a stinger if possible
+	
+--add a stinger if possible
 	if(player.stingers < MAX_STINGERS) then
 		player.stingers = $+1
 	end

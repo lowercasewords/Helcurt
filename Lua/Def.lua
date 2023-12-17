@@ -166,6 +166,27 @@ addHook("PostThinkFrame", function()
 		player.mo.prevstate = player.mo.state
 	end
 end)
+
+
+--Determines how to handle the killing of targets
+addHook("MobjDeath", function(target, inflictor, source, dmgtype)
+	// 	print("T: "..target.type)
+	// 	print("I: "..inflictor.type)
+	// 	print("S: "..source.type)
+	// 	print("D: "..dmgtype)
+
+		--If Helcurt is the death source for targets in defined target-range (enemies, monitors, etc? NOT RINGS)
+		if(not source or not source.valid or not source.skin or not source.skin == "helcurt" or not source.player
+		or not target or not (target.flags & TARGET_DMG_RANGE)) then
+			return nil
+		end
+		
+		-- print(source.skin)
+		if(target.flags & MF_ENEMY|MF_BOSS) then
+			source.player.killcount = $+1
+		end
+	end)
+
 --/--------------------------
 --/ ACTIONS
 --/--------------------------
