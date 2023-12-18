@@ -25,9 +25,10 @@ addHook("PlayerThink", function(player)
 
 	--Using Deadly Stinger 
 	if(player.mo.state == S_BLADE_HIT and (not (player.cmd.buttons & BT_SPIN)) and player.spinheld > 10)-- and player.mo.stingers > 0)
+	-- if(player.mo.state == S_PRE_TRANSITION and player.cmd.buttons & BT_SPIN)-- and player.mo.stingers > 0)
 		-- if(player.cmd.buttons & BT_SPIN)
 			
-		print("Release "..player.mo.stingers.." deadly stingers!")
+		-- print("Release "..player.mo.stingers.." deadly stingers!")
 		
 		--Player's vertical boost
 		local momz = player.mo.stingers*5*FRACUNIT
@@ -50,6 +51,8 @@ addHook("PlayerThink", function(player)
 
 		--Reset stingers after usage
 		RemoveStingers(player.mo, MAX_STINGERS)
+		player.mo.can_teleport = 1
+		player.can_bladeattack = true
 	end
 	
 	--Loose a stinger when the chain is broken (hit the floor)
