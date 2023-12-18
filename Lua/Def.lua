@@ -28,6 +28,35 @@ rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "X_BLADE_ATTACK_MOMENTUM", 5*FRACUNIT)
 rawset(_G, "Z_BLADE_ATTACK_MOMENTUM", 8*FRACUNIT)
 
+--Adds stingers to the (player's) helcurt mobject 
+--mo (mobj_t): the mobject to add stingers
+--amount (int): the number of stingers to add (won't exceed the limit)
+rawset(_G, "AddStingers", function(mo, amount)
+	--add a stinger if possible	
+	if(mo and mo.stingers ~= nil and mo.skin == "helcurt") then
+		for i = 1, amount, 1 do
+			if(mo.stingers < MAX_STINGERS) then
+				mo.hudstingers[mo.stingers].frame = $&~FF_FULLDARK
+				mo.stingers = $ + 1
+			end 
+		end
+	end
+end)
+
+--Removes stingers from the (player's) helcurt mobject 
+--mo (mobj_t): the mobject to remove stingers stingers
+--amount (int): the number of stingers to remove (won't exceed the limit)
+rawset(_G, "RemoveStingers", function(mo, amount)
+	if(mo and mo.stingers ~= nil and mo.skin == "helcurt") then
+		for i = 1, amount, 1 do
+			if(mo.stingers > 0) then
+				mo.hudstingers[mo.stingers - 1].frame = $|FF_FULLDARK
+				mo.stingers = $ - 1
+			end 
+		end
+	end
+end)
+
 rawset(_G, "SpawnAfterImage", function(mo)
 	if(not mo or not mo.valid) then
 		return false
@@ -80,6 +109,16 @@ rawset(_G, "SpawnDistance", function(og_x, og_y, og_z, distance, angle, mtype)
 	return obj
 end)
 
+--Function Written by clairebun and was given to use on SRB2 discord page
+--mo1 (mobj_t): first mobj to check for collision
+--mo2 (mobj_t): second mobj to check for collision
+--returns: true if two mobjects collide vertically, false otherwise
+rawset(_G, "L_ZCollide", function(mo1, mo2)
+    if mo1.z > mo2.height+mo2.z then return false end
+    if mo2.z > mo1.height+mo1.z then return false end
+    return true
+end)
+
 --------------------------
 --/ THESE HOOKS ARE RAN FIRST
 ----------------------------/
@@ -89,17 +128,26 @@ addHook("PlayerSpawn", function(player)
 	player.spinheld = 0 --Increments each tic it's held IN POST THINK, use BT_SPIN to get current update
 	player.jumpheld = 0 --Increments each tic it's held IN POST THINK, use BT_JUMP to get current update
 	player.killcount = 0
-	player.can_teleport = 1
+	player.mo.can_teleport = 1
+	player.mo.enhanced_teleport = 0
 	player.can_bladeattack = true
 	player.can_stinger = true
 	player.lockon = nil
-	player.stingers = 0
+	player.mo.stingers = 0
 	player.sting_timer = 0
+	player.mo.hudstingers = {} --keeping track of HUD elements that represent the string
 	
 	--DEPRECATED - Prevent changing to default particle color each time player respawns
 	if(player.particlecolor == nil) then
 		player.particlecolor = SKINCOLOR_DUSK
 	end
+
+
+	for i = 0, MAX_STINGERS-1, 1 do
+		player.mo.hudstingers[i] = P_SpawnMobjFromMobj(player.mo, 0, 0, player.mo.height, MT_STGS)
+		player.mo.hudstingers[i].frame = $|FF_FULLDARK
+	end
+	
 end)
 
 local debug_timer = 0
@@ -115,7 +163,7 @@ addHook("PreThinkFrame", function()
 			if(debug_timer == 1) then
 				print("Kill count: "..player.killcount)
 				print("Can stinger: "..tostring(player.can_stinger))
-				print("Stingers: "..player.stingers)
+				print("Stingers: "..player.mo.stingers)
 				debug_timer = $+1
 			else
 				debug_timer = $+1
@@ -130,7 +178,44 @@ addHook("PreThinkFrame", function()
 		--Gets the horizontal direction of inputs
 		player.inputangle = player.cmd.angleturn*FRACUNIT + R_PointToAngle2(0, 0, player.cmd.forwardmove*FRACUNIT, -player.cmd.sidemove*FRACUNIT)
 	-- 	player.mo.x = player.mo.x*cos(player.mo.angle) - player.mo.y*sin(player.mo.angle)
-	-- 	player.mo.y = player.mo.x*cos(player.mo.angle) + player.mo.y*sin(player.mo.angle)
+	-- 	player.mo.y = player.mo.y*cos(player.mo.angle) + player.mo.x*sin(player.mo.angle)
+
+		--Original coordinates of a HUD stinger
+		local x = 0
+		local y = 0
+		local z = 0
+
+		--Cosine and sine of the helcurt's angle
+		local c = 0  
+		local s = 0
+
+		--Certain updated coordinates of HUD with respect to helcurt's facing angle 
+		local newx = 0
+		local newy = 0
+		--Setting positions of HUD stingers
+		for i = 0, MAX_STINGERS-1, 1 do
+			x = player.mo.x+player.mo.radius/3-5*FRACUNIT
+			y = player.mo.y+player.mo.radius/3-((i-1)*32/2)*FRACUNIT
+			z = player.mo.z + player.mo.height
+
+			c = cos(player.mo.angle)
+			s = sin(player.mo.angle)
+
+			x = $-player.mo.x
+			y = $-player.mo.y
+
+			newx = FixedMul(x, c) - FixedMul(y, s)
+			newy = FixedMul(y, c) + FixedMul(x, s)
+
+			x = newx+player.mo.x
+			y = newy+player.mo.y
+
+			P_MoveOrigin(player.mo.hudstingers[i], x, y, z, MT_STGS)
+
+			--The following rotates around the origin of the world!
+			-- player.mo.hudstingers[i].x = player.mo.hudstingers[i].x*cos(player.mo.angle) - player.mo.hudstingers[i].y*sin(player.mo.angle)
+			-- player.mo.hudstingers[i].y = player.mo.hudstingers[i].x*cos(player.mo.angle) + player.mo.hudstingers[i].y*sin(player.mo.angle)
+		end
 	end
 end)
 
@@ -154,8 +239,32 @@ addHook("PostThinkFrame", function()
 		end
 
 		player.mo.prevstate = player.mo.state
+
+
+
 	end
 end)
+
+
+--Determines how to handle the killing of targets
+addHook("MobjDeath", function(target, inflictor, source, dmgtype)
+	// 	print("T: "..target.type)
+	// 	print("I: "..inflictor.type)
+	// 	print("S: "..source.type)
+	// 	print("D: "..dmgtype)
+
+		--If Helcurt is the death source for targets in defined target-range (enemies, monitors, etc? NOT RINGS)
+		if(not source or not source.valid or not source.skin or not source.skin == "helcurt" or not source.player
+		or not target or not (target.flags & TARGET_DMG_RANGE)) then
+			return nil
+		end
+		
+		-- print(source.skin)
+		if(target.flags & MF_ENEMY|MF_BOSS) then
+			source.player.killcount = $+1
+		end
+	end)
+
 --/--------------------------
 --/ ACTIONS
 --/--------------------------
@@ -177,11 +286,18 @@ local function A_BladeHit(actor, par1, par2)
 end
 
 local function A_Pre_Transition(actor, par1, par2)
-	actor.player.can_teleport = 0
+	actor.can_teleport = 0
 	S_StartSound(actor, sfx_trns1)
 	actor.momz = $/10
 	actor.momy = $/2
 	actor.momx = $/2
+	if(actor.enhanced_teleport ~= nil and actor.enhanced_teleport == 1) then
+		-- if(actor.state == S_PRE_TRANSITION) then
+			actor.state = states[S_PRE_TRANSITION].nextstate
+			
+			actor.enhanced_teleport = 0
+			print("enhanced!")
+		end
 end
 
 --Start the teleportation transition
@@ -211,6 +327,23 @@ local function A_End_Transition(actor, par1, par2)
 	actor.flags = $&~MF_NOCLIPTHING
 	actor.momy = $/TELEPORT_STOP_SPEED
 	actor.momx = $/TELEPORT_STOP_SPEED
+
+
+	--[[
+	--Potential increase in horizontal momentum after teleportation through decreasing stopping power
+	if(actor.enhanced_teleport and actor.enhanced_teleport ~= nil) then
+		print("enhance!")
+		actor.momy = $/(TELEPORT_STOP_SPEED/2)
+		actor.momx = $/(TELEPORT_STOP_SPEED/2)
+	else
+		actor.momy = $/TELEPORT_STOP_SPEED
+		actor.momx = $/TELEPORT_STOP_SPEED
+	end
+	-- actor.momy = $/(TELEPORT_STOP_SPEED-FixedMul(TELEPORT_STOP_SPEED, actor.enhanced_teleport))
+	-- actor.momx = $/(TELEPORT_STOP_SPEED-FixedMul(TELEPORT_STOP_SPEED, actor.enhanced_teleport))
+
+	actor.enhanced_teleport = 0
+	]]--
 end
 
 --/--------------------------
