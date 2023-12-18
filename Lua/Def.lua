@@ -129,6 +129,7 @@ addHook("PlayerSpawn", function(player)
 	player.jumpheld = 0 --Increments each tic it's held IN POST THINK, use BT_JUMP to get current update
 	player.killcount = 0
 	player.mo.can_teleport = 1
+	player.mo.enhanced_teleport = 0
 	player.can_bladeattack = true
 	player.can_stinger = true
 	player.lockon = nil
@@ -290,6 +291,13 @@ local function A_Pre_Transition(actor, par1, par2)
 	actor.momz = $/10
 	actor.momy = $/2
 	actor.momx = $/2
+	if(actor.enhanced_teleport ~= nil and actor.enhanced_teleport == 1) then
+		-- if(actor.state == S_PRE_TRANSITION) then
+			actor.state = states[S_PRE_TRANSITION].nextstate
+			
+			actor.enhanced_teleport = 0
+			print("enhanced!")
+		end
 end
 
 --Start the teleportation transition
@@ -319,6 +327,23 @@ local function A_End_Transition(actor, par1, par2)
 	actor.flags = $&~MF_NOCLIPTHING
 	actor.momy = $/TELEPORT_STOP_SPEED
 	actor.momx = $/TELEPORT_STOP_SPEED
+
+
+	--[[
+	--Potential increase in horizontal momentum after teleportation through decreasing stopping power
+	if(actor.enhanced_teleport and actor.enhanced_teleport ~= nil) then
+		print("enhance!")
+		actor.momy = $/(TELEPORT_STOP_SPEED/2)
+		actor.momx = $/(TELEPORT_STOP_SPEED/2)
+	else
+		actor.momy = $/TELEPORT_STOP_SPEED
+		actor.momx = $/TELEPORT_STOP_SPEED
+	end
+	-- actor.momy = $/(TELEPORT_STOP_SPEED-FixedMul(TELEPORT_STOP_SPEED, actor.enhanced_teleport))
+	-- actor.momx = $/(TELEPORT_STOP_SPEED-FixedMul(TELEPORT_STOP_SPEED, actor.enhanced_teleport))
+
+	actor.enhanced_teleport = 0
+	]]--
 end
 
 --/--------------------------

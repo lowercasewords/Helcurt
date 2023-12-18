@@ -30,11 +30,18 @@ addHook("PlayerThink", function(player)
 			
 		-- print("Release "..player.mo.stingers.." deadly stingers!")
 		
+		--Make sure capped stinger gives you same vertical boost as the one before cap, 
+		--but additionally iproving your teleport
+		local adj_stingers = player.mo.stingers
+		if(player.mo.stingers == MAX_STINGERS) then
+			adj_stingers = $-1
+			print("make enhanced")
+			player.mo.enhanced_teleport = 1
+			-- states[S_PRE]
+		end
+		
 		--Player's vertical boost
-		local momz = player.mo.stingers*5*FRACUNIT
-		P_SetObjectMomZ(player.mo, momz, false)
-		-- print("z:"..momz/FRACUNIT)
-		-- print("s:"..FixedHypot(player.mo.momx, player.mo.momy)/FRACUNIT)
+		P_SetObjectMomZ(player.mo, FixedSqrt(adj_stingers*(100*FRACUNIT)), false)
 		
 		--Releasing damaging stingers one by one
 		local angle = player.mo.angle - FixedAngle((player.mo.stingers-1)*STINGER_ANGLE_ADJ/2)
