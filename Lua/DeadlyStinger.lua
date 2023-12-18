@@ -49,9 +49,8 @@ addHook("PlayerThink", function(player)
 		end
 
 		--Reset stingers after usage
-		player.mo.stingers = 0
+		RemoveStingers(player.mo, MAX_STINGERS)
 	end
-	
 	
 	--Loose a stinger when the chain is broken (hit the floor)
 	--[[
@@ -127,7 +126,6 @@ addHook("MobjDamage", function(target, inflictor, source, damage, damagetype)
 	or not source.player.target == inflictor or not target or not (target.flags & TARGET_DMG_RANGE)) then
 			return nil
 		end
-	print("stinger hit")
 	AddStingers(source, 1)
 
 end)

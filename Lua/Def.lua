@@ -28,16 +28,32 @@ rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "X_BLADE_ATTACK_MOMENTUM", 5*FRACUNIT)
 rawset(_G, "Z_BLADE_ATTACK_MOMENTUM", 8*FRACUNIT)
 
---Adds a stinger to the (player's) helcurt mobject 
+--Adds stingers to the (player's) helcurt mobject 
 --mo (mobj_t): the mobject to add stingers
 --amount (int): the number of stingers to add (won't exceed the limit)
 rawset(_G, "AddStingers", function(mo, amount)
 	--add a stinger if possible	
-	if(mo and mo.stingers ~= nil and mo.stingers < MAX_STINGERS and mo.skin == "helcurt") then
-		print("add")
-		mo.stingers = $+amount
-	else
-		print("can't add stinger")
+	if(mo and mo.stingers ~= nil and mo.skin == "helcurt") then
+		for i = 1, amount, 1 do
+			if(mo.stingers < MAX_STINGERS) then
+				mo.hudstingers[mo.stingers].frame = $&~FF_FULLDARK
+				mo.stingers = $ + 1
+			end 
+		end
+	end
+end)
+
+--Removes stingers from the (player's) helcurt mobject 
+--mo (mobj_t): the mobject to remove stingers stingers
+--amount (int): the number of stingers to remove (won't exceed the limit)
+rawset(_G, "RemoveStingers", function(mo, amount)
+	if(mo and mo.stingers ~= nil and mo.skin == "helcurt") then
+		for i = 1, amount, 1 do
+			if(mo.stingers > 0) then
+				mo.hudstingers[mo.stingers - 1].frame = $|FF_FULLDARK
+				mo.stingers = $ - 1
+			end 
+		end
 	end
 end)
 
@@ -118,11 +134,19 @@ addHook("PlayerSpawn", function(player)
 	player.lockon = nil
 	player.mo.stingers = 0
 	player.sting_timer = 0
+	player.mo.hudstingers = {} --keeping track of HUD elements that represent the string
 	
 	--DEPRECATED - Prevent changing to default particle color each time player respawns
 	if(player.particlecolor == nil) then
 		player.particlecolor = SKINCOLOR_DUSK
 	end
+
+
+	for i = 0, MAX_STINGERS-1, 1 do
+		player.mo.hudstingers[i] = P_SpawnMobjFromMobj(player.mo, 0, 0, player.mo.height, MT_STGS)
+		player.mo.hudstingers[i].frame = $|FF_FULLDARK
+	end
+	
 end)
 
 local debug_timer = 0
@@ -153,7 +177,44 @@ addHook("PreThinkFrame", function()
 		--Gets the horizontal direction of inputs
 		player.inputangle = player.cmd.angleturn*FRACUNIT + R_PointToAngle2(0, 0, player.cmd.forwardmove*FRACUNIT, -player.cmd.sidemove*FRACUNIT)
 	-- 	player.mo.x = player.mo.x*cos(player.mo.angle) - player.mo.y*sin(player.mo.angle)
-	-- 	player.mo.y = player.mo.x*cos(player.mo.angle) + player.mo.y*sin(player.mo.angle)
+	-- 	player.mo.y = player.mo.y*cos(player.mo.angle) + player.mo.x*sin(player.mo.angle)
+
+		--Original coordinates of a HUD stinger
+		local x = 0
+		local y = 0
+		local z = 0
+
+		--Cosine and sine of the helcurt's angle
+		local c = 0  
+		local s = 0
+
+		--Certain updated coordinates of HUD with respect to helcurt's facing angle 
+		local newx = 0
+		local newy = 0
+		--Setting positions of HUD stingers
+		for i = 0, MAX_STINGERS-1, 1 do
+			x = player.mo.x+player.mo.radius/3-5*FRACUNIT
+			y = player.mo.y+player.mo.radius/3-((i-1)*32/2)*FRACUNIT
+			z = player.mo.z + player.mo.height
+
+			c = cos(player.mo.angle)
+			s = sin(player.mo.angle)
+
+			x = $-player.mo.x
+			y = $-player.mo.y
+
+			newx = FixedMul(x, c) - FixedMul(y, s)
+			newy = FixedMul(y, c) + FixedMul(x, s)
+
+			x = newx+player.mo.x
+			y = newy+player.mo.y
+
+			P_MoveOrigin(player.mo.hudstingers[i], x, y, z, MT_STGS)
+
+			--The following rotates around the origin of the world!
+			-- player.mo.hudstingers[i].x = player.mo.hudstingers[i].x*cos(player.mo.angle) - player.mo.hudstingers[i].y*sin(player.mo.angle)
+			-- player.mo.hudstingers[i].y = player.mo.hudstingers[i].x*cos(player.mo.angle) + player.mo.hudstingers[i].y*sin(player.mo.angle)
+		end
 	end
 end)
 
@@ -177,6 +238,9 @@ addHook("PostThinkFrame", function()
 		end
 
 		player.mo.prevstate = player.mo.state
+
+
+
 	end
 end)
 
