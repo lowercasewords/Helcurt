@@ -308,7 +308,15 @@ local function A_Start_Transition(actor, par1, par2)
 -- 	actor.player.can_teleport = false
 -- 	actor.player.can_bladeattack = true
 	
-	P_InstaThrust(actor, actor.angle, TELEPORT_SPEED)
+	-- if(player.night_timer > 0) then
+	-- 	P_InstaThrust(actor, actor.angle, TELEPORT_SPEED * )
+	-- end
+	
+	--Thrusts forward, increased with the nightfall.
+	--NOTE: consider making teleport's speed relative to helcurt's, the faster he moves
+	--the fastere teleport is, but give the teleport the base speed so that Helcurt can teleport
+	--from stand still
+	P_InstaThrust(actor, actor.angle, (actor.player.night_timer == 0 and TELEPORT_SPEED or TELEPORT_SPEED + TELEPORT_SPEED/3))
 	P_SetObjectMomZ(actor, 0, false)
 end
 
