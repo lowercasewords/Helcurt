@@ -136,6 +136,7 @@ addHook("PlayerSpawn", function(player)
 	player.mo.stingers = 0
 	player.sting_timer = 0
 	player.mo.hudstingers = {} --keeping track of HUD elements that represent the string
+	player.night_timer = 0
 	
 	--DEPRECATED - Prevent changing to default particle color each time player respawns
 	if(player.particlecolor == nil) then
