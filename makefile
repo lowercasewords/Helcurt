@@ -8,16 +8,15 @@ MAP = map01
 CHEATS = "godmode 1" "devmode 1"
 
 # Sometimes LUA are not loaded so they need to be refreshed by going into slade and saving any file
-all: build launch
+all: clean build launch
 	echo "done!"
 
 launch: 
 	$(EXECUTABLE) -file $(OUTPK3) -warp $(MAP) + $(SKIN)
-
 build:
 	zip $(OUTPK3) $(DIRS)
 	zip $(OUTPK3) $(PRIORITY_FILES)
 	zip $(OUTPK3) -r $(DIRS) -x $(PRIORITY_FILES) -x *.DS_Store -x *.bak
 
 clean:
-	rm $(OUTPK3)
+	-rm $(OUTPK3)
