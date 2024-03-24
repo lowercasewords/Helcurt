@@ -12,7 +12,7 @@ freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRAN
 "S_BLADE_HIT", "S_BLADE_ATTACK", "S_STINGER_LAUNCH", "S_STINGER_STACK", "S_LOCK")
 freeslot("MT_STGP", "MT_STGS", "MT_LOCK")
 freeslot("SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_LOCK")
-freeslot("sfx_trns1", "sfx_trns2", "sfx_blde1")
+freeslot("sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1")
 
 --constants and functions used throghout the project
 rawset(_G, "SPAWN_RADIUS_MAX", 10)
@@ -405,7 +405,25 @@ sfxinfo[sfx_blde1] = {
 	singular = false,
 	priority = 60
 }
+sfxinfo[sfx_mnlg1] = {
+	singular = false,
+	priority = 60
+}
 
+sfxinfo[sfx_ult01] = {
+	singular = false,
+	priority = 60
+}
+
+sfxinfo[sfx_ult02] = {
+	singular = false,
+	priority = 60
+}
+
+sfxinfo[sfx_ult03] = {
+	singular = false,
+	priority = 60
+}
 --/--------------------------
 --/ STATES
 --/--------------------------

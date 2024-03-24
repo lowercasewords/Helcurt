@@ -37,8 +37,18 @@ addHook("PlayerThink", function(player)
 
         --Changes the background for the Night Fall
         P_SetupLevelSky(6)
-        P_SetSkyboxMobj(nil) 
+        P_SetSkyboxMobj(nil)  
         -- P_SwitchWeather(PRECIP_STORM)
+
+        --Starting the monologue and night sound
+        S_StartSound(player.mo, sfx_mnlg1)
+        S_StartSound(player.mo, sfx_ult01)
+
+        --Fading the background music
+        S_FadeMusic(50, 20)
+        -- S_SpeedMusic(FRACUNIT/2)
+        
+        --Make each sector of the map darker
         for sector in sectors.iterate do
             -- sector.oglightlevel = 0
             -- sector.oglightlevel = sector.lightlevel
@@ -48,6 +58,10 @@ addHook("PlayerThink", function(player)
     --Proceeding with the countdown
     elseif(player.night_timer > 1) then
             player.night_timer = $-1
+            --Keep playing the repeating night sound 
+            if(not S_SoundPlaying(player.mo, sfx_ult01) and not S_SoundPlaying(player.mo, sfx_ult02)) then
+                S_StartSound(player.mo, sfx_ult02)
+            end
     --Clearing up after the night ends
     elseif(player.night_timer == 1) then
         local skin = skins[player.skin]
@@ -59,10 +73,18 @@ addHook("PlayerThink", function(player)
       
         --Changes the background back to the OG (OriGinal)
         P_SetupLevelSky(current_mapinfo.skynum)
+        -- P_SwitchWeather(current_mapinfo.weather)
         if(og_skybox.valid) then
             P_SetSkyboxMobj(og_skybox)
         end
-        -- P_SwitchWeather(current_mapinfo.weather)
+
+        --Wrapping-up the night sound and bringing back original level sounds
+        S_FadeMusic(100, 20)
+        S_StopSoundByID(player.mo, sfx_ult02)
+        S_StartSound(player.mo, sfx_ult03)
+        S_SpeedMusic(FRACUNIT)
+        
+        
 
         for sector in sectors.iterate do
             -- P_FadeLight(sector.tag, -sector.lightlevel/2, 20)
