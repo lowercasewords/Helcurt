@@ -136,7 +136,16 @@ addHook("PlayerSpawn", function(player)
 	player.mo.stingers = 0
 	player.sting_timer = 0
 	player.mo.hudstingers = {} --keeping track of HUD elements that represent the string
+	
+	-- if(player.night_timer ~= nil) then
+	-- 	EndHelcurtNightBuff(originplayer)
+	-- end
+	
+	if(player.night_timer ~= nil and player.night_timer ~= 0) then
+		SPEED_BUG_PREVENTION(player)
+	end
 	player.night_timer = 0
+	-- end
 	
 	--DEPRECATED - Prevent changing to default particle color each time player respawns
 	if(player.particlecolor == nil) then
