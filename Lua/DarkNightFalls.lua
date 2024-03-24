@@ -10,7 +10,7 @@ local NIGHT_LIGHT_MULTIPLYER = 3/4
 
 local function StartHelcurtNightBuff(originplayer)
     --Increase in speed
-    originplayer.acceleration = $+$/2
+    originplayer.acceleration = $+$/4
     originplayer.normalspeed = $+$/2
 end
 
@@ -84,7 +84,7 @@ addHook("MapLoad", function(mapnum)
             break
         end         
     end
-    
+
 end)
 
 -- addHook("MapChange", function(player)
