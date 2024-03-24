@@ -12,7 +12,7 @@ freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRAN
 "S_BLADE_HIT", "S_BLADE_ATTACK", "S_STINGER_LAUNCH", "S_STINGER_STACK", "S_LOCK")
 freeslot("MT_STGP", "MT_STGS", "MT_LOCK")
 freeslot("SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_LOCK")
-freeslot("sfx_trns1", "sfx_trns2", "sfx_blde1")
+freeslot("sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1")
 
 --constants and functions used throghout the project
 rawset(_G, "SPAWN_RADIUS_MAX", 10)
@@ -136,6 +136,16 @@ addHook("PlayerSpawn", function(player)
 	player.mo.stingers = 0
 	player.sting_timer = 0
 	player.mo.hudstingers = {} --keeping track of HUD elements that represent the string
+	
+	-- if(player.night_timer ~= nil) then
+	-- 	EndHelcurtNightBuff(originplayer)
+	-- end
+	
+	if(player.night_timer ~= nil and player.night_timer ~= 0) then
+		SPEED_BUG_PREVENTION(player)
+	end
+	player.night_timer = 0
+	-- end
 	
 	--DEPRECATED - Prevent changing to default particle color each time player respawns
 	if(player.particlecolor == nil) then
@@ -307,7 +317,15 @@ local function A_Start_Transition(actor, par1, par2)
 -- 	actor.player.can_teleport = false
 -- 	actor.player.can_bladeattack = true
 	
-	P_InstaThrust(actor, actor.angle, TELEPORT_SPEED)
+	-- if(player.night_timer > 0) then
+	-- 	P_InstaThrust(actor, actor.angle, TELEPORT_SPEED * )
+	-- end
+	
+	--Thrusts forward, increased with the nightfall.
+	--NOTE: consider making teleport's speed relative to helcurt's, the faster he moves
+	--the fastere teleport is, but give the teleport the base speed so that Helcurt can teleport
+	--from stand still
+	P_InstaThrust(actor, actor.angle, (actor.player.night_timer == 0 and TELEPORT_SPEED or TELEPORT_SPEED + TELEPORT_SPEED/3))
 	P_SetObjectMomZ(actor, 0, false)
 end
 
@@ -396,7 +414,25 @@ sfxinfo[sfx_blde1] = {
 	singular = false,
 	priority = 60
 }
+sfxinfo[sfx_mnlg1] = {
+	singular = false,
+	priority = 60
+}
 
+sfxinfo[sfx_ult01] = {
+	singular = false,
+	priority = 60
+}
+
+sfxinfo[sfx_ult02] = {
+	singular = false,
+	priority = 60
+}
+
+sfxinfo[sfx_ult03] = {
+	singular = false,
+	priority = 60
+}
 --/--------------------------
 --/ STATES
 --/--------------------------
