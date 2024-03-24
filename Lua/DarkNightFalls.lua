@@ -6,6 +6,7 @@ local og_skybox = 0
 --Duration of the night
 local NIGHT_MAX_TIC = 5*TICRATE
 local NIGHT_SKYBOX = 6
+local NIGHT_LIGHT_MULTIPLYER = 3/4
 
 addHook("MapLoad", function(mapnum)
     -- print(mapthing.skynum)
@@ -15,7 +16,8 @@ addHook("MapLoad", function(mapnum)
     for mp in mapthings.iterate do
             if(mp.type == 780) then
                 og_skybox = mp.mobj
-            end
+                break
+            end         
         end
     
 end)
@@ -35,7 +37,14 @@ addHook("PlayerThink", function(player)
 
         --Changes the background for the Night Fall
         P_SetupLevelSky(6)
-        P_SetSkyboxMobj(nil)
+        P_SetSkyboxMobj(nil) 
+        -- P_SwitchWeather(PRECIP_STORM)
+        for sector in sectors.iterate do
+            -- sector.oglightlevel = 0
+            -- sector.oglightlevel = sector.lightlevel
+            -- P_FadeLight(sector.tag, sector.lightlevel - sector.lightlevel/NIGHT_LIGHT_MULTIPLYER, 3)
+           sector.lightlevel = $*3/4
+        end
     --Proceeding with the countdown
     elseif(player.night_timer > 1) then
             player.night_timer = $-1
@@ -50,6 +59,15 @@ addHook("PlayerThink", function(player)
       
         --Changes the background back to the OG (OriGinal)
         P_SetupLevelSky(current_mapinfo.skynum)
-        P_SetSkyboxMobj(og_skybox)
+        if(og_skybox.valid) then
+            P_SetSkyboxMobj(og_skybox)
+        end
+        -- P_SwitchWeather(current_mapinfo.weather)
+
+        for sector in sectors.iterate do
+            -- P_FadeLight(sector.tag, -sector.lightlevel/2, 20)
+            -- sector.lightlevel = sector.oglightlevel
+            sector.lightlevel = $*4/3
+        end
     end
 end)
