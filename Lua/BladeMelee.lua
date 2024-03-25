@@ -132,7 +132,10 @@ addHook("SpinSpecial", function(player)
  			-- print("allow")
  			player.powers[pw_strong] = STR_FLOOR|STR_SPRING
  		end
-
+	elseif(player.spinheld >= 1 
+	and player.mo.state == S_BLADE_ATTACK) then
+		P_SetObjectMomZ(player.mo, -3*FRACUNIT, true)
+		print(player.mo.momz)
 	end
 end)
 
