@@ -12,7 +12,7 @@ freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRAN
 "S_BLADE_HIT", "S_BLADE_ATTACK", "S_STINGER_LAUNCH", "S_STINGER_STACK", "S_LOCK")
 freeslot("MT_STGP", "MT_STGS", "MT_LOCK")
 freeslot("SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_LOCK")
-freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", 
+freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", "sfx_hide1",
 "sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1")
 
 --constants and functions used throghout the project
@@ -463,6 +463,10 @@ sfxinfo[sfx_upg04] = {
 	priority = 60
 }
 
+sfxinfo[sfx_hide1] = {
+	singular = true,
+	priority = 60
+}
 
 --/--------------------------
 --/ STATES
