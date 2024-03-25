@@ -135,6 +135,8 @@ addHook("PlayerSpawn", function(player)
 	player.lockon = nil
 	player.mo.stingers = 0
 	player.sting_timer = 0
+	player.mo.stinger_charge_countdown = -1
+	player.mo.isconcealed = 0
 	player.mo.hudstingers = {} --keeping track of HUD elements that represent the string
 	
 	-- if(player.night_timer ~= nil) then
