@@ -1,8 +1,6 @@
 --Particle slots
 freeslot("MT_SHDW", "SPR_SHDW", "S_SHDW_PRT")
 
-
-
 local spawn_tic_counter = 0
 
 COM_AddCommand("hel_particlecolor", function(player, color)
@@ -26,11 +24,11 @@ mobjinfo[MT_SHDW] = {
 	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY
 }
 
-/*
+
 addHook("PlayerThink", function(player)
 -- 	if(player.valid and player.mo and player.mo.valid and player.mo.skin and player.mo.skin.valid
 -- 	and player.mo.skin == "helcurt")
-	if(player.mo.skin == "helcurt") then
+	if(player.mo.skin == "helcurt" and player.mo.isconcealed) then
 		local particle = P_SpawnMobj(player.mo.x+P_RandomRange(SPAWN_RADIUS_MAX, -SPAWN_RADIUS_MAX)*FRACUNIT, 
 									player.mo.y+P_RandomRange(SPAWN_RADIUS_MAX, -SPAWN_RADIUS_MAX)*FRACUNIT,  
 									player.mo.z+P_RandomRange(0, player.mo.height/FRACUNIT/2)*FRACUNIT,
@@ -39,4 +37,3 @@ addHook("PlayerThink", function(player)
 		P_SetObjectMomZ(particle, 2*FRACUNIT, false)
 	end
 end)
-*/
