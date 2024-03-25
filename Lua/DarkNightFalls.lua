@@ -56,7 +56,7 @@ local function EndTheNight(originplayer, skybox, skynum)
    --Changes the background back to the OG (OriGinal)
    P_SetupLevelSky(skynum)
    -- P_SwitchWeather(current_mapinfo.weather)
-   if(og_skybox.valid) then
+   if(og_skybox.valid and og_skybox ~= nil) then
        P_SetSkyboxMobj(skybox)
    end
 
