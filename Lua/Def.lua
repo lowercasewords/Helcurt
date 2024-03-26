@@ -216,6 +216,24 @@ addHook("PreThinkFrame", function()
 	-- 	player.mo.x = player.mo.x*cos(player.mo.angle) - player.mo.y*sin(player.mo.angle)
 	-- 	player.mo.y = player.mo.y*cos(player.mo.angle) + player.mo.x*sin(player.mo.angle)
 
+		
+		if(player.mo.state == S_PLAY_JUMP and player.hasjumped == 0) then
+			player.hasjumped = 1
+		elseif(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0) then
+			player.hasjumped = 0
+		end
+	end
+end)
+
+--The Thinker that plays after other thikers,
+--mostly used to clean up, record the previous state, 
+--and jump and spin button holding
+addHook("PostThinkFrame", function()
+	for player in players.iterate() do
+		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt")
+			continue
+		end
+
 		--Original coordinates of a HUD stinger
 		local x = 0
 		local y = 0
@@ -252,23 +270,7 @@ addHook("PreThinkFrame", function()
 			-- player.mo.hudstingers[i].x = player.mo.hudstingers[i].x*cos(player.mo.angle) - player.mo.hudstingers[i].y*sin(player.mo.angle)
 			-- player.mo.hudstingers[i].y = player.mo.hudstingers[i].x*cos(player.mo.angle) + player.mo.hudstingers[i].y*sin(player.mo.angle)
 		end
-		if(player.mo.state == S_PLAY_JUMP and player.hasjumped == 0) then
-			player.hasjumped = 1
-		elseif(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0) then
-			player.hasjumped = 0
-		end
-	end
-end)
-
---The Thinker that plays after other thikers,
---mostly used to clean up, record the previous state, 
---and jump and spin button holding
-addHook("PostThinkFrame", function()
-	for player in players.iterate() do
-		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt")
-			continue
-		end
-
+		
 		-- if(player.cmd.buttons & BT_SPIN) then
 		-- 	player.spinheld = $+1
 		-- elseif(player.spinheld ~= 0 and player.cmd.buttons ~= BT_SPIN) then
