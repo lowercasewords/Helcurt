@@ -132,8 +132,8 @@ end)
 
 --Handle needed variables on spawn
 addHook("PlayerSpawn", function(player)
-	player.spinheld = 0 --Increments each tic it's held IN POST THINK, use BT_SPIN to get current update
-	player.jumpheld = 0 --Increments each tic it's held IN POST THINK, use BT_JUMP to get current update
+	player.spinheld = 0 --Increments each tic it's held IN PRETHINK, use PF_SPINDOWN to get previous update
+	player.jumpheld = 0 --Increments each tic it's held IN PRETHINK, use PF_JUMPDOWN to get previous update
 	player.killcount = 0
 	player.mo.can_teleport = 0
 	player.mo.teleported = 0
@@ -192,6 +192,18 @@ addHook("PreThinkFrame", function()
 			debug_timer = 0
 		end
 			
+		--Retrieves the current input
+		if(player.cmd.buttons & BT_SPIN) then
+			player.spinheld = $+1
+		elseif(player.spinheld ~= 0 and player.cmd.buttons ~= BT_SPIN) then
+			player.spinheld = 0
+		end
+		if(player.cmd.buttons & BT_JUMP) then
+			player.jumpheld = $+1
+		elseif(player.jumpheld ~= 0 and player.cmd.buttons ~= BT_JUMP) then
+			player.jumpheld = 0
+		end
+
 	-- 		print("D: "..debug_timer)
 
 		
@@ -240,28 +252,26 @@ addHook("PreThinkFrame", function()
 end)
 
 --The Thinker that plays after other thikers,
---mostly used to clean up and record the previous state
+--mostly used to clean up, record the previous state, 
+--and jump and spin button holding
 addHook("PostThinkFrame", function()
 	for player in players.iterate() do
 		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt")
 			continue
 		end
 
-		if(player.cmd.buttons & BT_SPIN) then
-			player.spinheld = $+1
-		elseif(player.spinheld ~= 0 and player.cmd.buttons ~= BT_SPIN) then
-			player.spinheld = 0
-		end
-		if(player.cmd.buttons & BT_JUMP) then
-			player.jumpheld = $+1
-		elseif(player.jumpheld ~= 0 and player.cmd.buttons ~= BT_JUMP) then
-			player.jumpheld = 0
-		end
+		-- if(player.cmd.buttons & BT_SPIN) then
+		-- 	player.spinheld = $+1
+		-- elseif(player.spinheld ~= 0 and player.cmd.buttons ~= BT_SPIN) then
+		-- 	player.spinheld = 0
+		-- end
+		-- if(player.cmd.buttons & BT_JUMP) then
+		-- 	player.jumpheld = $+1
+		-- elseif(player.jumpheld ~= 0 and player.cmd.buttons ~= BT_JUMP) then
+		-- 	player.jumpheld = 0
+		-- end
 
 		player.mo.prevstate = player.mo.state
-
-
-
 	end
 end)
 
