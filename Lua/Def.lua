@@ -15,7 +15,7 @@ freeslot("SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_LOCK")
 freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", 
 "sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1")
 
---constants and functions used throghout the project
+--constants and functions used throghout the project (rest are defined in other files too)
 rawset(_G, "SPAWN_RADIUS_MAX", 10)
 rawset(_G, "SPAWN_TIC_MAX", 1)
 rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MONITOR|MF_SPRING)
@@ -134,12 +134,15 @@ end)
 addHook("PlayerSpawn", function(player)
 	player.spinheld = 0 --Increments each tic it's held IN PRETHINK, use PF_SPINDOWN to get previous update
 	player.jumpheld = 0 --Increments each tic it's held IN PRETHINK, use PF_JUMPDOWN to get previous update
+	player.prevjumpheld = 0 --Value of jumpheld in previous tic
+	--Did player jump? Resets to 0 when hits the floor
+	player.hasjumped = 0
 	player.killcount = 0
 	player.mo.can_teleport = 0
 	player.mo.teleported = 0
 	player.mo.enhanced_teleport = 0
 	player.mo.can_bladeattack = true
-	player.can_stinger = true
+	player.mo.can_stinger = true
 	player.lockon = nil
 	player.mo.stingers = 0
 	player.sting_timer = 0
@@ -172,7 +175,7 @@ end)
 
 local debug_timer = 0
 --The Base Thinker that plays before others,
---mostly used to record players input before interacting with the abilities
+--mostly used to record players input  before interacting with the abilities
 addHook("PreThinkFrame", function()
 	for player in players.iterate() do
 		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt")
@@ -182,7 +185,7 @@ addHook("PreThinkFrame", function()
 		if(player.cmd.buttons & BT_CUSTOM1) then
 			if(debug_timer == 1) then
 				print("Kill count: "..player.killcount)
-				print("Can stinger: "..tostring(player.can_stinger))
+				print("Can stinger: "..tostring(player.mo.can_stinger))
 				print("Stingers: "..player.mo.stingers)
 				debug_timer = $+1
 			else
@@ -248,6 +251,11 @@ addHook("PreThinkFrame", function()
 			-- player.mo.hudstingers[i].x = player.mo.hudstingers[i].x*cos(player.mo.angle) - player.mo.hudstingers[i].y*sin(player.mo.angle)
 			-- player.mo.hudstingers[i].y = player.mo.hudstingers[i].x*cos(player.mo.angle) + player.mo.hudstingers[i].y*sin(player.mo.angle)
 		end
+		if(player.mo.state == S_PLAY_JUMP and player.hasjumped == 0) then
+			player.hasjumped = 1
+		elseif(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0) then
+			player.hasjumped = 0
+		end
 	end
 end)
 
@@ -271,6 +279,7 @@ addHook("PostThinkFrame", function()
 		-- 	player.jumpheld = 0
 		-- end
 
+		player.prevjumpheld = player.jumpheld
 		player.mo.prevstate = player.mo.state
 	end
 end)

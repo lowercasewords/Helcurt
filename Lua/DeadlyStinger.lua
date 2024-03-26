@@ -24,18 +24,54 @@ addHook("PlayerThink", function(player)
 	-- end
 
 	--Using Deadly Stinger 
-	if(player.mo.state == S_BLADE_HIT and (not (player.cmd.buttons & BT_SPIN)) and player.spinheld > 10)-- and player.mo.stingers > 0)
+	-- if(player.mo.state == S_BLADE_HIT and (not (player.cmd.buttons & BT_SPIN)) and player.spinheld > 10)-- and player.mo.stingers > 0)
 	-- if(player.mo.state == S_PRE_TRANSITION and player.cmd.buttons & BT_SPIN)-- and player.mo.stingers > 0)
-		-- if(player.cmd.buttons & BT_SPIN)
-			
+	-- print(player.jumpheld)
+	-- print(player.cmd.buttons&BT_JUMP)
+
+	-- if(not P_IsObjectOnGround(player.mo) and player.mo.stingers > 0 and  player.jumpheld == 1) then
+	-- if(not P_IsObjectOnGround(player.mo) and player.jumpheld == 1) then
+	-- if(player.cmd.buttons & BT_SPIN)
+	-- print(player.jumpheld == 0 and player.pflags&PF_JUMPDOWN ~= 0)
+
+	
+
+	-- if(player.mo.can_stinger == 1 and player.jumpheld == 0 and player.pflags&PF_JUMPDOWN ~= 0 and player.hasjumped) then
+
+	--Following if-statement executes when jump is released after jump in the air
+	-- if(player.mo.can_stinger == 1 and player.jumpheld <= TICS_TO_JUMPHOLD and player.cmd.buttons ~= BT_JUMP and player.hasjumped) then
+	-- print(player.jumpheld == 0 and player.cmd.buttons&BT_JUMP == 0)
+
+	-- print("J: "..player.jumpheld)
+	-- print("P: "..player.prevjumpheld)
+
+	--press, SELF RELEASE
+	--press, press, SELF RELEASE
+	--press, press, press, SELF RELEASE
+	--press, press, press... TRIGGER PRESS (automatic release)
+
+	--[[
+	if(player.jumpheld == 0 and player.hasjumped and player.mo.can_stinger == 0) then
+		player.mo.can_stinger = 1
+		-- print(player.mo.momz)
+	end
+	]]--
+	
+	-- if(player.prevjumpheld <= TICS_TO_JUMPHOLD and player.prevjumpheld ~= 0 and player.jumpheld == 0 and 
+	-- player.mo.can_stinger == 1 and player.hasjumped) then
+	if(player.prevjumpheld <= TICS_TO_JUMPHOLD and player.prevjumpheld ~= 0 and 
+	player.jumpheld == 0 and player.mo.can_stinger == 1 and player.mo.stingers > 0)
+	
+		--Using Deadly Stinger 	
+		player.mo.can_stinger = 0
 		-- print("Release "..player.mo.stingers.." deadly stingers!")
-		
+			
 		--Make sure capped stinger gives you same vertical boost as the one before cap, 
 		--but additionally iproving your teleport
 		local adj_stingers = player.mo.stingers
 		if(player.mo.stingers == MAX_STINGERS) then
 			adj_stingers = $-1
-			print("make enhanced")
+			-- print("make enhanced")
 			player.mo.enhanced_teleport = 1
 			-- states[S_PRE]
 		end
@@ -62,12 +98,20 @@ addHook("PlayerThink", function(player)
 		player.mo.can_bladeattack = true
 	end
 	
+	
+		
+	-- end
+	
 	--Loose a stinger when the chain is broken (hit the floor)
 	--[[
 	if(player.mo.stingers > 0 and player.mo.eflags & MFE_JUSTHITFLOOR) then
 		player.mo.stingers = $-1
 	end
 	]]--
+
+	if(player.mo.eflags&MFE_JUSTHITFLOOR) then
+		player.mo.can_stinger = 1
+	end
 end)
 
 --Handle the Stinger Projectile
@@ -148,9 +192,9 @@ addHook("SpinSpecial", function(player)
 
 	--[[
 	--Perform Deadly Stinger Attack!
-	if(player.spinheld >= 10 and player.can_stinger and player.mo.stingers > 0 and P_IsObjectOnGround(player.mo)) then
+	if(player.spinheld >= 10 and player.mo.can_stinger and player.mo.stingers > 0 and P_IsObjectOnGround(player.mo)) then
  		player.mo.can_bladeattack = false
-		player.can_stinger = false
+		player.mo.can_stinger = false
 		
 		local angle = player.mo.angle - FixedAngle((player.mo.stingers-1)*STINGER_ANGLE_ADJ/2)
 		
