@@ -39,7 +39,7 @@ end
 --player (mobj_t): the player that locks on the target
 --returns: ??? NO DECIDED YET
 local function SpawnLockOn(target, player)
-	if(target.valid and target.health ~= 0) then
+	if(target.valid and target.health ~= 0 and target.flags&TARGET_IGNORE_RANGE == 0 and target.flags&TARGET_RANGE) then
 		--Remove previous lockon since there can only be one
 		StopLockOn(player)
 		--spawn lockon and keep reference
@@ -66,7 +66,7 @@ end
 --player (plzyer_t): the damage sender
 -- returns: nil
 local function BladeDamage(target, player)
-	if(target.flags & TARGET_DMG_RANGE) then
+	if(target.flags & TARGET_DMG_RANGE | ~TARGET_IGNORE_RANGE) then
 		if(target.spawnhealth == nil) then
 			P_KillMobj(target, player.mo, player.mo)
 		else
