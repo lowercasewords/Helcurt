@@ -135,9 +135,10 @@ addHook("PlayerSpawn", function(player)
 	player.spinheld = 0 --Increments each tic it's held IN POST THINK, use BT_SPIN to get current update
 	player.jumpheld = 0 --Increments each tic it's held IN POST THINK, use BT_JUMP to get current update
 	player.killcount = 0
-	player.mo.can_teleport = 1
+	player.mo.can_teleport = 0
+	player.mo.teleported = 0
 	player.mo.enhanced_teleport = 0
-	player.can_bladeattack = true
+	player.mo.can_bladeattack = true
 	player.can_stinger = true
 	player.lockon = nil
 	player.mo.stingers = 0
@@ -297,7 +298,7 @@ end
 local function A_BladeAttack(actor, par1, par2)
 -- 	P_SetObjectMomZ(actor, -Z_BLADE_ATTACK_MOMENTUM, true)
 -- 	P_Thrust(actor, actor.angle, X_BLADE_ATTACK_MOMENTUM)
--- 	actor.player.can_bladeattack = false
+-- 	actor.can_bladeattack = false
 
 end
 
@@ -306,25 +307,27 @@ end
 
 local function A_Pre_Transition(actor, par1, par2)
 	actor.can_teleport = 0
+	actor.teleported = 1
 	S_StartSound(actor, sfx_trns1)
 	actor.momz = $/10
 	actor.momy = $/2
 	actor.momx = $/2
 	if(actor.enhanced_teleport ~= nil and actor.enhanced_teleport == 1) then
-		-- if(actor.state == S_PRE_TRANSITION) then
+		if(actor.state == S_PRE_TRANSITION) then
 			actor.state = states[S_PRE_TRANSITION].nextstate
 			
 			actor.enhanced_teleport = 0
 			print("enhanced!")
 		end
+	end
 end
 
 --Start the teleportation transition
 local function A_Start_Transition(actor, par1, par2)
 -- 	actor.flags = $|MF_NOCLIPTHING
 -- 	actor.angle = actor.player.inputangle
--- 	actor.player.can_teleport = false
--- 	actor.player.can_bladeattack = true
+-- 	actor.can_teleport = false
+-- 	actor.mo.can_bladeattack = true
 	
 	-- if(player.night_timer > 0) then
 	-- 	P_InstaThrust(actor, actor.angle, TELEPORT_SPEED * )
@@ -348,7 +351,7 @@ end
 local function A_End_Transition(actor, par1, par2)
 	S_StartSound(actor, sfx_trns2)
 -- 	if(actor.player and actor.player.valid) then
-		-- actor.player.can_bladeattack = true
+		-- actor.can_bladeattack = true
 -- 	end
 	-- print("end!")
 	actor.flags = $&~MF_NOCLIPTHING
@@ -509,7 +512,7 @@ states[S_BLADE_ATTACK] = {
 states[S_PRE_TRANSITION] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_JUMP|FF_FULLDARK,
-	tics = 6,
+	tics = 2,
 	action = A_Pre_Transition,
 	nextstate = S_START_TRANSITION
 }

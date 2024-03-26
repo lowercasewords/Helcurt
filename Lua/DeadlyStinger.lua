@@ -58,8 +58,8 @@ addHook("PlayerThink", function(player)
 
 		--Reset stingers after usage
 		RemoveStingers(player.mo, MAX_STINGERS)
-		player.mo.can_teleport = 1
-		player.can_bladeattack = true
+		-- player.mo.can_teleport = 1
+		player.mo.can_bladeattack = true
 	end
 	
 	--Loose a stinger when the chain is broken (hit the floor)
@@ -149,7 +149,7 @@ addHook("SpinSpecial", function(player)
 	--[[
 	--Perform Deadly Stinger Attack!
 	if(player.spinheld >= 10 and player.can_stinger and player.mo.stingers > 0 and P_IsObjectOnGround(player.mo)) then
- 		player.can_bladeattack = false
+ 		player.mo.can_bladeattack = false
 		player.can_stinger = false
 		
 		local angle = player.mo.angle - FixedAngle((player.mo.stingers-1)*STINGER_ANGLE_ADJ/2)

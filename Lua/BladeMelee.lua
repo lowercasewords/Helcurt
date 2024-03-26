@@ -79,8 +79,8 @@ local function BladeDamage(target, player)
 	player.mo.state = S_BLADE_HIT
 	
 	--restore both teleport and blade attack
-	player.can_teleport = true
-	player.can_bladeattack = true
+	-- player.mo.can_teleport = true
+	player.mo.can_bladeattack = true
 	
 	--after-hit boost to grand momentum for combos or traversal
 	P_SetObjectMomZ(player.mo, BLADE_VERT_BOOST, false)
@@ -121,7 +121,7 @@ addHook("SpinSpecial", function(player)
 	--Perform a Blade Attack!
 	if(player.spinheld == 1 
 	and player.mo.state ~= S_BLADE_ATTACK 
-	and player.can_bladeattack 
+	and player.mo.can_bladeattack 
 	and not P_IsObjectOnGround(player.mo)) then
 		player.mo.prevstate = player.mo.state
 		player.mo.state = S_BLADE_ATTACK
@@ -178,9 +178,9 @@ addHook("PlayerThink", function(player)
 	if(not player or not player.mo.valid or not player.mo or player.mo.skin ~= "helcurt") then
 		return
 	end
--- 	print(player.can_teleport)
+-- 	print(player.mo.can_teleport)
 	local target = nil
-	if(not P_IsObjectOnGround(player.mo) and player.can_bladeattack) then
+	if(not P_IsObjectOnGround(player.mo) and player.mo.can_bladeattack) then
 		--Tries to find the target to lock-on
 		searchBlockmap("objects", function(mo, mfound)
 			if(LockDistanceCheck(mo, mfound) and mfound.health ~= 0) then
@@ -201,11 +201,11 @@ addHook("PlayerThink", function(player)
 	end
 
 	--Performs a homing attack on the lockon target if any
-	if(player.can_bladeattack and 
+	if(player.mo.can_bladeattack and 
 	player.mo.state == S_BLADE_ATTACK 
 	and player.lockon and player.lockon.valid 
 	and player.lockon.locktarget and player.lockon.locktarget.valid) then
-		player.can_bladeattack = false
+		player.mo.can_bladeattack = false
 		P_MoveOrigin(player.mo, 
 					player.lockon.locktarget.x, 
 					player.lockon.locktarget.y, 
@@ -233,7 +233,7 @@ addHook("PlayerThink", function(player)
 	--Reset cooldown when land on the floor
 	if(player.mo.eflags & MFE_JUSTHITFLOOR 
 	or (player.mo.prevstate == S_BLADE_ATTACK and player.mo.state == S_BLADE_HIT)) then
-		player.can_bladeattack = true
+		player.mo.can_bladeattack = true
 		player.powers[pw_strong] = $&~STR_FLOOR&~STR_SPRING
 		StopLockOn(player)
 	end
