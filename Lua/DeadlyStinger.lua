@@ -6,7 +6,8 @@
 ------------------------------------
 ---CONSTANTS
 -------------------------------------
-
+local MAX_ANGLE = ANGLE_90
+local MIN_ANGLE = -ANGLE_90
 --Angle adjustment for each stinger at their spawn
 local STINGER_ANGLE_ADJ = 10*FRACUNIT
 --DEPRECATED
@@ -18,7 +19,7 @@ addHook("PlayerThink", function(player)
 	if(not player or not player.mo or player.mo.skin ~= "helcurt") then
 		return
 	end
-
+	
 	-- if(P_IsObjectOnGround(player.mo)) then
 	-- 	player.mo.stingers = 2
 	-- end
@@ -59,6 +60,9 @@ addHook("PlayerThink", function(player)
 	
 	-- if(player.prevjumpheld <= TICS_TO_JUMPHOLD and player.prevjumpheld ~= 0 and player.jumpheld == 0 and 
 	-- player.mo.can_stinger == 1 and player.hasjumped) then
+	
+	-- print("P: "..player.mo.angle)
+	-- print("A: "..player.mo.angle - ANGLE_180)
 	if(player.prevjumpheld <= TICS_TO_JUMPHOLD and player.prevjumpheld ~= 0 and 
 	player.jumpheld == 0 and player.mo.can_stinger == 1 and player.mo.stingers > 0)
 	
@@ -77,19 +81,29 @@ addHook("PlayerThink", function(player)
 		end
 		
 		--Player's vertical boost
-		P_SetObjectMomZ(player.mo, FixedSqrt(adj_stingers*(100*FRACUNIT)), false)
+		-- P_SetObjectMomZ(player.mo, FixedSqrt(adj_stingers*(100*FRACUNIT)), false)
 		
 		--Releasing damaging stingers one by one
-		local angle = player.mo.angle - FixedAngle((player.mo.stingers-1)*STINGER_ANGLE_ADJ/2)
+		local angle = player.mo.angle - FixedAngle((player.mo.stingers-1)*STINGER_ANGLE_ADJ/2) + ANGLE_180
+		-- local angle = player.mo.angle - ANGLE_180  -- - FixedAngle((player.mo.stingers-1)*STINGER_ANGLE_ADJ/2)
 		for i = 1, player.mo.stingers, 1 do
 			if(i ~= 1) then
 				angle = $+FixedAngle(STINGER_ANGLE_ADJ)
 			end
-			local stinger = SpawnDistance(player.mo.x, player.mo.y, player.mo.z, 0, angle, MT_STGP)
+			local stinger = SpawnDistance(player.mo.x, player.mo.y, player.mo.z + player.mo.height, 0, angle, MT_STGP)
 			stinger.target = player.mo
 			stinger.homing = 0
+			--Horizontal angle
+			stinger.angle = player.mo.angle
+			--Vertical counter relative to the player
+			stinger.anglecounter = MAX_ANGLE
+			--The number of the current stinger
+			stinger.num = i 
+			-- stinger.scale = 2*FRACUNIT
 			
-			P_InstaThrust(stinger, angle, stinger.info.speed)
+			-- P_InstaThrust(stinger, angle, stinger.info.speed)
+			-- P_SetObjectMomZ(stinger, -stinger.info.speed/2, false)
+			
 		end
 
 		--Reset stingers after usage
@@ -113,14 +127,63 @@ addHook("PlayerThink", function(player)
 		player.mo.can_stinger = 1
 	end
 end)
+--[[
+--This thinker is used for correct following (not working 'cause idk how to iterate through mobjects)
+addHook("PreThinkFrame", function()
+	local num = 0
+	for mapthing in mapthings.iterate do
+		if(mapthing.mobj ~= nil and mapthing.mobj.type == MT_STGP) then
+			num = $+1
+		end
+		print(num)
+		-- if(i.mobj.type == MT_STGP) then
+		-- 	num = $+1
+		-- end
+	end
+end)
+]]--
 
 --Handle the Stinger Projectile
 addHook("MobjThinker", function(stinger)
+	
+	
 	if(not stinger or not stinger.valid) then
 		return
 	end
+	
+	--Basic visual properties
+	stinger.frame = $|FF_FULLBRIGHT
+	-- SpawnAfterImage(stinger)
+	
+	print(stinger.anglecounter)
+	
+	if(stinger.anglecounter >= MIN_ANGLE and stinger.anglecounter < MAX_ANGLE) then
+		print('stop!')
+		P_KillMobj(stinger)
+		return
+	end
+
+	local pivot = stinger.target.z + stinger.target.height/3
+	local radius = stinger.target.radius*2
+	local x = (FixedMul(radius, cos(stinger.anglecounter)) + stinger.target.x) + (FixedMul(radius, cos(stinger.anglecounter)) + stinger.target.x)
+	local y = (FixedMul(radius, cos(stinger.anglecounter)) + stinger.target.y) + (stinger.target.y)
+	local z = FixedMul(radius, sin(stinger.anglecounter)) + stinger.target.z
+	P_MoveOrigin(stinger, x, y, z)
+	
+
+	stinger.anglecounter = $+1*ANG1
+
+
+	--Each rojectile must:
+	--Spawn above the player (all of them in the same spot)
+	--Circle around the player (player's center is the pivot point)
+	--	Radius of the circle is shorter for some stingers
+	--Shoot out in their respective directions downwards
+
+
 	--Do not lock-on if already locked-n
-	if(stinger.homing == 0) then
+	-- if(stinger.homing == 0) then
+	if(false) then
 		local enemy = nil
 		local enemydistx = nil
 		local enemydisty = nil

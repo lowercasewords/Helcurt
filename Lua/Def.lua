@@ -168,7 +168,13 @@ addHook("PlayerSpawn", function(player)
 
 
 	for i = 0, MAX_STINGERS-1, 1 do
-		player.mo.hudstingers[i] = P_SpawnMobjFromMobj(player.mo, 0, 0, player.mo.height, MT_STGS)
+		-- player.mo.hudstingers[i] = P_SpawnMobjFromMobj(player.mo, 
+		-- 											player.mo.radius/3-5*FRACUNIT, 
+		-- 											player.mo.radius/3-((1-1)*32/2)*FRACUNIT, 
+		-- 											player.mo.height, MT_STGS)
+		--The spawn location doesn't matter because the object
+		--will be constantly set to the desired location (locked to the player)
+		player.mo.hudstingers[i] = P_SpawnMobjFromMobj(player.mo, 0,0,0,MT_STGS)
 		player.mo.hudstingers[i].frame = $|FF_FULLDARK
 	end
 	
@@ -225,6 +231,49 @@ addHook("PreThinkFrame", function()
 	end
 end)
 
+--OMG THERE ARE SO MANY ARGUMENTS I'M SORRY, wait who do I appologize to if I'm the only one using it :O
+--rotatemo (mobj_t): the object to rotate
+--pivotx (int): x-coordinate of a pivot point (around which rotatemo should be corrected by rotation)
+--pivoty (int): y-coordinate of a pivot point (around which rotatemo should be corrected by rotation)
+--desiredx (int): x-coordinate desired location (without rotation points forward (positive) and back (negative))
+--desiredy (int): y-coordinate desired location (without rotation points left (positive) and right (negative))
+--desiredz (int): z-coordinate desired location (won't be rotated)
+--angle (angle_t): the correction angle of rotation
+local function CorrectRotationHoriz(rotatemo, pivotx, pivoty, desiredx, desiredy, desiredz, angle)
+	--The desired coordinates for rotatemo without rotation 
+	-- local x = desired.x + desired.radius/3-5*FRACUNIT
+	-- local y = desired.y + desired.radius/3-((1-1)*32/2)*FRACUNIT
+	-- local z = desired.z + desired.height
+	
+	--The desired coordinates for rotatemo without rotation 
+	local x = desiredx
+	local y = desiredy 
+	local z = desiredz 
+
+	--The angle of rotation
+	local c = cos(angle)
+	local s = sin(angle)
+
+	--New rotated coordinates
+	local xnew = 0
+	local ynew = 0
+	
+	--Translating coordinates of rotatemo to the desired to perform rotation
+	x = $ - pivotx
+	y = $ - pivoty
+
+	--rotate point
+	xnew = FixedMul(x, c) - FixedMul(y, s)
+	ynew = FixedMul(y, c) + FixedMul(x, s)
+
+	--translate point back:
+	x = xnew + pivotx
+	y = ynew + pivoty
+
+	P_MoveOrigin(rotatemo, x, y, z)
+	
+end
+
 --The Thinker that plays after other thikers,
 --mostly used to clean up, record the previous state, 
 --and jump and spin button holding
@@ -233,43 +282,20 @@ addHook("PostThinkFrame", function()
 		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt")
 			continue
 		end
-
-		--Original coordinates of a HUD stinger
-		local x = 0
-		local y = 0
-		local z = 0
-
-		--Cosine and sine of the helcurt's angle
-		local c = 0  
-		local s = 0
-
-		--Certain updated coordinates of HUD with respect to helcurt's facing angle 
-		local newx = 0
-		local newy = 0
-		--Setting positions of HUD stingers
+		
+		--Setting positions of HUD stingers 
 		for i = 0, MAX_STINGERS-1, 1 do
-			x = player.mo.x+player.mo.radius/3-5*FRACUNIT
-			y = player.mo.y+player.mo.radius/3-((i-1)*32/2)*FRACUNIT
-			z = player.mo.z + player.mo.height
-
-			c = cos(player.mo.angle)
-			s = sin(player.mo.angle)
-
-			x = $-player.mo.x
-			y = $-player.mo.y
-
-			newx = FixedMul(x, c) - FixedMul(y, s)
-			newy = FixedMul(y, c) + FixedMul(x, s)
-
-			x = newx+player.mo.x
-			y = newy+player.mo.y
-
-			P_MoveOrigin(player.mo.hudstingers[i], x, y, z, MT_STGS)
-
-			--The following rotates around the origin of the world!
-			-- player.mo.hudstingers[i].x = player.mo.hudstingers[i].x*cos(player.mo.angle) - player.mo.hudstingers[i].y*sin(player.mo.angle)
-			-- player.mo.hudstingers[i].y = player.mo.hudstingers[i].x*cos(player.mo.angle) + player.mo.hudstingers[i].y*sin(player.mo.angle)
+			--How Desired y-coordinate should depend on amount of maximum stingers 
+			--So their position should be dependant on number of maximum stingers (in case we want to change it)
+			--But right now it only works with 3 stingers because I neither have time nor skills :(
+			--   1 
+			--  1 2 
+			-- 1 2 3
+			CorrectRotationHoriz(player.mo.hudstingers[i], player.mo.x, player.mo.y,
+			player.mo.x-player.mo.radius, player.mo.y+player.mo.radius-player.mo.radius*i, player.mo.z+player.mo.height, player.mo.angle)
 		end
+		--player.mo.y+player.mo.radius/4-((i-1)*32/2
+		
 		
 		-- if(player.cmd.buttons & BT_SPIN) then
 		-- 	player.spinheld = $+1
@@ -412,12 +438,12 @@ mobjinfo[MT_STGP] = {
 	spawnstate = S_STINGER_LAUNCH,
 	-- height = 32*FRACUNIT,
 	-- radius = 16*FRACUNIT,
-	-- scale = 3*FRACUNIT,
+	
 	-- followitem = MT_PLAYER,
 	deathstate = S_NULL,
 	-- xdeathstate = S_NULL,
-	speed = 25*FRACUNIT,
-	flags = MF_MISSILE|MF2_SUPERFIRE|MF_NOGRAVITY
+	speed = 2*FRACUNIT,
+	flags = MF2_SUPERFIRE|MF_NOGRAVITY|MF_NOBLOCKMAP
 }
 
 --A stinger hud Stack 
@@ -500,7 +526,7 @@ states[S_STINGER_LAUNCH] = {
 -- 	action = A_CustomPower,
 -- 	var1 = pw_strong,
 -- 	var2 = STR_FLOOR,
-	tics = 100,
+	tics = -1,
 	nexstate = S_NULL
 }
 
