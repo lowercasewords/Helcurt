@@ -163,14 +163,18 @@ addHook("MobjThinker", function(stinger)
 		return
 	end
 
-	local pivot = stinger.target.z + stinger.target.height/3
-	local radius = stinger.target.radius*2
-	local x = (FixedMul(radius, cos(stinger.anglecounter)) + stinger.target.x) + (FixedMul(radius, cos(stinger.anglecounter)) + stinger.target.x)
-	local y = (FixedMul(radius, cos(stinger.anglecounter)) + stinger.target.y) + (stinger.target.y)
-	local z = FixedMul(radius, sin(stinger.anglecounter)) + stinger.target.z
-	P_MoveOrigin(stinger, x, y, z)
-	
+	local pivotx = stinger.target.x
+	local pivoty = stinger.target.y
+	local pivotz = stinger.target.z + stinger.target.height/3
 
+	local radius = stinger.target.radius*2
+
+	--Currently turning coordinates (x is forward/backward, y is left/right, z is up/down)
+	local x = pivotx --(FixedMul(radius, cos(stinger.anglecounter)) + stinger.target.x) + (FixedMul(radius, cos(stinger.anglecounter)) + stinger.target.x)
+	local y = FixedMul(radius, cos(stinger.anglecounter)) + stinger.target.y
+	local z = FixedMul(radius, sin(stinger.anglecounter)) + stinger.target.z
+	CorrectRotationHoriz(stinger, pivotx, pivoty, x, y, z, stinger.target.angle)
+	
 	stinger.anglecounter = $+1*ANG1
 
 

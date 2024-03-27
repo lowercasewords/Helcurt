@@ -127,6 +127,50 @@ rawset(_G, "L_ZCollide", function(mo1, mo2)
     return true
 end)
 
+
+--OMG THERE ARE SO MANY ARGUMENTS I'M SORRY, wait who do I appologize to if I'm the only one using it :O
+--rotatemo (mobj_t): the object to rotate
+--pivotx (int): x-coordinate of a pivot point (around which rotatemo should be corrected by rotation)
+--pivoty (int): y-coordinate of a pivot point (around which rotatemo should be corrected by rotation)
+--desiredx (int): x-coordinate desired location (without rotation points forward (positive) and back (negative))
+--desiredy (int): y-coordinate desired location (without rotation points left (positive) and right (negative))
+--desiredz (int): z-coordinate desired location (won't be rotated)
+--angle (angle_t): the correction angle of rotation
+rawset(_G, "CorrectRotationHoriz", function(rotatemo, pivotx, pivoty, desiredx, desiredy, desiredz, angle)
+	--The desired coordinates for rotatemo without rotation 
+	-- local x = desired.x + desired.radius/3-5*FRACUNIT
+	-- local y = desired.y + desired.radius/3-((1-1)*32/2)*FRACUNIT
+	-- local z = desired.z + desired.height
+	
+	--The desired coordinates for rotatemo without rotation 
+	local x = desiredx
+	local y = desiredy 
+	local z = desiredz 
+
+	--The angle of rotation
+	local c = cos(angle)
+	local s = sin(angle)
+
+	--New rotated coordinates
+	local xnew = 0
+	local ynew = 0
+	
+	--Translating coordinates of rotatemo to the desired to perform rotation
+	x = $ - pivotx
+	y = $ - pivoty
+
+	--rotate point
+	xnew = FixedMul(x, c) - FixedMul(y, s)
+	ynew = FixedMul(y, c) + FixedMul(x, s)
+
+	--translate point back:
+	x = xnew + pivotx
+	y = ynew + pivoty
+
+	P_MoveOrigin(rotatemo, x, y, z)
+	
+end)
+
 --------------------------
 --/ THESE HOOKS ARE RAN FIRST
 ----------------------------/
@@ -230,49 +274,6 @@ addHook("PreThinkFrame", function()
 		end
 	end
 end)
-
---OMG THERE ARE SO MANY ARGUMENTS I'M SORRY, wait who do I appologize to if I'm the only one using it :O
---rotatemo (mobj_t): the object to rotate
---pivotx (int): x-coordinate of a pivot point (around which rotatemo should be corrected by rotation)
---pivoty (int): y-coordinate of a pivot point (around which rotatemo should be corrected by rotation)
---desiredx (int): x-coordinate desired location (without rotation points forward (positive) and back (negative))
---desiredy (int): y-coordinate desired location (without rotation points left (positive) and right (negative))
---desiredz (int): z-coordinate desired location (won't be rotated)
---angle (angle_t): the correction angle of rotation
-local function CorrectRotationHoriz(rotatemo, pivotx, pivoty, desiredx, desiredy, desiredz, angle)
-	--The desired coordinates for rotatemo without rotation 
-	-- local x = desired.x + desired.radius/3-5*FRACUNIT
-	-- local y = desired.y + desired.radius/3-((1-1)*32/2)*FRACUNIT
-	-- local z = desired.z + desired.height
-	
-	--The desired coordinates for rotatemo without rotation 
-	local x = desiredx
-	local y = desiredy 
-	local z = desiredz 
-
-	--The angle of rotation
-	local c = cos(angle)
-	local s = sin(angle)
-
-	--New rotated coordinates
-	local xnew = 0
-	local ynew = 0
-	
-	--Translating coordinates of rotatemo to the desired to perform rotation
-	x = $ - pivotx
-	y = $ - pivoty
-
-	--rotate point
-	xnew = FixedMul(x, c) - FixedMul(y, s)
-	ynew = FixedMul(y, c) + FixedMul(x, s)
-
-	--translate point back:
-	x = xnew + pivotx
-	y = ynew + pivoty
-
-	P_MoveOrigin(rotatemo, x, y, z)
-	
-end
 
 --The Thinker that plays after other thikers,
 --mostly used to clean up, record the previous state, 
