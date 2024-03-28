@@ -96,9 +96,11 @@ addHook("PlayerThink", function(player)
 			--Horizontal angle
 			stinger.angle = player.mo.angle
 			--Vertical counter relative to the player
-			stinger.anglecounter = MAX_ANGLE
+			stinger.rollcounter = MAX_ANGLE
 			--The number of the current stinger
 			stinger.num = i 
+			--How many stingers were released (not the best way to do it I know but it works just fine)
+			stinger.released = player.mo.stingers
 			-- stinger.scale = 2*FRACUNIT
 			
 			-- P_InstaThrust(stinger, angle, stinger.info.speed)
@@ -155,35 +157,87 @@ addHook("MobjThinker", function(stinger)
 	stinger.frame = $|FF_FULLBRIGHT
 	-- SpawnAfterImage(stinger)
 	
-	print(stinger.anglecounter)
+	-- print(stinger.rollcounter)
 	
-	if(stinger.anglecounter >= MIN_ANGLE and stinger.anglecounter < MAX_ANGLE) then
-		print('stop!')
+	--Make sure that stinger(s) only travel half a circle around the player
+	if(stinger.rollcounter >= MIN_ANGLE and stinger.rollcounter < MAX_ANGLE) then
 		P_KillMobj(stinger)
 		return
 	end
 
+	
 	local pivotx = stinger.target.x
 	local pivoty = stinger.target.y
 	local pivotz = stinger.target.z + stinger.target.height/3
 
 	local radius = stinger.target.radius*2
+	
+	--[[
+	180
+	180+45	 	180+45
+	180+45		180		 180+45
+	180+45+45   180+45	 180+45	   180+45+45
+	180+45+45   180+45	 180	   180+45	  180+45+45
 
-	--Currently turning coordinates (x is forward/backward, y is left/right, z is up/down)
-	local x = pivotx --(FixedMul(radius, cos(stinger.anglecounter)) + stinger.target.x) + (FixedMul(radius, cos(stinger.anglecounter)) + stinger.target.x)
-	local y = FixedMul(radius, cos(stinger.anglecounter)) + stinger.target.y
-	local z = FixedMul(radius, sin(stinger.anglecounter)) + stinger.target.z
+	0
+		0+45	 	
+	0		 0+45		
+		0+45		 0+45+45
+	0		 0+45			 0+45+45
+
+			1
+		  2	  2
+		2	1	2
+	  3	  2	  2	  3
+	3	2	1	2	3
+	]]--
+	--Circle's around the player where's stinger's location is reset (I forgot how I did it but it works AHHAAHAHAHAHAHAAHAH)
+	--[[
+	local x = FixedMul(FixedMul(radius, cos(stinger.rollcounter)),cos(stinger.yawcounter-(stinger.num-1)*stinger.yawcounter)) + stinger.target.x
+	local y = FixedMul(FixedMul(radius, cos(stinger.rollcounter)),sin(stinger.yawcounter-(stinger.num-1)*stinger.yawcounter)) + stinger.target.y
+	local z = FixedMul(radius, sin(stinger.rollcounter)) + stinger.target.z
+	]]--
+
+	local yawangle = 0
+	--Starting with the base angle of 0, each added stinger would be moved by 45 degrees to the left
+	yawangle = (stinger.num-1)*ANGLE_45
+
+	--Correcting stingers to be behind the player 
+	yawangle = $-(stinger.released-1)*(ANGLE_45/2)
+
+	--Making the stinger(s) circle
+
+	--[[
+	This is what is happening below to the coordinates of each stinger
+		x′=𝑟cos𝜃cos𝛼
+		𝑦′=𝑟sin𝜃
+		𝑧′=𝑟cos𝜃sin𝛼
+	]]--
+	local x = FixedMul(FixedMul(radius, cos(stinger.rollcounter)),cos(yawangle)) + stinger.target.x
+	local y = FixedMul(FixedMul(radius, cos(stinger.rollcounter)),sin(yawangle)) + stinger.target.y
+	local z = FixedMul(radius, sin(stinger.rollcounter)) + stinger.target.z
+	--Corrects the stingers to be relative the player's facing direction horizontal angle
 	CorrectRotationHoriz(stinger, pivotx, pivoty, x, y, z, stinger.target.angle)
 	
-	stinger.anglecounter = $+1*ANG1
 
+	--[[
+		NOT WORKING because of roll and yaw functions because I can't yaw and roll and the same time,
+		I have no clue how I made it worked through other functions above
+	-- Appear right above the player for initial
+	P_MoveOrigin(stinger, stinger.target.x+10*FRACUNIT, stinger.target.y, stinger.target.z + stinger.target.height)
+	
+	--Rotate based on the roll, yaw, and pitch angles
+	Roll(stinger, pivoty, pivotz, stinger.rollcounter)
+	Yaw(stinger, pivotx, pivoty, stinger.target.angle)
+	]]--
+	
+	stinger.rollcounter = $+1*ANG10
+	
 
 	--Each rojectile must:
 	--Spawn above the player (all of them in the same spot)
 	--Circle around the player (player's center is the pivot point)
-	--	Radius of the circle is shorter for some stingers
 	--Shoot out in their respective directions downwards
-
 
 	--Do not lock-on if already locked-n
 	-- if(stinger.homing == 0) then

@@ -171,6 +171,154 @@ rawset(_G, "CorrectRotationHoriz", function(rotatemo, pivotx, pivoty, desiredx, 
 	
 end)
 
+--Rotates the mobject around the pivot, think of a circle with pivot as a center and
+--torotate being on the edge of the circle (distance between pivot and torotate is the radius of a circle)
+--roll (angle_t): rotation along absolute x-axis
+--yaw (angle_t): rotation along absolute z-axis (due to doom's engine coordinate system)
+--pitch (angle_t): rotation along absolute y-axis (due to doom's engine coordinate system)
+--[[
+rawset(_G, "Rotate", function(torotate, pivotx, pivoty, pivotz, roll, yaw, pitch) 
+
+	-- local radius = torotate.target.radius*2
+	-- local x = FixedMul(FixedMul(radius, cos(torotate.rollcounter)),cos(torotate.yawcounter-(torotate.num-1)*torotate.yawcounter)) + torotate.target.x
+	-- local y = FixedMul(FixedMul(radius, cos(torotate.rollcounter)),sin(torotate.yawcounter-(torotate.num-1)*torotate.yawcounter)) + torotate.target.y
+	-- local z = FixedMul(radius, sin(torotate.rollcounter)) + torotate.target.z
+	-- CorrectRotationHoriz(torotate, pivotx, pivoty, x, y, z, torotate.target.angle)
+
+	--Initial coordinates of the object without the rotation
+	local initx = torotate.x
+	local inity = torotate.y
+	local initz = torotate.z
+	
+	--Distance between the object to be rotated and pivot point
+	local radius = FixedSqrt(
+	FixedMul(torotate.x-pivotx, torotate.x-pivotx) +
+	FixedMul(torotate.y-pivoty, torotate.y-pivoty) +
+	FixedMul(torotate.z-pivotz, torotate.z-pivotz) )
+	
+	--Updated to be around the origin
+	local normx = initx-pivotx
+	local normy = inity-pivoty
+	local normz = initz-pivotz
+
+	local rolledx = FixedMul(radius, cos(roll))
+	local rolledy = FixedMul(y, c) + FixedMul(x, s)
+
+	initx = rolledx + pivotx
+	inity = inity + pivoty
+	initz = initz + pivotz
+
+	P_MoveOrigin(torotate, rolledx, inity, initz)
+
+end)
+]]--
+
+--[[
+
+THOSE THREE FUNCTIONS CANNOT BE MIXED AT ALL! Read the answer for this post for more 
+questions: https://stackoverflow.com/questions/14607640/rotating-a-vector-in-3d-space
+"This works perfectly fine for 2D and for simple 3D cases; 
+but when rotation needs to be performed around all three axes at the same time 
+then Euler angles may not be sufficient due to an inherent deficiency in this system 
+which manifests itself as Gimbal lock. People resort to Quaternions in such situations, 
+which is more advanced than this but doesn't suffer from Gimbal locks when used correctly."
+
+
+--Rotates around z-axis 
+rawset(_G, "Yaw", function(torotate, pivotx, pivoty, angle)
+
+	--The desired coordinates for rotatemo without rotation 
+	local x = torotate.x
+	local y = torotate.y 
+
+	--The angle of rotation
+	local c = cos(angle)
+	local s = sin(angle)
+
+	--New rotated coordinates
+	local xnew = 0
+	local ynew = 0
+	
+	--Translating coordinates of rotatemo to the desired to perform rotation
+	x = $ - pivotx
+	y = $ - pivoty
+
+	--rotate point
+	xnew = FixedMul(x, c) - FixedMul(y, s)
+	ynew = FixedMul(y, c) + FixedMul(x, s)
+
+	--translate point back:
+	x = xnew + pivotx
+	y = ynew + pivoty
+
+	P_MoveOrigin(torotate, x, y, torotate.z)
+end)
+
+--Rotates arounc x-axis
+rawset(_G, "Roll", function(torotate, pivoty, pivotz, angle)
+
+	--The desired coordinates for rotatemo without rotation 
+	local y = torotate.y 
+	local z = torotate.z 
+
+	--The angle of rotation
+	local c = cos(angle)
+	local s = sin(angle)
+
+	--New rotated coordinates
+	local ynew = 0
+	local znew = 0
+	
+	--Translating coordinates of rotatemo to the desired to perform rotation
+	y = $ - pivoty
+	z = $ - pivotz
+
+	--rotate point
+	znew = FixedMul(z, c) - FixedMul(y, s)
+	ynew = FixedMul(y, c) + FixedMul(z, s)
+	
+
+	--translate point back:
+	y = ynew + pivoty
+	z = znew + pivotz
+
+	P_MoveOrigin(torotate, torotate.x, y, z)
+end)
+
+
+--Rotates arounc y-axis
+rawset(_G, "Pitch", function(torotate, pivotx, pivotz, angle)
+
+	--The desired coordinates for rotatemo without rotation 
+	local x = torotate.x
+	local z = torotate.z
+
+	--The angle of rotation
+	local c = cos(angle)
+	local s = sin(angle)
+
+	--New rotated coordinates
+	local xnew = 0
+	local znew = 0
+	
+	--Translating coordinates of rotatemo to the desired to perform rotation
+	x = $ - pivotx
+	z = $ - pivotz
+
+	--rotate point
+	xnew = FixedMul(x, c) - FixedMul(z, s)
+	znew = FixedMul(z, c) + FixedMul(x, s)
+	
+
+	--translate point back:
+	x = xnew + pivotx
+	z = znew + pivotz
+
+	P_MoveOrigin(torotate, x, torotate.y, z)
+end)
+
+]]--
+
 --------------------------
 --/ THESE HOOKS ARE RAN FIRST
 ----------------------------/
@@ -292,8 +440,21 @@ addHook("PostThinkFrame", function()
 			--   1 
 			--  1 2 
 			-- 1 2 3
+
 			CorrectRotationHoriz(player.mo.hudstingers[i], player.mo.x, player.mo.y,
 			player.mo.x-player.mo.radius, player.mo.y+player.mo.radius-player.mo.radius*i, player.mo.z+player.mo.height, player.mo.angle)
+			
+			--[[
+			Same as correct rotation horiz function, 
+			P_MoveOrigin(player.mo.hudstingers[i], 
+						player.mo.x-player.mo.radius, 
+						player.mo.y+player.mo.radius-player.mo.radius*i, 
+						player.mo.z+player.mo.height)
+			
+			Yaw(player.mo.hudstingers[i], player.mo.x, player.mo.y,player.mo.angle)
+			]]--
+
+			-- Pitch(player.mo.hudstingers[i], player.mo.x, player.mo.z, player.mo.angle)
 		end
 		--player.mo.y+player.mo.radius/4-((i-1)*32/2
 		
@@ -527,7 +688,7 @@ states[S_STINGER_LAUNCH] = {
 -- 	action = A_CustomPower,
 -- 	var1 = pw_strong,
 -- 	var2 = STR_FLOOR,
-	tics = -1,
+	tics = 100,
 	nexstate = S_NULL
 }
 
