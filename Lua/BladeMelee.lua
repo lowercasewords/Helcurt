@@ -132,10 +132,12 @@ addHook("SpinSpecial", function(player)
  			-- print("allow")
  			player.powers[pw_strong] = STR_FLOOR|STR_SPRING
  		end
-	elseif(player.spinheld >= 1 
+		--Initial downwards momentum 
+		P_SetObjectMomZ(player.mo, -10*FRACUNIT, true)
+	--If spin is held while in blade attack mode, keep falling
+	elseif(player.spinheld >= 1 and player.spinheld < TICRATE/2
 	and player.mo.state == S_BLADE_ATTACK) then
-		P_SetObjectMomZ(player.mo, -3*FRACUNIT, true)
-		print(player.mo.momz)
+		P_SetObjectMomZ(player.mo, -FRACUNIT, true)
 	end
 end)
 
@@ -178,7 +180,14 @@ addHook("PlayerThink", function(player)
 	if(not player or not player.mo.valid or not player.mo or player.mo.skin ~= "helcurt") then
 		return
 	end
--- 	print(player.mo.can_teleport)
+	--Stop the attacking state if released the spin
+	if(player.spinheld == 0 and player.mo.state == S_BLADE_ATTACK) then
+		print(player.mo.momz)
+		player.mo.prevstate = player.mo.state 
+		player.mo.state = states[S_BLADE_ATTACK].nextstate
+	end
+
+	--Lock-on behavior
 	local target = nil
 	if(not P_IsObjectOnGround(player.mo) and player.mo.can_bladeattack) then
 		--Tries to find the target to lock-on
