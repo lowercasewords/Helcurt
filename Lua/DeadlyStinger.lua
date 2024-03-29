@@ -47,10 +47,10 @@ addHook("PlayerThink", function(player)
 
 	
 
-	-- if(player.mo.can_stinger == 1 and player.jumpheld == 0 and player.pflags&PF_JUMPDOWN ~= 0 and player.hasjumped) then
+	-- if(player.mo.can_stinger == 1 and player.jumpheld == 0 and player.pflags&PF_JUMPDOWN ~= 0 and player.mo.hasjumped) then
 
 	--Following if-statement executes when jump is released after jump in the air
-	-- if(player.mo.can_stinger == 1 and player.jumpheld <= TICS_TO_JUMPHOLD and player.cmd.buttons ~= BT_JUMP and player.hasjumped) then
+	-- if(player.mo.can_stinger == 1 and player.jumpheld <= TICS_TO_JUMPHOLD and player.cmd.buttons ~= BT_JUMP and player.mo.hasjumped) then
 	-- print(player.jumpheld == 0 and player.cmd.buttons&BT_JUMP == 0)
 
 	-- print("J: "..player.jumpheld)
@@ -62,25 +62,27 @@ addHook("PlayerThink", function(player)
 	--press, press, press... TRIGGER PRESS (automatic release)
 
 	--[[
-	if(player.jumpheld == 0 and player.hasjumped and player.mo.can_stinger == 0) then
+	if(player.jumpheld == 0 and player.mo.hasjumped and player.mo.can_stinger == 0) then
 		player.mo.can_stinger = 1
 		-- print(player.mo.momz)
 	end
 	]]--
 	
 	-- if(player.prevjumpheld <= TICS_TO_JUMPHOLD and player.prevjumpheld ~= 0 and player.jumpheld == 0 and 
-	-- player.mo.can_stinger == 1 and player.hasjumped) then
+	-- player.mo.can_stinger == 1 and player.mo.hasjumped) then
 	
 	-- print("P: "..player.mo.angle)
 	-- print("A: "..player.mo.angle - ANGLE_180)
 
+	
 
-	--FOR REAL BUGGY IF-STATEMENT
+	--Using Deadly Stinger 	
 	if(player.prevjumpheld <= TICS_TO_JUMPHOLD and player.prevjumpheld ~= 0 and 
 	player.jumpheld == 0 and player.mo.can_stinger == 1 and player.mo.stingers > 0) then
 	
-		--Using Deadly Stinger 	
+		
 		player.mo.can_stinger = 0
+		player.mo.stung = 1
 		-- print("Release "..player.mo.stingers.." deadly stingers!")
 		
 		--[[
@@ -137,7 +139,15 @@ addHook("PlayerThink", function(player)
 		-- player.mo.can_teleport = 1
 		player.mo.can_bladeattack = true
 	end
-	
+
+	--Allow to perform a stinger ability once when tapping jump button in the midair after a jump (or holding it for a little bit to avoid annoying controls)
+	if(player.mo.hasjumped and player.jumpheld == 0 and not P_IsObjectOnGround(player.mo) and player.mo.stung == 0) then
+		player.mo.can_stinger = 1
+	--Not allow when landed when landed
+	elseif(player.mo.eflags&MFE_JUSTHITFLOOR) then
+		player.mo.can_stinger = 0
+		player.mo.stung = 0
+	end
 	
 		
 	-- end
@@ -149,9 +159,25 @@ addHook("PlayerThink", function(player)
 	end
 	]]--
 
-	if(player.mo.eflags&MFE_JUSTHITFLOOR) then
-		player.mo.can_stinger = 1
-	end
+	--First press:
+		--Turns into a jumpstate
+		--Works whenever on the ground
+			--All non-zero jumptics is in the air
+			--Can be enough to trigger the stinger ability while not triggering teleport (just tap or quick hold instead of long hold)
+		
+	--Mid air press:
+		--Any state
+		--Only works when helcurtmo.can_stinger is true!
+			--All non-zero jumptics is in the air
+			--Can be enough to trigger the stinger ability while not triggering teleport (just tap or quick hold instead of long hold)
+		
+
+
+
+	-- if(player.mo.eflags&MFE_JUSTHITFLOOR) then
+	-- if(player.mo.state == S_PLAY_JUMP) then
+
+	
 end)
 --[[
 --This thinker is used for correct following (not working 'cause idk how to iterate through mobjects)

@@ -332,13 +332,14 @@ addHook("PlayerSpawn", function(player)
 	player.jumpheld = 0 --Increments each tic it's held IN PRETHINK, use PF_JUMPDOWN to get previous update
 	player.prevjumpheld = 0 --Value of jumpheld in previous tic
 	--Did player jump? Resets to 0 when hits the floor
-	player.hasjumped = 0
+	player.mo.hasjumped = 0
 	player.killcount = 0
 	player.mo.can_teleport = 0
 	player.mo.teleported = 0
 	player.mo.enhanced_teleport = 0
 	player.mo.can_bladeattack = true
-	player.mo.can_stinger = true
+	player.mo.can_stinger = 0
+	player.mo.stung = 0
 	player.lockon = nil
 	player.mo.stingers = 0
 	player.sting_timer = 0
@@ -419,10 +420,11 @@ addHook("PreThinkFrame", function()
 	-- 	player.mo.y = player.mo.y*cos(player.mo.angle) + player.mo.x*sin(player.mo.angle)
 
 		
-		if(player.mo.state == S_PLAY_JUMP and player.hasjumped == 0) then
-			player.hasjumped = 1
+		if(player.mo.state == S_PLAY_JUMP and player.mo.hasjumped == 0) then
+			player.mo.hasjumped = 1
 		elseif(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0) then
-			player.hasjumped = 0
+		-- elseif(P_IsObjectOnGround(player.mo))
+			player.mo.hasjumped = 0
 		end
 	end
 end)

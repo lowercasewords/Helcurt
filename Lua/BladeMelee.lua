@@ -182,7 +182,8 @@ addHook("PlayerThink", function(player)
 	end
 	--Stop the attacking state if released the spin
 	if(player.spinheld == 0 and player.mo.state == S_BLADE_ATTACK) then
-		print(player.mo.momz)
+		--print(player.mo.momz)
+
 		player.mo.prevstate = player.mo.state 
 		player.mo.state = states[S_BLADE_ATTACK].nextstate
 	end
