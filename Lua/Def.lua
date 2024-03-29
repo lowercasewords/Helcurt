@@ -9,7 +9,10 @@
 --/--------------------------
 
 freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRANSITION",
-"S_BLADE_HIT", "S_BLADE_ATTACK", "S_STINGER_LAUNCH", "S_STINGER_STACK", "S_LOCK")
+"S_BLADE_HIT", "S_BLADE_ATTACK", 
+
+"S_STINGER_CHARGE", "S_STINGER_THURST", "S_STINGER_STACK",
+"S_PLAYER_CHARGE", "S_PLAYER_THURST", "S_LOCK")
 freeslot("MT_STGP", "MT_STGS", "MT_LOCK")
 freeslot("SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_LOCK")
 freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", 
@@ -380,6 +383,7 @@ addHook("PreThinkFrame", function()
 		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt")
 			continue
 		end
+		
 		--Special input players input
 		if(player.cmd.buttons & BT_CUSTOM1) then
 			if(debug_timer == 1) then
@@ -499,11 +503,6 @@ addHook("MobjDeath", function(target, inflictor, source, dmgtype)
 --/ ACTIONS
 --/--------------------------
 
-local function A_StingerLaunch(actor, par1, par2)
--- 	print("ACTION!")
--- 	P_InstaThrust(actor, actor.angle, STINGER_LAUNCH_SPEED)
--- 	SpawnAfterImage(actor)
-end
 
 local function A_BladeAttack(actor, par1, par2)
 -- 	P_SetObjectMomZ(actor, -Z_BLADE_ATTACK_MOMENTUM, true)
@@ -586,6 +585,27 @@ local function A_End_Transition(actor, par1, par2)
 	]]--
 end
 
+local function A_StingerLaunch(actor, par1, par2)
+	-- 	print("ACTION!")
+	-- 	P_InstaThrust(actor, actor.angle, STINGER_LAUNCH_SPEED)
+	-- 	SpawnAfterImage(actor)
+end
+
+--[[
+--Action performed by a stinger when released (before lock-on)
+local function A_STINGER_THRUST(actor, var1, var2)
+	--Owner of the stinger
+	local ownerspeed = FixedHypot(actor.target.momx, actor.target.momy)
+	-- P_Thrust(actor, actor.target.angle, ownerspeed)
+
+	P_SetObjectMomZ(actor, var1, false)
+	P_Thrust(actor, R_PointToAngle2(actor.x, actor.y, actor.target.x, actor.target.y), ownerspeed*2/3)
+	
+	
+end
+]]--
+
+
 --/--------------------------
 --/ MOBJECT INFOS
 --/--------------------------
@@ -595,17 +615,13 @@ mobjinfo[MT_LOCK] = {
 	deathstate = S_NULL,
 	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY
 }
+
 --A stinger Projectile
 mobjinfo[MT_STGP] = {
-	spawnstate = S_STINGER_LAUNCH,
-	-- height = 32*FRACUNIT,
-	-- radius = 16*FRACUNIT,
-	
-	-- followitem = MT_PLAYER,
+	spawnstate = S_STINGER_CHARGE,
 	deathstate = S_NULL,
-	-- xdeathstate = S_NULL,
 	speed = 2*FRACUNIT,
-	flags = MF2_SUPERFIRE|MF_NOGRAVITY|MF_NOBLOCKMAP
+	flags = MF2_SUPERFIRE|MF_NOGRAVITY|MF_NOBLOCKMAP|MF_MISSILE
 }
 
 --A stinger hud Stack 
@@ -682,12 +698,20 @@ sfxinfo[sfx_upg04] = {
 --/--------------------------
 
 
-states[S_STINGER_LAUNCH] = {
+states[S_STINGER_CHARGE] = {
 	sprite = SPR_STGP,
 -- 	action = A_StingerLaunch,
 -- 	action = A_CustomPower,
 -- 	var1 = pw_strong,
 -- 	var2 = STR_FLOOR,
+	tics = 200,
+	nexstate = S_NULL
+}
+
+states[S_STINGER_THURST] = {
+	sprite = SPR_STGP,
+	-- action = A_STINGER_THRUST,
+	-- var1 = -5*FRACUNIT,
 	tics = 100,
 	nexstate = S_NULL
 }
@@ -703,12 +727,26 @@ states[S_LOCK] = {
 	nextstate = S_NULL
 }
 
+states[S_PLAYER_CHARGE] = {
+	sprite = SPR_PLAY,
+	frame = SPR2_FALL,
+	tics = 200,
+	nextstate = S_PLAYER_THURST 
+}
+
+states[S_PLAYER_THURST] = {
+	sprite = SPR_PLAY,
+	frame = SPR2_JUMP,
+	tics = 20,
+	nextstate = S_PLAY_FALL
+}
+
 states[S_BLADE_HIT] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_BLDE,
 	tics = 200,
 	action = A_BladeHit,
-	nextstate = SPR2_FALL
+	nextstate = S_PLAY_FALL
 }
 
 states[S_BLADE_ATTACK] = {
@@ -716,7 +754,7 @@ states[S_BLADE_ATTACK] = {
 	frame = SPR2_LNCH,
 	tics = 30,
 	action = A_BladeAttack,
-	nextstate = SPR2_FALL
+	nextstate = S_PLAY_FALL
 }
 
 states[S_PRE_TRANSITION] = {
