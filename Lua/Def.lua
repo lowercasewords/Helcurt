@@ -16,7 +16,8 @@ freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRAN
 freeslot("MT_STGP", "MT_STGS", "MT_LOCK")
 freeslot("SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_LOCK")
 freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", 
-"sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1")
+"sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1",
+"sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05")
 
 --constants and functions used throghout the project (rest are defined in other files too)
 rawset(_G, "SPAWN_RADIUS_MAX", 10)
@@ -693,6 +694,32 @@ sfxinfo[sfx_upg04] = {
 	singular = false,
 	priority = 60
 }
+
+sfxinfo[sfx_stg01] = {
+	singular = false,
+	priority = 60
+}
+
+sfxinfo[sfx_stg02] = {
+	singular = false,
+	priority = 60
+}
+
+sfxinfo[sfx_stg03] = {
+	singular = false,
+	priority = 60
+}
+
+sfxinfo[sfx_stg04] = {
+	singular = false,
+	priority = 60
+}
+
+sfxinfo[sfx_stg05] = {
+	singular = false,
+	priority = 60
+}
+
 
 
 --/--------------------------

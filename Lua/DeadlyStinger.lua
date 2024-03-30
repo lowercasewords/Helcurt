@@ -104,6 +104,7 @@ addHook("PlayerThink", function(player)
 		player.mo.momx = $/CHARGE_SLOWDOWN_FACTOR
 		player.mo.momy = $/CHARGE_SLOWDOWN_FACTOR
 		player.mo.momz = $/CHARGE_SLOWDOWN_FACTOR
+		S_StartSound(player.mo, sfx_stg01-1+player.mo.stingers)
 
 		-- local angle = player.mo.angle - FixedAngle((player.mo.stingers-1)*STINGER_ANGLE_ADJ/2) + ANGLE_180
 		-- local angle = player.mo.angle - ANGLE_180  -- - FixedAngle((player.mo.stingers-1)*STINGER_ANGLE_ADJ/2)
