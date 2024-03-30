@@ -27,7 +27,8 @@ rawset(_G, "TARGET_NONDMG_RANGE", MF_SPRING)
 rawset(_G, "TARGET_IGNORE_RANGE", MF_MISSILE)
 --The targets that the blade attack should register (not necessarily try to kill)
 rawset(_G, "TARGET_RANGE", TARGET_DMG_RANGE|TARGET_NONDMG_RANGE)
-rawset(_G, "MAX_STINGERS", 3)
+--Maximum amount of extra stingers (not counting the one you always have)
+rawset(_G, "MAX_STINGERS", 4)
 rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
 rawset(_G, "TELEPORT_STOP_SPEED", 3)
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
@@ -342,6 +343,7 @@ addHook("PlayerSpawn", function(player)
 	player.mo.can_stinger = 0
 	player.mo.stung = 0
 	player.lockon = nil
+	--Amount of extra stingers Helcurt has currently (not counting the current one)
 	player.mo.stingers = 0
 	player.sting_timer = 0
 	player.mo.stinger_charge_countdown = -1
@@ -382,7 +384,7 @@ local debug_timer = 0
 --mostly used to record players input  before interacting with the abilities
 addHook("PreThinkFrame", function()
 	for player in players.iterate() do
-		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt")
+		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt") then
 			continue
 		end
 		

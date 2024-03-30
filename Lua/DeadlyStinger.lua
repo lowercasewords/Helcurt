@@ -78,7 +78,7 @@ addHook("PlayerThink", function(player)
 
 	--Using Deadly Stinger 	
 	if(player.prevjumpheld <= TICS_TO_JUMPHOLD and player.prevjumpheld ~= 0 and 
-	player.jumpheld == 0 and player.mo.can_stinger == 1 and player.mo.stingers > 0) then
+	player.jumpheld == 0 and player.mo.can_stinger == 1) then
 	
 		
 		player.mo.can_stinger = 0
@@ -104,13 +104,13 @@ addHook("PlayerThink", function(player)
 		player.mo.momx = $/CHARGE_SLOWDOWN_FACTOR
 		player.mo.momy = $/CHARGE_SLOWDOWN_FACTOR
 		player.mo.momz = $/CHARGE_SLOWDOWN_FACTOR
-		S_StartSound(player.mo, sfx_stg01-1+player.mo.stingers)
+		S_StartSound(player.mo, sfx_stg01+player.mo.stingers)
 
 		-- local angle = player.mo.angle - FixedAngle((player.mo.stingers-1)*STINGER_ANGLE_ADJ/2) + ANGLE_180
 		-- local angle = player.mo.angle - ANGLE_180  -- - FixedAngle((player.mo.stingers-1)*STINGER_ANGLE_ADJ/2)
 		
-		--Spawning each of his available stingers
-		for i = 1, player.mo.stingers, 1 do
+		--Spawning each of Helcurt available stingers and one Helcurt always has
+		for i = 1, player.mo.stingers+1, 1 do
 			--[[
 			USELESS since stingers would be immediately relocated
 			if(i ~= 1) then
@@ -124,7 +124,7 @@ addHook("PlayerThink", function(player)
 			stinger.homing_enemy = nil --Is a stinger locked-on to a target
 			stinger.rollcounter = START_ANGLE --Vertical counter relative to the player
 			stinger.num = i --The number of the current stinger
-			stinger.released = player.mo.stingers --How many stingers were released (not the best way to do it I know but it works just fine)
+			stinger.released = player.mo.stingers + 1 --How many stingers were released (not the best way to do it I know but it works just fine)
 			--[[
 			--Horizontal angle
 			stinger.angle = player.mo.angle
