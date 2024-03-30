@@ -451,7 +451,10 @@ addHook("PostThinkFrame", function()
 			-- 1 2 3
 
 			CorrectRotationHoriz(player.mo.hudstingers[i], player.mo.x, player.mo.y,
-			player.mo.x-player.mo.radius, player.mo.y+player.mo.radius-player.mo.radius*i, player.mo.z+player.mo.height, player.mo.angle)
+								player.mo.x-player.mo.radius, 
+								-- player.mo.y+player.mo.radius-player.mo.radius*i, 
+								player.mo.y - (player.mo.radius*i) + (player.mo.radius/3) * MAX_STINGERS, 
+								player.mo.z+player.mo.height, player.mo.angle)
 			
 			--[[
 			Same as correct rotation horiz function, 
