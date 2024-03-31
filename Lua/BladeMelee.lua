@@ -173,7 +173,9 @@ addHook("PlayerThink", function(player)
 	--Activate only in the air if pressing or holding spin
 	if(player.mo.hasjumped == 1 and player.spinheld ~= 0 and not P_IsObjectOnGround(player.mo)) then
 		if(player.mo.state == S_BLADE_FALL) then
-			print(player.mo.momy)
+			print(player.mo.momz)
+			-- P_SetObjectMomZ(player.mo, BLADE_FALL_SPEED, true)
+			P_SetObjectMomZ(player.mo, -FRACUNIT/2, true)
 		end
 		--switch to blade falling state once
 		if(player.mo.state ~= S_BLADE_FALL and player.mo.state ~= S_BLADE_THURST and 
@@ -192,7 +194,8 @@ addHook("PlayerThink", function(player)
 		player.mo.state = states[$].nextstate
 	end
 	--Search for enemies to kill (Doesn't interupt the state)
-	if(player.mo.state == S_BLADE_THURST or player.mo.state == S_BLADE_FALL) then
+	-- if(player.mo.state == S_BLADE_THURST or player.mo.state == S_BLADE_FALL) then
+	if(player.mo.state == S_BLADE_THURST) then
 		--Search and filter through objects in small range to (hopefully) find the target
 		searchBlockmap("objects", function(playmo, checkmo)
 		--Gettings the horizontal distance between the stinger and currently scanning enemy

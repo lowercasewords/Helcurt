@@ -34,6 +34,7 @@ rawset(_G, "TELEPORT_STOP_SPEED", 3)
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "BLADE_THURST_SPEED", 40*FRACUNIT)
 rawset(_G, "BLADE_THURST_JUMP", 8*FRACUNIT)
+rawset(_G, "BLADE_FALL_SPEED", -8*FRACUNIT)
 
 --Adds stingers to the (player's) helcurt mobject 
 --mo (mobj_t): the mobject to add stingers
@@ -555,7 +556,8 @@ end
 ]]--
 
 local function A_BladeFall(actor, par1, par2)
-	-- P_SetObjectMomZ(actor, -10*FRACUNIT, true)
+	-- print("a "..actor.momz)
+	P_SetObjectMomZ(actor, 5*FRACUNIT, false)
 end
 
 --Thursts in the direction of the movement input while canceling all vertical momentum
