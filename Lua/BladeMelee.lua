@@ -4,7 +4,7 @@
 -------------------------------------
 
 --Horiontal offset for blade lock-on block searching 
-local BLADE_BLOCK_SEARCH = 1000*FRACUNIT
+-- local BLADE_BLOCK_SEARCH = 1000*FRACUNIT
 --Horizontal distance at which the blade lock-on will lock on the target
 local BLADE_LOCK_HORIZ_DISTANCE = 150*FRACUNIT
 --Vertical distance at which the blade lock-on will lock on the target
@@ -13,12 +13,15 @@ local BLADE_LOCK_VERT_DISTANCE = 100*FRACUNIT
 local BLADE_VERT_BOOST = 6*FRACUNIT
 --Vertical lockon spawn multipler offset to appear above the target
 local LOCK_HEIGHT_MUL = 2
-
+--Range system used in searchblock function to find targets
+local BLADE_BLOCK_SEARCH = 100*FRACUNIT
+--Maximum distance between enemy and Helcurt for latter to blade attack 
+local BLADE_HIT_DISTANCE = 100*FRACUNIT
 
 --/--------------------------
 --/ Functinos
 --/--------------------------
-
+--[[
 --Removes the lockon HUD from the existance
 --player (player_t): the player whose lockon HUD should be removed
 --returns: nil
@@ -47,7 +50,7 @@ local function SpawnLockOn(target, player)
 		player.lockon.locktarget = target
 	end
 end
-
+]]--
 
 --Checks if the target is in the lockon range of the player 
 --pmo (mobj_t): the player mobject initiating the lockon
@@ -60,7 +63,7 @@ local function LockDistanceCheck(pmo, targetmo)
 		abs(targetmo.z - pmo.z) <= BLADE_LOCK_VERT_DISTANCE
 end
 
-
+--[[
 --Handles Blade Damage 
 --target (mobj_t): the damage receiver
 --player (plzyer_t): the damage sender
@@ -91,13 +94,13 @@ local function BladeDamage(target, player)
 	--remove the lockon
 	StopLockOn(player)
 end
-
+]]--
 
 --/--------------------------
 --/ HOOKS
 --/--------------------------
 
-
+--[[
 --Defines the movement of the lockon HUD
 addHook("MobjThinker", function(molock)
 	if(molock.valid and molock.locktarget and molock.locktarget.valid) then
@@ -105,14 +108,13 @@ addHook("MobjThinker", function(molock)
 		 molock.locktarget.x, 
 		 molock.locktarget.y, 
 		 molock.locktarget.z + molock.locktarget.height*LOCK_HEIGHT_MUL)
-		--[[
+		
 	--Supposed to kill itself if target lost, but it needs a player to do it1
-	elseif(molock.valid and (not molock.locktarget or not molock.locktarget.valid)) then
-		StopLockOn(???)
-		]]--
+	-- elseif(molock.valid and (not molock.locktarget or not molock.locktarget.valid)) then
+	-- 	StopLockOn(???)
+		
 	end
 end, MT_LOCK)
-
 
 addHook("SpinSpecial", function(player)
 	if(not player or not player.mo or player.mo.skin ~= "helcurt") then
@@ -120,24 +122,11 @@ addHook("SpinSpecial", function(player)
 	end
 	--Perform a Blade Attack!
 	if(player.spinheld == 1 
-	and player.mo.state ~= S_BLADE_ATTACK 
+	and player.mo.state ~= S_BLADE_LAUNCH 
 	and player.mo.can_bladeattack 
 	and not P_IsObjectOnGround(player.mo)) then
 		player.mo.prevstate = player.mo.state
-		player.mo.state = S_BLADE_ATTACK
--- 		print("allow")
-// 		player.powers[pw_strong] = STR_FLOOR|STR_SPRING
- 			--allow to break walls and boost springs
- 		if(player.mo.state == S_BLADE_ATTACK or player.mo.state == S_BLADE_HIT) then
- 			-- print("allow")
- 			player.powers[pw_strong] = STR_FLOOR|STR_SPRING
- 		end
-		--Initial downwards momentum 
-		P_SetObjectMomZ(player.mo, -10*FRACUNIT, true)
-	--If spin is held while in blade attack mode, keep falling
-	elseif(player.spinheld >= 1 and player.spinheld < TICRATE/2
-	and player.mo.state == S_BLADE_ATTACK) then
-		P_SetObjectMomZ(player.mo, -FRACUNIT, true)
+		player.mo.state = S_BLADE_LAUNCH
 	end
 end)
 
@@ -149,7 +138,7 @@ addHook("ShouldDamage", function(mo, inflictor)
 	end
 	
 	--Don't get damaged whlie performing a Blade Attack
-	if(mo.state == S_BLADE_ATTACK and inflictor.flags & TARGET_DMG_RANGE) then
+	if(mo.state == S_BLADE_LAUNCH and inflictor.flags & TARGET_DMG_RANGE) then
 		return false
 	end
 end, MT_PLAYER)
@@ -161,7 +150,7 @@ addHook("MobjMoveCollide", function(playmo, target)
 		return nil
 	end
 	--Hit the target if attacking with blades and stop attacking furthermore
-	if(playmo.state == S_BLADE_ATTACK 
+	if(playmo.state == S_BLADE_LAUNCH 
 	and L_ZCollide(target, playmo) 
 	and target.flags & TARGET_DMG_RANGE) then
 		BladeDamage(target, playmo.player)
@@ -174,20 +163,91 @@ addHook("MobjDeath", function(molock)
 	-- molock.player.molock = nil
 	-- molock = nil
 end, MT_LOCK)
-
+]]--
 
 addHook("PlayerThink", function(player)
 	if(not player or not player.mo.valid or not player.mo or player.mo.skin ~= "helcurt") then
 		return
 	end
+
+	--Activate only in the air if pressing or holding spin
+	if(player.mo.hasjumped == 1 and player.spinheld ~= 0 and not P_IsObjectOnGround(player.mo)) then
+		if(player.mo.state == S_BLADE_FALL) then
+			print(player.mo.momy)
+		end
+		--switch to blade falling state once
+		if(player.mo.state ~= S_BLADE_FALL and player.mo.state ~= S_BLADE_THURST and 
+		player.cmd.forwardmove == 0 and player.cmd.sidemove == 0) then
+			player.mo.prevstate = player.mo.state
+			player.mo.state = S_BLADE_FALL
+		--switch to blade thrusting state once
+		elseif(player.mo.state ~= S_BLADE_THURST and player.mo.hasbthrusted == 0 and 
+		(player.cmd.forwardmove ~= 0 or player.cmd.sidemove ~= 0)) then
+			player.mo.prevstate = player.mo.state
+			player.mo.state = S_BLADE_THURST
+		end
+	--Canceling the blade thrusting or blade falling
+	elseif(player.spinnheld == 0 and (player.mo.state == S_BLADE_FALL or player.mo.state == S_BLADE_THURST)) then
+		player.mo.prevstate = player.mo.state
+		player.mo.state = states[$].nextstate
+	end
+	--Search for enemies to kill (Doesn't interupt the state)
+	if(player.mo.state == S_BLADE_THURST or player.mo.state == S_BLADE_FALL) then
+		--Search and filter through objects in small range to (hopefully) find the target
+		searchBlockmap("objects", function(playmo, checkmo)
+		--Gettings the horizontal distance between the stinger and currently scanning enemy
+		local distcheck = R_PointToDist2(playmo.x,playmo.y,checkmo.x,checkmo.y)
+		
+		--[[
+		--LOOKHERE:::::::: This thing overflows and malfunctions which is why it needs abs values for, it works but 
+		--should probably check for melee range values
+		local distcheck = 
+		FixedSqrt(abs(
+			FixedMul(checkmo.x - playmo.x, checkmo.x - playmo.x) + 
+			FixedMul(checkmo.y - playmo.y, checkmo.y - playmo.y) + 
+			FixedMul(checkmo.z - playmo.z, checkmo.z - playmo.z)))
+		]]--
+		--Damage the enemy and enter a state of hitting an enemy only if the target is valid and in the hit distance in all 3 directions
+		if(distcheck < BLADE_HIT_DISTANCE and L_ZCollide(playmo, checkmo, BLADE_HIT_DISTANCE-checkmo.height) 
+		and checkmo.flags & TARGET_DMG_RANGE ~= 0 and checkmo.flags & TARGET_IGNORE_RANGE == 0) then
+			P_DamageMobj(checkmo, player.mo, player.mo, 1)
+			playmo.prevstate = playmo.state 
+			playmo.state = S_BLADE_THURST_HIT
+			return true
+		end
+		end, 
+		player.mo, 
+		player.mo.x-BLADE_BLOCK_SEARCH, 
+		player.mo.x+BLADE_BLOCK_SEARCH, 
+		player.mo.y-BLADE_BLOCK_SEARCH, 
+		player.mo.y+BLADE_BLOCK_SEARCH)
+	end
+
+	--Ignore horizontal movement while thrusting
+	if(player.mo.state == S_BLADE_THURST) then
+		P_SetObjectMomZ(player.mo, 0, false)
+	end
+
+	--Recharge when hit the floor
+	if(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0) then
+		player.mo.hasbthrusted = 0
+	end
+	
+
+	-- print("f:"..player.cmd.forwardmove)
+	-- print("s:"..player.cmd.sidemove)
+	
+
+	--[[
 	--Stop the attacking state if released the spin
-	if(player.spinheld == 0 and player.mo.state == S_BLADE_ATTACK) then
+	if(player.spinheld == 0 and player.mo.state == S_BLADE_LAUNCH) then
 		--print(player.mo.momz)
 
 		player.mo.prevstate = player.mo.state 
-		player.mo.state = states[S_BLADE_ATTACK].nextstate
+		player.mo.state = states[S_BLADE_LAUNCH].nextstate
 	end
-
+	]]--
+	--[[
 	--Lock-on behavior
 	local target = nil
 	if(not P_IsObjectOnGround(player.mo) and player.mo.can_bladeattack) then
@@ -212,7 +272,7 @@ addHook("PlayerThink", function(player)
 
 	--Performs a homing attack on the lockon target if any
 	if(player.mo.can_bladeattack and 
-	player.mo.state == S_BLADE_ATTACK 
+	player.mo.state == S_BLADE_LAUNCH 
 	and player.lockon and player.lockon.valid 
 	and player.lockon.locktarget and player.lockon.locktarget.valid) then
 		player.mo.can_bladeattack = false
@@ -229,12 +289,9 @@ addHook("PlayerThink", function(player)
 		StopLockOn(player)
 	end
 
--- 	print("Pre prev: "..player.mo.prevstate)
--- 	print("Pre state: "..player.mo.state)
-	
 -- 	--dissallow to break walls and boost springs
--- 	if(player.mo.prevstate == S_BLADE_ATTACK) then--) or
--- 		if(player.mo.state ~= S_BLADE_ATTACK) then
+-- 	if(player.mo.prevstate == S_BLADE_LAUNCH) then--) or
+-- 		if(player.mo.state ~= S_BLADE_LAUNCH) then
 -- 			print("prevent")
 -- 			player.powers[pw_strong] = ~STR_FLOOR|~STR_SPRING
 -- 		end
@@ -242,9 +299,10 @@ addHook("PlayerThink", function(player)
 
 	--Reset cooldown when land on the floor
 	if(player.mo.eflags & MFE_JUSTHITFLOOR 
-	or (player.mo.prevstate == S_BLADE_ATTACK and player.mo.state == S_BLADE_HIT)) then
+	or (player.mo.prevstate == S_BLADE_LAUNCH and player.mo.state == S_BLADE_HIT)) then
 		player.mo.can_bladeattack = true
 		player.powers[pw_strong] = $&~STR_FLOOR&~STR_SPRING
 		StopLockOn(player)
 	end
+	]]--
 end)

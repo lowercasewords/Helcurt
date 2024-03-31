@@ -9,10 +9,10 @@
 --/--------------------------
 
 freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRANSITION",
-"S_BLADE_HIT", "S_BLADE_ATTACK", 
-
+"S_BLADE_FALL", "S_BLADE_THURST",
+--[["S_BLADE_HIT", "S_BLADE_LAUNCH", ]]--
 "S_STINGER_CHARGE", "S_STINGER_THURST", "S_STINGER_STACK",
-"S_PLAYER_CHARGE", "S_PLAYER_THURST", "S_LOCK")
+"S_PLAYER_CHARGE", "S_PLAYER_THURST", "S_BLADE_THURST_HIT", "S_LOCK")
 freeslot("MT_STGP", "MT_STGS", "MT_LOCK")
 freeslot("SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_LOCK")
 freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", 
@@ -32,8 +32,8 @@ rawset(_G, "MAX_STINGERS", 4)
 rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
 rawset(_G, "TELEPORT_STOP_SPEED", 3)
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
-rawset(_G, "X_BLADE_ATTACK_MOMENTUM", 5*FRACUNIT)
-rawset(_G, "Z_BLADE_ATTACK_MOMENTUM", 8*FRACUNIT)
+rawset(_G, "BLADE_THURST_SPEED", 40*FRACUNIT)
+rawset(_G, "BLADE_THURST_JUMP", 8*FRACUNIT)
 
 --Adds stingers to the (player's) helcurt mobject 
 --mo (mobj_t): the mobject to add stingers
@@ -122,12 +122,16 @@ rawset(_G, "SpawnDistance", function(og_x, og_y, og_z, distance, angle, mtype)
 	return obj
 end)
 
---Function Written by clairebun and was given to use on SRB2 discord page
+--Function mostly shown by clairebun to use on SRB2 discord page
 --mo1 (mobj_t): first mobj to check for collision
 --mo2 (mobj_t): second mobj to check for collision
+--extraheight (int): extra height added to the mo2
 --returns: true if two mobjects collide vertically, false otherwise
-rawset(_G, "L_ZCollide", function(mo1, mo2)
-    if mo1.z > mo2.height+mo2.z then return false end
+rawset(_G, "L_ZCollide", function(mo1, mo2, extraheight)
+	if(extraheight == nil) then
+		extraheight = 0
+	end
+    if mo1.z > mo2.height+mo2.z+extraheight then return false end
     if mo2.z > mo1.height+mo1.z then return false end
     return true
 end)
@@ -330,6 +334,9 @@ end)
 
 --Handle needed variables on spawn
 addHook("PlayerSpawn", function(player)
+	if(not player.mo or not player.mo.skin == "helcurt")  then
+		return
+	end
 	player.spinheld = 0 --Increments each tic it's held IN PRETHINK, use PF_SPINDOWN to get previous update
 	player.jumpheld = 0 --Increments each tic it's held IN PRETHINK, use PF_JUMPDOWN to get previous update
 	player.prevjumpheld = 0 --Value of jumpheld in previous tic
@@ -340,8 +347,11 @@ addHook("PlayerSpawn", function(player)
 	player.mo.teleported = 0
 	player.mo.enhanced_teleport = 0
 	player.mo.can_bladeattack = true
+	--Has performed bladeattack thurst move in the air already (reset to do it again)
+	player.mo.hasbthrusted = 0
 	player.mo.can_stinger = 0
 	player.mo.stung = 0
+	
 	player.lockon = nil
 	--Amount of extra stingers Helcurt has currently (not counting the current one)
 	player.mo.stingers = 0
@@ -387,7 +397,7 @@ addHook("PreThinkFrame", function()
 		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt") then
 			continue
 		end
-		
+		-- print(player.mo.state)
 		--Special input players input
 		if(player.cmd.buttons & BT_CUSTOM1) then
 			if(debug_timer == 1) then
@@ -401,6 +411,13 @@ addHook("PreThinkFrame", function()
 		elseif(debug_timer > 0) then
 			debug_timer = 0
 		end
+
+		--Not allow to move during these states
+		if(player.mo.state == S_BLADE_THURST or player.mo.state == S_IN_TRANSITION) then
+			player.cmd.forwardmove = 0
+			player.cmd.sidemove = 0
+		end
+		
 			
 		--Retrieves the current input
 		if(player.cmd.buttons & BT_SPIN) then
@@ -437,7 +454,7 @@ end)
 --and jump and spin button holding
 addHook("PostThinkFrame", function()
 	for player in players.iterate() do
-		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt")
+		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt") then
 			continue
 		end
 		
@@ -511,15 +528,61 @@ addHook("MobjDeath", function(target, inflictor, source, dmgtype)
 --/ ACTIONS
 --/--------------------------
 
-
-local function A_BladeAttack(actor, par1, par2)
--- 	P_SetObjectMomZ(actor, -Z_BLADE_ATTACK_MOMENTUM, true)
--- 	P_Thrust(actor, actor.angle, X_BLADE_ATTACK_MOMENTUM)
+--[[
+local function A_BladeLaunch(actor, par1, par2)
+-- 	P_SetObjectMomZ(actor, -BLADE_THURST_JUMP, true)
+-- 	P_Thrust(actor, actor.angle, BLADE_THURST_SPEED)
 -- 	actor.can_bladeattack = false
-
+	if(not actor and not actor.valid and not actor.player) then 
+		return
+	end
+	--allow to break walls and boost springs
+	actor.player.powers[pw_strong] = $|STR_BUST|STR_SPRING
+	--Initial downwards momentum 
+	P_SetObjectMomZ(actor, -5*FRACUNIT, true)
+	
+	-- --If spin is held while in blade attack mode, keep falling
+	-- elseif(actor.player.spinheld >= 1 and actor.player.spinheld < TICRATE/2
+	-- and actor.state == S_BLADE_LAUNCH) then
+	-- 	P_SetObjectMomZ(actor, -FRACUNIT, true)
+	-- end
+	
 end
 
 local function A_BladeHit(actor, par1, par2)
+	
+end
+]]--
+
+local function A_BladeFall(actor, par1, par2)
+	-- P_SetObjectMomZ(actor, -10*FRACUNIT, true)
+end
+
+--Thursts in the direction of the movement input while canceling all vertical momentum
+local function A_BladeThrust(actor, par1, par2)
+	if(actor == nil or actor.player == nil or actor.player.inputangle == 0 or actor.player.inputangle == nil) then
+		return
+	end
+	local ownerspeed = FixedHypot(actor.momx, actor.momy)
+	-- P_Thrust(actor, actor.player.inputangle, BLADE_THURST_SPEED)
+	P_InstaThrust(actor, actor.player.inputangle, ownerspeed/3+BLADE_THURST_SPEED)
+	--Signify that the player has already performed this ability
+	actor.hasbthrusted = 1
+end
+
+local function A_BladeThrustHit(actor, par1, par2)
+	if(not actor ~= nil and not actor.hasbthrusted) then
+		return 
+	end
+	local ownerspeed = FixedHypot(actor.momx, actor.momy)
+	
+	--Reset the thurst ability to be performed again
+	actor.hasbthrusted = 0
+	P_InstaThrust(actor, actor.player.inputangle, ownerspeed-BLADE_THURST_SPEED)
+	P_SetObjectMomZ(actor, BLADE_THURST_JUMP, false)
+	-- P_Thrust(actor, actor.player.inputangle, -BLADE_THURST_SPEED)
+	-- actor.momx = $*cos(actor.angle)-BLADE_THURST_SPEED
+	-- actor.momy = $*sin(actor.angle)-BLADE_THURST_SPEED
 end
 
 local function A_Pre_Transition(actor, par1, par2)
@@ -629,7 +692,7 @@ mobjinfo[MT_STGP] = {
 	spawnstate = S_STINGER_CHARGE,
 	deathstate = S_NULL,
 	speed = 2*FRACUNIT,
-	flags = MF2_SUPERFIRE|MF_NOGRAVITY|MF_NOBLOCKMAP|MF_MISSILE
+	flags = MF2_SUPERFIRE|MF_NOGRAVITY|MF_MISSILE
 }
 
 --A stinger hud Stack 
@@ -750,6 +813,7 @@ states[S_STINGER_THURST] = {
 	nexstate = S_NULL
 }
 
+
 states[S_STINGER_STACK] = {
 	sprite = SPR_STGS,
 	tics = -1
@@ -775,6 +839,7 @@ states[S_PLAYER_THURST] = {
 	nextstate = S_PLAY_FALL
 }
 
+--[[
 states[S_BLADE_HIT] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_BLDE,
@@ -783,11 +848,36 @@ states[S_BLADE_HIT] = {
 	nextstate = S_PLAY_FALL
 }
 
-states[S_BLADE_ATTACK] = {
+states[S_BLADE_LAUNCH] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_LNCH,
 	tics = 30,
-	action = A_BladeAttack,
+	action = A_BladeLaunch,
+	nextstate = S_PLAY_FALL
+}
+]]--
+
+states[S_BLADE_FALL] = {
+	sprite = SPR_PLAY,
+	frame = SPR2_WALK,
+	tics = 500,
+	action = A_BladeFall,
+	nextstate = S_PLAY_FALL
+}
+
+states[S_BLADE_THURST] = {
+	sprite = SPR_PLAY,
+	frame = SPR2_STND,
+	tics = TICRATE/3*2,
+	action = A_BladeThrust,
+	nextstate = S_PLAY_FALL
+}
+
+states[S_BLADE_THURST_HIT] = {
+	sprite = SPR_PLAY,
+	frame = SPR2_RUN,
+	tics = TICRATE,
+	action = A_BladeThrustHit,
 	nextstate = S_PLAY_FALL
 }
 
