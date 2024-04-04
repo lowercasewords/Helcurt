@@ -9,10 +9,10 @@
 --/--------------------------
 
 freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRANSITION",
-"S_BLADE_FALL", "S_BLADE_THURST",
---[["S_BLADE_HIT", "S_BLADE_LAUNCH", ]]--
-"S_STINGER_CHARGE", "S_STINGER_THURST", "S_STINGER_STACK",
-"S_PLAYER_CHARGE", "S_PLAYER_THURST", "S_BLADE_THURST_HIT", "S_LOCK")
+"S_BLADE_FALL", "S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK",
+"S_AIR_1", "S_GRND_1", "S_AIR_2", "S_GRND_2",
+"S_STINGER_AIR_1", "S_STINGER_AIR_2", 
+"S_STINGER_GRND_1", "S_STINGER_GRND_2")
 freeslot("MT_STGP", "MT_STGS", "MT_LOCK")
 freeslot("SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_LOCK")
 freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", 
@@ -32,9 +32,19 @@ rawset(_G, "MAX_STINGERS", 4)
 rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
 rawset(_G, "TELEPORT_STOP_SPEED", 3)
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
-rawset(_G, "BLADE_THURST_SPEED", 40*FRACUNIT)
+rawset(_G, "BLADE_THURST_SPEED", 20*FRACUNIT)
 rawset(_G, "BLADE_THURST_JUMP", 8*FRACUNIT)
 rawset(_G, "BLADE_FALL_SPEED", -8*FRACUNIT)
+rawset(_G, "STINGER_VERT_BOOST", 10*FRACUNIT)
+rawset(_G, "STINGER_HORIZ_BOOST", 15*FRACUNIT)
+--Half of the stinger's angular trajectory a it needs to travel
+rawset(_G, "HALF_AIR_ANGLE", ANGLE_135)
+--Half of the stinger's angular trajectory a it needs to travel
+rawset(_G, "HALF_GRND_ANGLE", ANGLE_90)
+--Extra vertical boost for helcurt when charging the stingers (before release)
+rawset(_G, "EXTRA_CHARGE_BOOST", 10*FRACUNIT)
+--Slow down Helcurt by this factor once when started charging stingers
+rawset(_G, "CHARGE_SLOWDOWN_FACTOR", 3)
 
 --Adds stingers to the (player's) helcurt mobject 
 --mo (mobj_t): the mobject to add stingers
@@ -341,6 +351,7 @@ addHook("PlayerSpawn", function(player)
 	player.spinheld = 0 --Increments each tic it's held IN PRETHINK, use PF_SPINDOWN to get previous update
 	player.jumpheld = 0 --Increments each tic it's held IN PRETHINK, use PF_JUMPDOWN to get previous update
 	player.prevjumpheld = 0 --Value of jumpheld in previous tic
+	player.prevspinheld = 0
 	--Did player jump? Resets to 0 when hits the floor
 	player.mo.hasjumped = 0
 	player.killcount = 0
@@ -413,8 +424,9 @@ addHook("PreThinkFrame", function()
 			debug_timer = 0
 		end
 
+		
 		--Not allow to move during these states
-		if(player.mo.state == S_BLADE_THURST or player.mo.state == S_IN_TRANSITION) then
+		if(player.mo.state == S_IN_TRANSITION) then
 			player.cmd.forwardmove = 0
 			player.cmd.sidemove = 0
 		end
@@ -501,6 +513,7 @@ addHook("PostThinkFrame", function()
 		-- end
 
 		player.prevjumpheld = player.jumpheld
+		player.prevspinheld = player.spinheld
 		player.mo.prevstate = player.mo.state
 	end
 end)
@@ -556,7 +569,6 @@ end
 ]]--
 
 local function A_BladeFall(actor, par1, par2)
-	-- print("a "..actor.momz)
 	P_SetObjectMomZ(actor, 5*FRACUNIT, false)
 end
 
@@ -658,10 +670,75 @@ local function A_End_Transition(actor, par1, par2)
 	]]--
 end
 
-local function A_StingerLaunch(actor, par1, par2)
-	-- 	print("ACTION!")
-	-- 	P_InstaThrust(actor, actor.angle, STINGER_LAUNCH_SPEED)
-	-- 	SpawnAfterImage(actor)
+--Not an action by itself by is called by different actions that do a very similar job 
+local function Stinger(playmo, startrollangle, stingerstate)
+	playmo.can_stinger = 0
+	playmo.stung = 1
+	-- print("Release "..playmo.stingers.." deadly stingers!")
+	
+	playmo.momx = $/CHARGE_SLOWDOWN_FACTOR
+	playmo.momy = $/CHARGE_SLOWDOWN_FACTOR
+	playmo.momz = $/CHARGE_SLOWDOWN_FACTOR
+	S_StartSound(playmo, sfx_stg01+playmo.stingers)
+
+	--Spawning each of Helcurt available stingers and one Helcurt always has
+	for i = 1, playmo.stingers+1, 1 do
+		--Spawn location doesn't really matter because it would immediately be displaced with no regards to its position
+		local stinger = P_SpawnMobj(playmo.x, playmo.y, playmo.z+playmo.height, MT_STGP)
+		stinger.target = playmo --object that "shot" a stinger			
+		stinger.homing_enemy = nil --Is a stinger locked-on to a target
+		stinger.rollcounter = startrollangle --Vertical counter relative to the player
+		stinger.num = i --The number of the current stinger
+		stinger.released = playmo.stingers + 1 --How many stingers were released (not the best way to do it I know but it works just fine)
+		stinger.state = stingerstate
+	end
+	
+
+	--Reset stingers after usage
+	RemoveStingers(playmo, MAX_STINGERS)
+	-- playmo.can_teleport = 1
+	playmo.can_bladeattack = true
+end
+
+
+local function A_StingerAir1(actor, var1, var2)
+	--Helcurt's when he started charging his stinger attack (that circly thing process around Helcurt)
+	P_SetObjectMomZ(actor, EXTRA_CHARGE_BOOST, false)
+	Stinger(actor, var1, var2)
+end
+
+local function A_StingerGrnd1(actor, var1, var2)
+	-- P_Thurst(pla)
+	Stinger(actor, var1, var2)
+end
+
+local function A_StingerAir2(actor, var1, var2)
+	P_SetObjectMomZ(actor.target, STINGER_VERT_BOOST, false)
+	P_Thrust(stinger.target, actor.target.player.inputangle, STINGER_HORIZ_BOOST)
+end
+
+local function A_StingerGrnd2(actor, var1, var2)
+
+end
+
+--Action performed by a stinger when charging is complete in the air
+local function A_Air2(actor, var1, var2)
+	--Point away from the player
+	actor.angle = 
+	ANGLE_180 + 
+	R_PointToAngle2(actor.x, actor.y, actor.target.x, actor.target.y) -
+	actor.target.angle +
+	actor.target.player.inputangle
+
+	--Fixed momentum change for the stinger
+	P_SetObjectMomZ(actor, -STINGER_VERT_BOOST, false)
+	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST)
+
+end
+
+--Action performed by a stinger when charging is complete on the ground
+local function A_Grnd2(actor, var1, var2)
+
 end
 
 --[[
@@ -691,7 +768,7 @@ mobjinfo[MT_LOCK] = {
 
 --A stinger Projectile
 mobjinfo[MT_STGP] = {
-	spawnstate = S_STINGER_CHARGE,
+	spawnstate = S_AIR_1,
 	deathstate = S_NULL,
 	speed = 2*FRACUNIT,
 	flags = MF2_SUPERFIRE|MF_NOGRAVITY|MF_MISSILE
@@ -699,7 +776,7 @@ mobjinfo[MT_STGP] = {
 
 --A stinger hud Stack 
 mobjinfo[MT_STGS] = {
-	spawnstate = S_STINGER_STACK,
+	spawnstate = S_STACK,
 	height = 128*FRACUNIT,
 	radius = 128*FRACUNIT,
 	deathstate = S_NULL,
@@ -797,48 +874,87 @@ sfxinfo[sfx_stg05] = {
 --/--------------------------
 
 
-states[S_STINGER_CHARGE] = {
-	sprite = SPR_STGP,
--- 	action = A_StingerLaunch,
--- 	action = A_CustomPower,
--- 	var1 = pw_strong,
--- 	var2 = STR_FLOOR,
-	tics = 200,
-	nexstate = S_NULL
-}
+---------------- CUSTOM OBJECT STATES ---------------- 
 
-states[S_STINGER_THURST] = {
-	sprite = SPR_STGP,
-	-- action = A_STINGER_THRUST,
-	-- var1 = -5*FRACUNIT,
-	tics = 100,
-	nexstate = S_NULL
-}
-
-
-states[S_STINGER_STACK] = {
+states[S_STACK] = {
 	sprite = SPR_STGS,
 	tics = -1
 }
 
+--[[
 states[S_LOCK] = {
 	sprite = SPR_LOCK,
 	tics = -1,
 	nextstate = S_NULL
 }
+]]--
 
-states[S_PLAYER_CHARGE] = {
-	sprite = SPR_PLAY,
-	frame = SPR2_FALL,
-	tics = 200,
-	nextstate = S_PLAYER_THURST 
+states[S_AIR_1] = {
+	sprite = SPR_STGP,
+	frame = FF_FULLBRIGHT,
+	tics = 6,
+	nextstate = S_AIR_2
 }
 
-states[S_PLAYER_THURST] = {
+states[S_AIR_2] = {
+	sprite = SPR_STGP,
+	frame = FF_FULLBRIGHT,
+	tics = 100,
+	action = A_Air2,
+	nextstate = S_NULL
+}
+
+states[S_GRND_1] = {
+	sprite = SPR_STGP,
+	frame = FF_FULLBRIGHT,
+	tics = 35,
+	nextstate = S_GRND_2
+}
+
+states[S_GRND_2] = {
+	sprite = SPR_STGP,
+	frame = FF_FULLBRIGHT,
+	tics = 100,
+	action = A_Grnd2,
+	nextstate = S_NULL
+}
+
+---------------- PLAYER STATES ----------------
+
+states[S_STINGER_AIR_1] = {
+	sprite = SPR_PLAY,
+	frame = SPR2_FALL,
+	action = A_StingerAir1,
+	var1 = -ANGLE_90,
+	var2 = S_AIR_1,
+	tics = 200,
+	nextstate = S_STINGER_AIR_2 
+}
+
+states[S_STINGER_GRND_1] = {
+	sprite = SPR_PLAY,
+	frame = SPR2_FALL,
+	action = A_StingerGrnd1,
+	var1 = ANGLE_157h,
+	var2 = S_GRND_1,
+	tics = 200,
+	nextstate = S_STINGER_GRND_2 
+}
+
+states[S_STINGER_AIR_2] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_JUMP,
+	action = A_StingerAir2,
 	tics = 20,
 	nextstate = S_PLAY_FALL
+}
+
+states[S_STINGER_GRND_2] = {
+	sprite = SPR_PLAY,
+	frame = SPR2_JUMP,
+	action = A_StingerGrnd2,
+	tics = 20,
+	nextstate = S_PLAY_STND
 }
 
 --[[

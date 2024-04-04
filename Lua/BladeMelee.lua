@@ -173,7 +173,7 @@ addHook("PlayerThink", function(player)
 	--Activate only in the air if pressing or holding spin
 	if(player.mo.hasjumped == 1 and player.spinheld ~= 0 and not P_IsObjectOnGround(player.mo)) then
 		if(player.mo.state == S_BLADE_FALL) then
-			print(player.mo.momz)
+			-- print(player.mo.momz)
 			-- P_SetObjectMomZ(player.mo, BLADE_FALL_SPEED, true)
 			P_SetObjectMomZ(player.mo, -FRACUNIT/2, true)
 		end
