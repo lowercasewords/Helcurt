@@ -72,7 +72,7 @@ stinger.target.state ~= nil) then
 			--Correcting stingers to be behind the player 
 			yawangle = $-(stinger.released-1)*(SEPARATION_AIR_ANGLE/2)
 		elseif(stinger.state == S_GRND_1) then
-		--Starting with the base angle of 0, each added stinger would be moved by 45 degrees to the left
+			--Starting with the base angle of 0, each added stinger would be moved by 45 degrees to the left
 			yawangle = (stinger.num-1)*SEPARATION_GRND_ANGLE
 			--Correcting stingers to be behind the player 
 			yawangle = $-(stinger.released-1)*(SEPARATION_GRND_ANGLE/2)
@@ -118,7 +118,7 @@ stinger.target.state ~= nil) then
 	--Redirects towards the direction of the enemy ALMOST immediately when stinger thrust starts,
 	--but doesn't actually tracks the enemy continuously to avoid bugs I have neither time nor 
 	--desire to fix :3
-	if(stinger.state == S_AIR_2 or stinger.state == S_GRND_2 and stinger.homing_enemy == nil) then
+	if(stinger.state == S_AIR_2 and stinger.tics < (states[stinger.state].tics)/2*3 and stinger.homing_enemy == nil) then
 		--Distance from the enemy to attack
 		local enemydist3d = nil
 		--Enemy to attack

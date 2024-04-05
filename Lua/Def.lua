@@ -700,8 +700,8 @@ local function A_StingerGrnd1(actor, var1, var2)
 end
 
 local function A_StingerAir2(actor, var1, var2)
-	P_SetObjectMomZ(actor.target, STINGER_VERT_BOOST, false)
-	P_Thrust(stinger.target, actor.target.player.inputangle, STINGER_HORIZ_BOOST)
+	P_SetObjectMomZ(actor, STINGER_VERT_BOOST, false)
+	P_Thrust(actor, actor.player.inputangle, STINGER_HORIZ_BOOST)
 end
 
 local function A_StingerGrnd2(actor, var1, var2)
@@ -900,7 +900,7 @@ states[S_AIR_1] = {
 states[S_AIR_2] = {
 	sprite = SPR_STGP,
 	frame = FF_FULLBRIGHT,
-	tics = 100,
+	tics = TICRATE,
 	action = A_Air2,
 	nextstate = S_NULL
 }
@@ -928,7 +928,7 @@ states[S_STINGER_AIR_1] = {
 	action = A_StingerAir1,
 	var1 = -ANGLE_90,
 	var2 = S_AIR_1,
-	tics = 200,
+	tics = states[S_AIR_1].tics,
 	nextstate = S_STINGER_AIR_2 
 }
 
@@ -938,7 +938,7 @@ states[S_STINGER_GRND_1] = {
 	action = A_StingerGrnd1,
 	var1 = ANGLE_157h,
 	var2 = S_GRND_1,
-	tics = 200,
+	tics = states[S_GRND_1].tics,
 	nextstate = S_STINGER_GRND_2 
 }
 
