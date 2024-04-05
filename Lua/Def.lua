@@ -9,7 +9,7 @@
 --/--------------------------
 
 freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRANSITION",
-"S_BLADE_FALL", "S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK",
+"S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK",
 "S_AIR_1", "S_GRND_1", "S_AIR_2", "S_GRND_2",
 "S_STINGER_AIR_1", "S_STINGER_AIR_2", 
 "S_STINGER_GRND_1", "S_STINGER_GRND_2")
@@ -21,6 +21,8 @@ freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04",
 
 --constants and functions used throghout the project (rest are defined in other files too)
 rawset(_G, "SPAWN_RADIUS_MAX", 10)
+--Anything below or equal to this tics counts as pressing a button once instead of holding it
+rawset(_G, "TICS_PRESS_RANGE", 5)
 rawset(_G, "SPAWN_TIC_MAX", 1)
 rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MONITOR|MF_SPRING)
 rawset(_G, "TARGET_NONDMG_RANGE", MF_SPRING)
@@ -34,7 +36,7 @@ rawset(_G, "TELEPORT_STOP_SPEED", 3)
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "BLADE_THURST_SPEED", 20*FRACUNIT)
 rawset(_G, "BLADE_THURST_JUMP", 8*FRACUNIT)
-rawset(_G, "BLADE_FALL_SPEED", -8*FRACUNIT)
+rawset(_G, "BLADE_FALL_SPEED", -FRACUNIT/2)
 rawset(_G, "STINGER_VERT_BOOST", 10*FRACUNIT)
 rawset(_G, "STINGER_HORIZ_BOOST", 15*FRACUNIT)
 --Half of the stinger's angular trajectory a it needs to travel
@@ -570,16 +572,12 @@ local function A_BladeHit(actor, par1, par2)
 	
 end
 ]]--
-
-local function A_BladeFall(actor, par1, par2)
-	P_SetObjectMomZ(actor, 5*FRACUNIT, false)
-end
-
 --Thursts in the direction of the movement input while canceling all vertical momentum
 local function A_BladeThrust(actor, par1, par2)
 	if(actor == nil or actor.player == nil or actor.player.inputangle == 0 or actor.player.inputangle == nil) then
 		return
 	end
+	P_SetObjectMomZ(actor, 5*FRACUNIT, false)
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
 	-- P_Thrust(actor, actor.player.inputangle, BLADE_THURST_SPEED)
 	P_InstaThrust(actor, actor.player.inputangle, ownerspeed/3+BLADE_THURST_SPEED)
@@ -976,14 +974,6 @@ states[S_BLADE_LAUNCH] = {
 }
 ]]--
 
-states[S_BLADE_FALL] = {
-	sprite = SPR_PLAY,
-	frame = SPR2_WALK,
-	tics = 500,
-	action = A_BladeFall,
-	nextstate = S_PLAY_FALL
-}
-
 states[S_BLADE_THURST] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_STND,
@@ -995,7 +985,7 @@ states[S_BLADE_THURST] = {
 states[S_BLADE_THURST_HIT] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_RUN,
-	tics = TICRATE,
+	tics = 5*TICRATE,
 	action = A_BladeThrustHit,
 	nextstate = S_PLAY_FALL
 }

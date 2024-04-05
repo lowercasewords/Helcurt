@@ -5,8 +5,6 @@
 --On Jump while jumping
 ------------------------------------
 
---Tics to hold the button to perform a teleport ability
-rawset(_G, "TICS_TO_STGHOLD", 5)
 
 addHook("AbilitySpecial",
 		function(player)
@@ -45,7 +43,7 @@ addHook("PlayerThink",
 			-- end
 
 			--Perform a teleport when one is available by HOLDING the jump button
-			if(player.mo.can_teleport and player.cmd.buttons&BT_JUMP and player.jumpheld > TICS_TO_STGHOLD) then
+			if(player.mo.can_teleport and player.cmd.buttons&BT_JUMP and player.jumpheld > TICS_PRESS_RANGE) then
 				-- print('TEL')
 				player.mo.prevstate = player.mo.state
 				player.mo.state = S_PRE_TRANSITION

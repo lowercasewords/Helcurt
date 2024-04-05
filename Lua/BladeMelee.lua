@@ -170,16 +170,29 @@ addHook("PlayerThink", function(player)
 		return
 	end
 
-	--Activate only in the air if pressing or holding spin
+	--If holding or pressing spin in the air
+	if(player.mo.hasjumped == 1 and player.spinheld ~= 0 and not P_IsObjectOnGround(player.mo)) then
+		if(player.mo.state == S_BLADE_THURST) then
+			P_SetObjectMomZ(player.mo, BLADE_FALL_SPEED, true)
+		--switch to blade thrusting state once
+		elseif(player.mo.state ~= S_BLADE_THURST and player.mo.hasbthrusted == 0 and 
+		(player.cmd.forwardmove ~= 0 or player.cmd.sidemove ~= 0)) then
+			player.mo.prevstate = player.mo.state
+			player.mo.state = S_BLADE_THURST
+		end
+	end
+	--[[
+	--Activate in the air while pressing or holding spin
 	if(player.mo.hasjumped == 1 and player.spinheld ~= 0 and not P_IsObjectOnGround(player.mo)) then
 		if(player.mo.state == S_BLADE_FALL) then
 			-- print(player.mo.momz)
 			-- P_SetObjectMomZ(player.mo, BLADE_FALL_SPEED, true)
 			P_SetObjectMomZ(player.mo, -FRACUNIT/2, true)
 		end
+
+
 		--switch to blade falling state once
-		if(player.mo.state ~= S_BLADE_FALL and player.mo.state ~= S_BLADE_THURST and 
-		player.cmd.forwardmove == 0 and player.cmd.sidemove == 0) then
+		if(player.spinheld <= TICS_PRESS_RANGE and player.mo.state == S_BLADE_THURST) then
 			player.mo.prevstate = player.mo.state
 			player.mo.state = S_BLADE_FALL
 		--switch to blade thrusting state once
@@ -193,6 +206,8 @@ addHook("PlayerThink", function(player)
 		player.mo.prevstate = player.mo.state
 		player.mo.state = states[$].nextstate
 	end
+	]]--
+
 	--Search for enemies to kill (Doesn't interupt the state)
 	-- if(player.mo.state == S_BLADE_THURST or player.mo.state == S_BLADE_FALL) then
 	if(player.mo.state == S_BLADE_THURST) then
@@ -226,16 +241,17 @@ addHook("PlayerThink", function(player)
 		player.mo.y+BLADE_BLOCK_SEARCH)
 	end
 
+	--[[
 	--Ignore horizontal movement while thrusting
 	if(player.mo.state == S_BLADE_THURST) then
 		P_SetObjectMomZ(player.mo, 0, false)
 	end
-
+	]]--
 	--Recharge when hit the floor
 	if(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0) then
 		player.mo.hasbthrusted = 0
 	end
-	
+
 
 	-- print("f:"..player.cmd.forwardmove)
 	-- print("s:"..player.cmd.sidemove)
@@ -308,4 +324,5 @@ addHook("PlayerThink", function(player)
 		StopLockOn(player)
 	end
 	]]--
+
 end)
