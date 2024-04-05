@@ -40,7 +40,9 @@ rawset(_G, "STINGER_HORIZ_BOOST", 15*FRACUNIT)
 --Half of the stinger's angular trajectory a it needs to travel
 rawset(_G, "HALF_AIR_ANGLE", ANGLE_135)
 --Half of the stinger's angular trajectory a it needs to travel
-rawset(_G, "HALF_GRND_ANGLE", ANGLE_90)
+rawset(_G, "HALF_GRND_ANGLE", ANG105-ANG20)
+rawset(_G, "SEPARATION_AIR_ANGLE", ANGLE_45)
+rawset(_G, "SEPARATION_GRND_ANGLE", ANG30)
 --Extra vertical boost for helcurt when charging the stingers (before release)
 rawset(_G, "EXTRA_CHARGE_BOOST", 10*FRACUNIT)
 --Slow down Helcurt by this factor once when started charging stingers
@@ -409,6 +411,7 @@ addHook("PreThinkFrame", function()
 		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt") then
 			continue
 		end
+		-- AddStingers(player.mo, MAX_STINGERS)
 		-- print(player.mo.state)
 		--Special input players input
 		if(player.cmd.buttons & BT_CUSTOM1) then
@@ -614,6 +617,7 @@ local function A_Pre_Transition(actor, par1, par2)
 			print("enhanced!")
 		end
 	end
+	AddStingers(actor, MAX_STINGERS)
 end
 
 --Start the teleportation transition
@@ -651,23 +655,6 @@ local function A_End_Transition(actor, par1, par2)
 	actor.flags = $&~MF_NOCLIPTHING
 	actor.momy = $/TELEPORT_STOP_SPEED
 	actor.momx = $/TELEPORT_STOP_SPEED
-
-
-	--[[
-	--Potential increase in horizontal momentum after teleportation through decreasing stopping power
-	if(actor.enhanced_teleport and actor.enhanced_teleport ~= nil) then
-		print("enhance!")
-		actor.momy = $/(TELEPORT_STOP_SPEED/2)
-		actor.momx = $/(TELEPORT_STOP_SPEED/2)
-	else
-		actor.momy = $/TELEPORT_STOP_SPEED
-		actor.momx = $/TELEPORT_STOP_SPEED
-	end
-	-- actor.momy = $/(TELEPORT_STOP_SPEED-FixedMul(TELEPORT_STOP_SPEED, actor.enhanced_teleport))
-	-- actor.momx = $/(TELEPORT_STOP_SPEED-FixedMul(TELEPORT_STOP_SPEED, actor.enhanced_teleport))
-
-	actor.enhanced_teleport = 0
-	]]--
 end
 
 --Not an action by itself by is called by different actions that do a very similar job 
@@ -725,10 +712,10 @@ end
 local function A_Air2(actor, var1, var2)
 	--Point away from the player
 	actor.angle = 
-	ANGLE_180 + 
-	R_PointToAngle2(actor.x, actor.y, actor.target.x, actor.target.y) -
-	actor.target.angle +
-	actor.target.player.inputangle
+		ANGLE_180 + 
+		R_PointToAngle2(actor.x, actor.y, actor.target.x, actor.target.y) -
+		actor.target.angle +
+		actor.target.player.inputangle
 
 	--Fixed momentum change for the stinger
 	P_SetObjectMomZ(actor, -STINGER_VERT_BOOST, false)
@@ -738,7 +725,21 @@ end
 
 --Action performed by a stinger when charging is complete on the ground
 local function A_Grnd2(actor, var1, var2)
+	--Point away from the player
+	-- actor.angle = actor.target.angle
+	
+	local forward = 150*FRACUNIT
+	
+	local c = cos(actor.target.angle) 
+	local s = sin(actor.target.angle)
+	
+	local x = actor.target.x + FixedMul(forward, c) - FixedMul(0, s)
+	local y = actor.target.y + FixedMul(0, c) + FixedMul(forward, s)
 
+	actor.angle = R_PointToAngle2(actor.x, actor.y, x, y)
+
+	--Fixed momentum change for the stinger
+	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST*2)
 end
 
 --[[
@@ -771,7 +772,7 @@ mobjinfo[MT_STGP] = {
 	spawnstate = S_AIR_1,
 	deathstate = S_NULL,
 	speed = 2*FRACUNIT,
-	flags = MF2_SUPERFIRE|MF_NOGRAVITY|MF_MISSILE
+	flags = MF_NOGRAVITY
 }
 
 --A stinger hud Stack 
@@ -907,14 +908,14 @@ states[S_AIR_2] = {
 states[S_GRND_1] = {
 	sprite = SPR_STGP,
 	frame = FF_FULLBRIGHT,
-	tics = 35,
+	tics = 10,
 	nextstate = S_GRND_2
 }
 
 states[S_GRND_2] = {
 	sprite = SPR_STGP,
 	frame = FF_FULLBRIGHT,
-	tics = 100,
+	tics = TICRATE,
 	action = A_Grnd2,
 	nextstate = S_NULL
 }

@@ -7,16 +7,6 @@
 ---CONSTANTS
 -------------------------------------
 
-
---[[
-local MAX_ANGLE = ANGLE_90
-local MIN_ANGLE = -ANGLE_67h--ANGLE_90
-]]--
-
---Angle adjustment for each stinger at their spawn
-local STINGER_ANGLE_ADJ = 10*FRACUNIT
---DEPRECATED
-local STINGER_SPAWN_DISTANCE = -100	
 --Maximum distance for the stinger to lock-on and track the enemy
 local MAX_HOMING_DISTANCE = 100*FRACUNIT
 
@@ -48,19 +38,6 @@ addHook("PlayerThink", function(player)
 end)
 
 
---Handle's the clean-up of stinger's object removal
-addHook("MobjRemoved", function(stinger)
-	if(not stinger.valid) then
-		return nil	
-	end
-	--[[print(stinger.state.."vs"..S_AIR_1)]]--
-	--Allow other stingers to home-in onto target that was
-	--homed-in by this stinger
-	if(stinger.homing_enemy ~= nil and stinger.homing_enemy.valid and stinger.homing_enemy.homing_source ~= nil and stinger.homing_enemy.homing_source.valid) then
-		stinger.homing_enemy.homing_source = nil
-	end
-	
-end, MT_STGP)
 
 --Handle the Stinger Projectile
 addHook("MobjThinker", function(stinger)
@@ -78,15 +55,29 @@ stinger.target.state ~= nil) then
 		local pivotx = stinger.target.x
 		local pivoty = stinger.target.y
 		local pivotz = stinger.target.z + stinger.target.height/3
-
-		local radius = stinger.target.radius*2
-		
+		local radius = 0
 		local yawangle = 0
-		--Starting with the base angle of 0, each added stinger would be moved by 45 degrees to the left
-		yawangle = (stinger.num-1)*ANGLE_45
+
+		--Radius of stinger's trajectory around helcurt
+		if(stinger.state == S_AIR_1) then
+			radius = stinger.target.radius*2
+		elseif(stinger.state == S_GRND_1) then
+			radius = stinger.target.radius*4
+		end
 		
-		--Correcting stingers to be behind the player 
-		yawangle = $-(stinger.released-1)*(ANGLE_45/2)
+		
+		if(stinger.state == S_AIR_1) then
+			--Starting with the base angle of 0, each added stinger would be moved by 45 degrees to the left
+			yawangle = (stinger.num-1)*SEPARATION_AIR_ANGLE
+			--Correcting stingers to be behind the player 
+			yawangle = $-(stinger.released-1)*(SEPARATION_AIR_ANGLE/2)
+		elseif(stinger.state == S_GRND_1) then
+		--Starting with the base angle of 0, each added stinger would be moved by 45 degrees to the left
+			yawangle = (stinger.num-1)*SEPARATION_GRND_ANGLE
+			--Correcting stingers to be behind the player 
+			yawangle = $-(stinger.released-1)*(SEPARATION_GRND_ANGLE/2)
+		end
+		
 		
 		--[[
 		Circle's around the player where's stinger's location is reset (I forgot how I did it but it works AHHAAHAHAHAHAHAAHAH)
@@ -101,16 +92,6 @@ stinger.target.state ~= nil) then
 		--Corrects the stingers to be relative the player's facing direction horizontal angle
 		CorrectRotationHoriz(stinger, pivotx, pivoty, x, y, z, stinger.target.angle)
 
-		--[[
-			NOT WORKING because of roll and yaw functions because I can't yaw and roll and the same time,
-			I have no clue how I made it worked through other functions above
-		-- Appear right above the player for initial
-		P_MoveOrigin(stinger, stinger.target.x+10*FRACUNIT, stinger.target.y, stinger.target.z + stinger.target.height)
-		
-		--Rotate based on the roll, yaw, and pitch angles
-		Roll(stinger, pivoty, pivotz, stinger.rollcounter)
-		Yaw(stinger, pivotx, pivoty, stinger.target.angle)
-		]]--
 		
 		--The direction of rolling, and yes I know this is not the best way to change directions
 		--depending on the state
@@ -119,6 +100,8 @@ stinger.target.state ~= nil) then
 			--in this case angular distance and time used area HALF of the true value because anything above 180 is negative and messes it up!
 			stinger.rollcounter = $+((HALF_AIR_ANGLE)/(states[stinger.state].tics/2))
 		elseif(stinger.state == S_GRND_1) then
+			--Divide total angle distance to travel by the time it needs to take to travel, meaning that we just provide angular velocity.
+			--in this case angular distance and time used area HALF of the true value because anything above 180 is negative and messes it up!
 			stinger.rollcounter = $+((-HALF_GRND_ANGLE)/(states[stinger.state].tics/2))
 		end
 		
@@ -189,3 +172,32 @@ addHook("MobjDamage", function(target, inflictor, source, damage, damagetype)
 	AddStingers(source, 1)
 
 end)
+
+
+--Handle's the clean-up of stinger's object removal
+addHook("MobjRemoved", function(stinger)
+	if(not stinger.valid) then
+		return nil	
+	end
+
+	-- print(stinger.state.."vs"..S_GRND_2)
+	--Allow other stingers to home-in onto target that was
+	--homed-in by this stinger
+	if(stinger.homing_enemy ~= nil and stinger.homing_enemy.valid and stinger.homing_enemy.homing_source ~= nil and stinger.homing_enemy.homing_source.valid) then
+		stinger.homing_enemy.homing_source = nil
+	end
+	
+end, MT_STGP)
+
+--Defines behavior when a stinger collides with an object
+addHook("MobjMoveCollide", function(stinger, object)
+	if(not stinger.valid or not object.valid) then
+		return nil	
+	end
+
+	--Damage if colided with an enemy
+	if(object.flags&TARGET_DMG_RANGE ~= 0 and object.flags&TARGET_IGNORE_RANGE == 0) then
+		P_DamageMobj(object, stinger, stinger.target)
+	end
+
+end, MT_STGP)
