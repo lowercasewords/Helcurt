@@ -769,6 +769,8 @@ mobjinfo[MT_LOCK] = {
 mobjinfo[MT_STGP] = {
 	spawnstate = S_AIR_1,
 	deathstate = S_NULL,
+	height = 16*FRACUNIT,
+	radius = 16*FRACUNIT,
 	speed = 2*FRACUNIT,
 	flags = MF_NOGRAVITY
 }
@@ -776,8 +778,8 @@ mobjinfo[MT_STGP] = {
 --A stinger hud Stack 
 mobjinfo[MT_STGS] = {
 	spawnstate = S_STACK,
-	height = 128*FRACUNIT,
-	radius = 128*FRACUNIT,
+	height = 4*FRACUNIT,
+	radius = 4*FRACUNIT,
 	deathstate = S_NULL,
 	xdeathstate = S_NULL,
 	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY
