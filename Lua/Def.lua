@@ -24,6 +24,7 @@ rawset(_G, "SPAWN_RADIUS_MAX", 10)
 --Anything below or equal to this tics counts as pressing a button once instead of holding it
 rawset(_G, "TICS_PRESS_RANGE", 5)
 rawset(_G, "SPAWN_TIC_MAX", 1)
+
 rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MONITOR|MF_SPRING)
 rawset(_G, "TARGET_NONDMG_RANGE", MF_SPRING)
 -- rawset(_G, "TARGET_KILL_RANGE", MT_POINTYBALL|MT_EGGMOBILE_BALL|MT_SPIKEBALL|MT_SPIKE|MT_WALLSPIKE|MT_WALLSPIKEBASE|MT_SMASHINGSPIKEBALL)
@@ -32,8 +33,9 @@ rawset(_G, "TARGET_IGNORE_RANGE", MF_MISSILE)
 rawset(_G, "MAX_STINGERS", 4)
 rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
 rawset(_G, "TELEPORT_STOP_SPEED", 3)
+
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
-rawset(_G, "BLADE_THURST_SPEED", 25*FRACUNIT)
+rawset(_G, "BLADE_THURST_SPEED", 15*FRACUNIT)
 rawset(_G, "BLADE_THURST_JUMP", 4*FRACUNIT)
 rawset(_G, "BLADE_FALL_SPEED", -FRACUNIT/2)
 rawset(_G, "STINGER_VERT_BOOST", 10*FRACUNIT)
@@ -636,10 +638,10 @@ local function A_BladeThrust(actor, par1, par2)
 		return
 	end
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
-	-- P_Thrust(actor, actor.player.inputangle, BLADE_THURST_SPEED)
 	-- P_InstaThrust(actor, actor.player.inputangle, ownerspeed/3+BLADE_THURST_SPEED)
-	P_SetObjectMomZ(actor, 0, false)
-	P_InstaThrust(actor, actor.player.inputangle, BLADE_THURST_SPEED)
+	P_SetObjectMomZ(actor, BLADE_THURST_JUMP/2, false)
+	P_InstaThrust(actor, actor.player.inputangle, ownerspeed)
+	-- P_Thrust(actor, actor.player.inputangle, BLADE_THURST_SPEED)
 end
 
 local function A_BladeThrustHit(actor, par1, par2)
@@ -648,7 +650,8 @@ local function A_BladeThrustHit(actor, par1, par2)
 	end
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
 	
-	P_InstaThrust(actor, actor.player.inputangle, ownerspeed-BLADE_THURST_SPEED/2)
+	-- P_InstaThrust(actor, actor.player.inputangle, ownerspeed-BLADE_THURST_SPEED/2)
+	P_Thrust(actor, actor.player.inputangle + ANGLE_180, ownerspeed/5)
 	P_SetObjectMomZ(actor, 2*BLADE_THURST_JUMP, false)
 	-- P_Thrust(actor, actor.player.inputangle, -BLADE_THURST_SPEED)
 	-- actor.momx = $*cos(actor.angle)-BLADE_THURST_SPEED
@@ -1003,7 +1006,7 @@ states[S_BLADE_LAUNCH] = {
 states[S_BLADE_THURST] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_STND,
-	tics = TICRATE/3*2,
+	tics = 10*TICRATE,
 	action = A_BladeThrust,
 	nextstate = S_PLAY_FALL
 }

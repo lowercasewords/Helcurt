@@ -44,7 +44,7 @@ addHook("PlayerThink", function(player)
 			player.mo.state = S_BLADE_THURST
 		end
 	end
-
+	
 	--Search for enemies to kill (Doesn't interupt the state)
 	-- if(player.mo.state == S_BLADE_THURST or player.mo.state == S_BLADE_FALL) then
 	if(player.mo.state == S_BLADE_THURST) then
