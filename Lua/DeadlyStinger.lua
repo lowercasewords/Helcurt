@@ -39,7 +39,8 @@ addHook("PlayerThink", function(player)
 
 end)
 
-
+-- addHoook("PreThinkFrame"), function(stinger)
+-- end, MT_STGP)
 
 --Handle the Stinger Projectile
 addHook("MobjThinker", function(stinger)
@@ -49,6 +50,9 @@ addHook("MobjThinker", function(stinger)
 	
 	SpawnAfterImage(stinger)
 
+	if(stinger.state == S_AIR_2 and stinger.eflags&MFE_JUSTHITFLOOR) then
+		stinger.state = S_AIR_3
+	end
 	
 	-- print("A "..stinger.rollcounter/ANG1)
 	--Stinger Charging behavior 
@@ -117,6 +121,7 @@ stinger.target.state ~= nil) then
 		return
 	end
 
+	--[[
 	--Redirects towards the direction of the enemy ALMOST immediately when stinger thrust starts,
 	--but doesn't actually tracks the enemy continuously to avoid bugs I have neither time nor 
 	--desire to fix :3
@@ -157,6 +162,7 @@ stinger.target.state ~= nil) then
 			stinger.momz = (enemy.z-stinger.z)/TICRATE
 		end
 	end
+	]]--
 end, MT_STGP)
 
 

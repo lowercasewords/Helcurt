@@ -10,7 +10,7 @@
 
 freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRANSITION",
 "S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK",
-"S_AIR_1", "S_GRND_1", "S_AIR_2", "S_GRND_2",
+"S_AIR_1", "S_GRND_1", "S_AIR_2", "S_GRND_2", "S_AIR_3",
 "S_STINGER_AIR_1", "S_STINGER_AIR_2", 
 "S_STINGER_GRND_1", "S_STINGER_GRND_2")
 freeslot("MT_STGP", "MT_STGS", "MT_LOCK")
@@ -458,6 +458,7 @@ addHook("PreThinkFrame", function()
 	-- 	player.mo.y = player.mo.y*cos(player.mo.angle) + player.mo.x*sin(player.mo.angle)
 
 		
+	--Detect voluntery jumping
 		if(player.mo.state == S_PLAY_JUMP and player.mo.hasjumped == 0) then
 			player.mo.hasjumped = 1
 		elseif(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0) then
@@ -618,6 +619,13 @@ local function A_Grnd2(actor, var1, var2)
 	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST*2)
 end
 
+local function A_Air3(actor, var1, var2)
+	local ownerspeed = FixedHypot(actor.momx, actor.momy)
+
+	actor.angle = R_PointToAngle2(actor.x, actor.y, actor.target.x, actor.target.y)
+	P_InstaThrust(actor, actor.angle, ownerspeed+STINGER_HORIZ_BOOST)
+	
+end
 
 ---------------- PLAYER ACTIONS ---------------- 
 
@@ -910,7 +918,7 @@ states[S_AIR_2] = {
 	frame = FF_FULLBRIGHT,
 	tics = TICRATE,
 	action = A_Air2,
-	nextstate = S_NULL
+	nextstate = S_AIR_3
 }
 
 states[S_GRND_1] = {
@@ -923,8 +931,16 @@ states[S_GRND_1] = {
 states[S_GRND_2] = {
 	sprite = SPR_STGP,
 	frame = FF_FULLBRIGHT,
-	tics = TICRATE,
+	tics = TICRATE/2,
 	action = A_Grnd2,
+	nextstate = S_NULL
+}
+
+states[S_AIR_3] = {
+	sprite = SPR_STGP,
+	frame = FF_FULLBRIGHT,
+	tics = TICRATE,
+	action = A_Air3,
 	nextstate = S_NULL
 }
 
@@ -962,7 +978,7 @@ states[S_STINGER_GRND_2] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_JUMP,
 	action = A_StingerGrnd2,
-	tics = 10,
+	tics = states[S_GRND_2].tics,
 	nextstate = S_PLAY_STND
 }
 
