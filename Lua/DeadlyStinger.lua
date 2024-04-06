@@ -47,7 +47,7 @@ addHook("MobjThinker", function(stinger)
 		return
 	end
 	
-	-- SpawnAfterImage(stinger)
+	SpawnAfterImage(stinger)
 
 	
 	-- print("A "..stinger.rollcounter/ANG1)
@@ -195,10 +195,16 @@ addHook("MobjMoveCollide", function(stinger, object)
 	if(not stinger.valid or not object.valid) then
 		return nil	
 	end
-	--Damage if colided with an enemy
+	
+	--Damage if collided with an enemy
 	if(object.flags&TARGET_DMG_RANGE ~= 0 and object.flags&TARGET_IGNORE_RANGE == 0) then
 		P_DamageMobj(object, stinger, stinger.target)
+	-- elseif(object.type == TARGET_KILL_RANGE) then
+	--Kill if collided with a spike or some of its variants
+	elseif(object.type == MT_SPIKE or object.type == MT_WALLSPIKE or object.type == MT_POINTYBALL) then
+		P_KillMobj(object, stinger, stinger.target)
 	end
+	
 
 end, MT_STGP)
 
@@ -215,7 +221,7 @@ addHook("MobjLineCollide", function(stinger, line)
 	if(not stinger.valid or not line.valid) then
 		return nil	
 	end
-
+	
 	--Checking the front side of the line
 	for fof in line.frontsector.ffloors() do
 		WallBust(stinger, fof)

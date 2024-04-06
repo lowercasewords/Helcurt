@@ -26,16 +26,15 @@ rawset(_G, "TICS_PRESS_RANGE", 5)
 rawset(_G, "SPAWN_TIC_MAX", 1)
 rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MONITOR|MF_SPRING)
 rawset(_G, "TARGET_NONDMG_RANGE", MF_SPRING)
+-- rawset(_G, "TARGET_KILL_RANGE", MT_POINTYBALL|MT_EGGMOBILE_BALL|MT_SPIKEBALL|MT_SPIKE|MT_WALLSPIKE|MT_WALLSPIKEBASE|MT_SMASHINGSPIKEBALL)
 rawset(_G, "TARGET_IGNORE_RANGE", MF_MISSILE)
---The targets that the blade attack should register (not necessarily try to kill)
-rawset(_G, "TARGET_RANGE", TARGET_DMG_RANGE|TARGET_NONDMG_RANGE)
 --Maximum amount of extra stingers (not counting the one you always have)
 rawset(_G, "MAX_STINGERS", 4)
 rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
 rawset(_G, "TELEPORT_STOP_SPEED", 3)
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "BLADE_THURST_SPEED", 25*FRACUNIT)
-rawset(_G, "BLADE_THURST_JUMP", 8*FRACUNIT)
+rawset(_G, "BLADE_THURST_JUMP", 4*FRACUNIT)
 rawset(_G, "BLADE_FALL_SPEED", -FRACUNIT/2)
 rawset(_G, "STINGER_VERT_BOOST", 10*FRACUNIT)
 rawset(_G, "STINGER_HORIZ_BOOST", 15*FRACUNIT)
@@ -358,23 +357,22 @@ addHook("PlayerSpawn", function(player)
 	player.prevspinheld = 0
 	--Did player jump? Resets to 0 when hits the floor
 	player.mo.hasjumped = 0
-	player.killcount = 0
+
 	player.mo.can_teleport = 0
 	player.mo.teleported = 0
 	player.mo.enhanced_teleport = 0
-	player.mo.can_bladeattack = true
-	--Has performed bladeattack thurst move in the air already (reset to do it again)
-	player.mo.hasbthrusted = 0
+
 	player.mo.can_stinger = 0
 	player.mo.stung = 0
-	
-	player.lockon = nil
-	--Amount of extra stingers Helcurt has currently (not counting the current one)
 	player.mo.stingers = 0
 	player.sting_timer = 0
 	player.mo.stinger_charge_countdown = -1
-	player.mo.isconcealed = 0
 	player.mo.hudstingers = {} --keeping track of HUD elements that represent the string
+
+	player.killcount = 0
+	player.lockon = nil
+	--Amount of extra stingers Helcurt has currently (not counting the current one)
+	player.mo.isconcealed = 0
 	
 	-- if(player.night_timer ~= nil) then
 	-- 	EndHelcurtNightBuff(originplayer)
@@ -580,32 +578,79 @@ local function A_BladeHit(actor, par1, par2)
 	
 end
 ]]--
+
+---------------- CUSTOM OBJECT ACTIONS ---------------- 
+
+--Action performed by a stinger when charging is complete in the air
+local function A_Air2(actor, var1, var2)
+	if(actor.target == nil or actor.target.player == nil) then
+		return nil
+	end
+	--Point away from the player
+	actor.angle = 
+		ANGLE_180 + 
+		R_PointToAngle2(actor.x, actor.y, actor.target.x, actor.target.y) -
+		actor.target.angle +
+		actor.target.player.inputangle
+
+	--Fixed momentum change for the stinger
+	P_SetObjectMomZ(actor, -STINGER_VERT_BOOST, false)
+	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST)
+
+end
+
+--Action performed by a stinger when charging is complete on the ground
+local function A_Grnd2(actor, var1, var2)
+	--Point away from the player
+	-- actor.angle = actor.target.angle
+	
+	local forward = 150*FRACUNIT
+	
+	local c = cos(actor.target.angle) 
+	local s = sin(actor.target.angle)
+	
+	local x = actor.target.x + FixedMul(forward, c) - FixedMul(0, s)
+	local y = actor.target.y + FixedMul(0, c) + FixedMul(forward, s)
+
+	actor.angle = R_PointToAngle2(actor.x, actor.y, x, y)
+
+	--Fixed momentum change for the stinger
+	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST*2)
+end
+
+
+---------------- PLAYER ACTIONS ---------------- 
+
+
 --Thursts in the direction of the movement input while canceling all vertical momentum
 local function A_BladeThrust(actor, par1, par2)
 	if(actor == nil or actor.player == nil or actor.player.inputangle == 0 or actor.player.inputangle == nil) then
 		return
 	end
-	P_SetObjectMomZ(actor, 5*FRACUNIT, false)
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
 	-- P_Thrust(actor, actor.player.inputangle, BLADE_THURST_SPEED)
-	P_InstaThrust(actor, actor.player.inputangle, ownerspeed/3+BLADE_THURST_SPEED)
-	--Signify that the player has already performed this ability
-	actor.hasbthrusted = 1
+	-- P_InstaThrust(actor, actor.player.inputangle, ownerspeed/3+BLADE_THURST_SPEED)
+	P_SetObjectMomZ(actor, 0, false)
+	P_InstaThrust(actor, actor.player.inputangle, BLADE_THURST_SPEED)
 end
 
 local function A_BladeThrustHit(actor, par1, par2)
-	if(not actor ~= nil and not actor.hasbthrusted) then
+	if(actor == nil) then
 		return 
 	end
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
 	
-	--Reset the thurst ability to be performed again
-	actor.hasbthrusted = 0
 	P_InstaThrust(actor, actor.player.inputangle, ownerspeed-BLADE_THURST_SPEED/2)
-	P_SetObjectMomZ(actor, BLADE_THURST_JUMP, false)
+	P_SetObjectMomZ(actor, 2*BLADE_THURST_JUMP, false)
 	-- P_Thrust(actor, actor.player.inputangle, -BLADE_THURST_SPEED)
 	-- actor.momx = $*cos(actor.angle)-BLADE_THURST_SPEED
 	-- actor.momy = $*sin(actor.angle)-BLADE_THURST_SPEED
+
+	--Recharge the stinger ability (technically just air stinger you're in the air)
+	actor.can_stinger = 1
+	actor.stung = 0
+	actor.can_teleport = 1
+	actor.teleported = 0
 end
 
 local function A_Pre_Transition(actor, par1, par2)
@@ -660,6 +705,10 @@ local function A_End_Transition(actor, par1, par2)
 	actor.flags = $&~MF_NOCLIPTHING
 	actor.momy = $/TELEPORT_STOP_SPEED
 	actor.momx = $/TELEPORT_STOP_SPEED
+	
+	--Recharge the stinger ability (technically just air stinger you're in the air)
+	actor.can_stinger = 1
+	actor.stung = 0
 end
 
 --Not an action by itself by is called by different actions that do a very similar job 
@@ -684,12 +733,10 @@ local function Stinger(playmo, startrollangle, stingerstate)
 		stinger.released = playmo.stingers + 1 --How many stingers were released (not the best way to do it I know but it works just fine)
 		stinger.state = stingerstate
 	end
-	
+
 
 	--Reset stingers after usage
 	RemoveStingers(playmo, MAX_STINGERS)
-	-- playmo.can_teleport = 1
-	playmo.can_bladeattack = true
 end
 
 local function A_StingerAir1(actor, var1, var2)
@@ -714,54 +761,6 @@ end
 local function A_StingerGrnd2(actor, var1, var2)
 	
 end
-
---Action performed by a stinger when charging is complete in the air
-local function A_Air2(actor, var1, var2)
-	--Point away from the player
-	actor.angle = 
-		ANGLE_180 + 
-		R_PointToAngle2(actor.x, actor.y, actor.target.x, actor.target.y) -
-		actor.target.angle +
-		actor.target.player.inputangle
-
-	--Fixed momentum change for the stinger
-	P_SetObjectMomZ(actor, -STINGER_VERT_BOOST, false)
-	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST)
-
-end
-
---Action performed by a stinger when charging is complete on the ground
-local function A_Grnd2(actor, var1, var2)
-	--Point away from the player
-	-- actor.angle = actor.target.angle
-	
-	local forward = 150*FRACUNIT
-	
-	local c = cos(actor.target.angle) 
-	local s = sin(actor.target.angle)
-	
-	local x = actor.target.x + FixedMul(forward, c) - FixedMul(0, s)
-	local y = actor.target.y + FixedMul(0, c) + FixedMul(forward, s)
-
-	actor.angle = R_PointToAngle2(actor.x, actor.y, x, y)
-
-	--Fixed momentum change for the stinger
-	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST*2)
-end
-
---[[
---Action performed by a stinger when released (before lock-on)
-local function A_STINGER_THRUST(actor, var1, var2)
-	--Owner of the stinger
-	local ownerspeed = FixedHypot(actor.target.momx, actor.target.momy)
-	-- P_Thrust(actor, actor.target.angle, ownerspeed)
-
-	P_SetObjectMomZ(actor, var1, false)
-	P_Thrust(actor, R_PointToAngle2(actor.x, actor.y, actor.target.x, actor.target.y), ownerspeed*2/3)
-	
-	
-end
-]]--
 
 
 --/--------------------------
