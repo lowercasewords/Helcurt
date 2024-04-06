@@ -172,11 +172,12 @@ addHook("PlayerThink", function(player)
 
 	--If holding or pressing spin in the air
 	if(player.mo.hasjumped == 1 and player.spinheld ~= 0 and not P_IsObjectOnGround(player.mo)) then
+		--Continuous behavior 
 		if(player.mo.state == S_BLADE_THURST) then
 			P_SetObjectMomZ(player.mo, BLADE_FALL_SPEED, true)
 		--switch to blade thrusting state once
-		elseif(player.mo.state ~= S_BLADE_THURST and player.mo.hasbthrusted == 0 and 
-		(player.cmd.forwardmove ~= 0 or player.cmd.sidemove ~= 0)) then
+		elseif(player.mo.tics < states[S_BLADE_THURST_HIT].tics/2*3 and 
+		player.mo.state ~= S_BLADE_THURST and player.mo.hasbthrusted == 0) then
 			player.mo.prevstate = player.mo.state
 			player.mo.state = S_BLADE_THURST
 		end

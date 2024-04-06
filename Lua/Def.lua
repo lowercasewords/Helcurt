@@ -34,7 +34,7 @@ rawset(_G, "MAX_STINGERS", 4)
 rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
 rawset(_G, "TELEPORT_STOP_SPEED", 3)
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
-rawset(_G, "BLADE_THURST_SPEED", 20*FRACUNIT)
+rawset(_G, "BLADE_THURST_SPEED", 25*FRACUNIT)
 rawset(_G, "BLADE_THURST_JUMP", 8*FRACUNIT)
 rawset(_G, "BLADE_FALL_SPEED", -FRACUNIT/2)
 rawset(_G, "STINGER_VERT_BOOST", 10*FRACUNIT)
@@ -405,6 +405,8 @@ addHook("PlayerSpawn", function(player)
 	
 end)
 
+
+
 local debug_timer = 0
 --The Base Thinker that plays before others,
 --mostly used to record players input  before interacting with the abilities
@@ -431,7 +433,9 @@ addHook("PreThinkFrame", function()
 
 		
 		--Not allow to move during these states
-		if(player.mo.state == S_IN_TRANSITION) then
+		if(player.mo.state == S_IN_TRANSITION or 
+		player.mo.state == S_STINGER_GRND_1 or 
+		player.mo.state == S_STINGER_GRND_2) then
 			player.cmd.forwardmove = 0
 			player.cmd.sidemove = 0
 		end
@@ -449,9 +453,7 @@ addHook("PreThinkFrame", function()
 			player.jumpheld = 0
 		end
 
-	-- 		print("D: "..debug_timer)
 
-		
 		--Gets the horizontal direction of inputs
 		player.inputangle = player.cmd.angleturn*FRACUNIT + R_PointToAngle2(0, 0, player.cmd.forwardmove*FRACUNIT, -player.cmd.sidemove*FRACUNIT)
 	-- 	player.mo.x = player.mo.x*cos(player.mo.angle) - player.mo.y*sin(player.mo.angle)
@@ -461,11 +463,17 @@ addHook("PreThinkFrame", function()
 		if(player.mo.state == S_PLAY_JUMP and player.mo.hasjumped == 0) then
 			player.mo.hasjumped = 1
 		elseif(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0) then
-		-- elseif(P_IsObjectOnGround(player.mo))
 			player.mo.hasjumped = 0
+
+			--Allow for the next state of a stinger attack (stinger release)
+			if(player.mo.state == S_STINGER_GRND_1) then
+				player.mo.state = S_STINGER_GRND_2
+			end
 		end
 	end
 end)
+
+
 
 --The Thinker that plays after other thikers,
 --mostly used to clean up, record the previous state, 
@@ -504,18 +512,18 @@ addHook("PostThinkFrame", function()
 			-- Pitch(player.mo.hudstingers[i], player.mo.x, player.mo.z, player.mo.angle)
 		end
 		--player.mo.y+player.mo.radius/4-((i-1)*32/2
-		
-		
-		-- if(player.cmd.buttons & BT_SPIN) then
-		-- 	player.spinheld = $+1
-		-- elseif(player.spinheld ~= 0 and player.cmd.buttons ~= BT_SPIN) then
-		-- 	player.spinheld = 0
-		-- end
-		-- if(player.cmd.buttons & BT_JUMP) then
-		-- 	player.jumpheld = $+1
-		-- elseif(player.jumpheld ~= 0 and player.cmd.buttons ~= BT_JUMP) then
-		-- 	player.jumpheld = 0
-		-- end
+		--[[
+		if(player.cmd.buttons & BT_SPIN) then
+			player.spinheld = $+1
+		elseif(player.spinheld ~= 0 and player.cmd.buttons ~= BT_SPIN) then
+			player.spinheld = 0
+		end
+		if(player.cmd.buttons & BT_JUMP) then
+			player.jumpheld = $+1
+		elseif(player.jumpheld ~= 0 and player.cmd.buttons ~= BT_JUMP) then
+			player.jumpheld = 0
+		end
+		]]--
 
 		player.prevjumpheld = player.jumpheld
 		player.prevspinheld = player.spinheld
@@ -526,22 +534,22 @@ end)
 
 --Determines how to handle the killing of targets
 addHook("MobjDeath", function(target, inflictor, source, dmgtype)
-	// 	print("T: "..target.type)
-	// 	print("I: "..inflictor.type)
-	// 	print("S: "..source.type)
-	// 	print("D: "..dmgtype)
+	-- print("T: "..target.type)
+	-- print("I: "..inflictor.type)
+	-- print("S: "..source.type)
+	-- print("D: "..dmgtype)
 
-		--If Helcurt is the death source for targets in defined target-range (enemies, monitors, etc? NOT RINGS)
-		if(not source or not source.valid or not source.skin or not source.skin == "helcurt" or not source.player
-		or not target or not (target.flags & TARGET_DMG_RANGE)) then
-			return nil
-		end
-		
-		-- print(source.skin)
-		if(target.flags & MF_ENEMY|MF_BOSS) then
-			source.player.killcount = $+1
-		end
-	end)
+	--If Helcurt is the death source for targets in defined target-range (enemies, monitors, etc? NOT RINGS)
+	if(not source or not source.valid or not source.skin or not source.skin == "helcurt" or not source.player
+	or not target or not (target.flags & TARGET_DMG_RANGE)) then
+		return nil
+	end
+	
+	-- print(source.skin)
+	if(target.flags & MF_ENEMY|MF_BOSS) then
+		source.player.killcount = $+1
+	end
+end)
 
 --/--------------------------
 --/ ACTIONS
@@ -593,7 +601,7 @@ local function A_BladeThrustHit(actor, par1, par2)
 	
 	--Reset the thurst ability to be performed again
 	actor.hasbthrusted = 0
-	P_InstaThrust(actor, actor.player.inputangle, ownerspeed-BLADE_THURST_SPEED)
+	P_InstaThrust(actor, actor.player.inputangle, ownerspeed-BLADE_THURST_SPEED/2)
 	P_SetObjectMomZ(actor, BLADE_THURST_JUMP, false)
 	-- P_Thrust(actor, actor.player.inputangle, -BLADE_THURST_SPEED)
 	-- actor.momx = $*cos(actor.angle)-BLADE_THURST_SPEED
@@ -615,7 +623,6 @@ local function A_Pre_Transition(actor, par1, par2)
 			print("enhanced!")
 		end
 	end
-	AddStingers(actor, MAX_STINGERS)
 end
 
 --Start the teleportation transition
@@ -685,7 +692,6 @@ local function Stinger(playmo, startrollangle, stingerstate)
 	playmo.can_bladeattack = true
 end
 
-
 local function A_StingerAir1(actor, var1, var2)
 	--Helcurt's when he started charging his stinger attack (that circly thing process around Helcurt)
 	P_SetObjectMomZ(actor, EXTRA_CHARGE_BOOST, false)
@@ -695,6 +701,9 @@ end
 local function A_StingerGrnd1(actor, var1, var2)
 	-- P_Thurst(pla)
 	Stinger(actor, var1, var2)
+	local ownerspeed = FixedHypot(actor.momx, actor.momy)
+	P_SetObjectMomZ(actor, 2*FRACUNIT, false)
+	P_Thrust(actor, actor.player.inputangle, ownerspeed + STINGER_HORIZ_BOOST)
 end
 
 local function A_StingerAir2(actor, var1, var2)
@@ -703,7 +712,7 @@ local function A_StingerAir2(actor, var1, var2)
 end
 
 local function A_StingerGrnd2(actor, var1, var2)
-
+	
 end
 
 --Action performed by a stinger when charging is complete in the air
@@ -770,7 +779,7 @@ mobjinfo[MT_STGP] = {
 	spawnstate = S_AIR_1,
 	deathstate = S_NULL,
 	height = 16*FRACUNIT,
-	radius = 16*FRACUNIT,
+	radius = 32*FRACUNIT,
 	speed = 2*FRACUNIT,
 	flags = MF_NOGRAVITY
 }
@@ -954,7 +963,7 @@ states[S_STINGER_GRND_2] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_JUMP,
 	action = A_StingerGrnd2,
-	tics = 20,
+	tics = 10,
 	nextstate = S_PLAY_STND
 }
 
@@ -987,7 +996,7 @@ states[S_BLADE_THURST] = {
 states[S_BLADE_THURST_HIT] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_RUN,
-	tics = 5*TICRATE,
+	tics = TICRATE,
 	action = A_BladeThrustHit,
 	nextstate = S_PLAY_FALL
 }

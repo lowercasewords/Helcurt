@@ -20,8 +20,10 @@ addHook("PlayerThink", function(player)
 	player.jumpheld == 0 and player.mo.can_stinger == 1)) then
 		player.mo.prevstate = player.mo.state
 		player.mo.state = S_STINGER_AIR_1
+		
 	--Start using Deadly Stinger on the ground
-	elseif(player.mo.state ~= S_STINGER_GRND_1 and player.spinheld ~= 0 and P_IsObjectOnGround(player.mo)) then
+	elseif(player.mo.state ~= S_STINGER_GRND_1 and player.mo.state ~= S_STINGER_GRND_2 and player.spinheld ~= 0 and 
+	P_IsObjectOnGround(player.mo)) then
 		player.mo.prevstate = player.mo.state
 		player.mo.state = S_STINGER_GRND_1
 	end
@@ -155,7 +157,6 @@ stinger.target.state ~= nil) then
 			stinger.momz = (enemy.z-stinger.z)/TICRATE
 		end
 	end
-
 end, MT_STGP)
 
 
