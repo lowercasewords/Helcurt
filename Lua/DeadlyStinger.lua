@@ -16,12 +16,12 @@ addHook("PlayerThink", function(player)
 	end
 
 	--Start using Deadly Stinger in the Air
-	if((player.prevjumpheld <= TICS_TO_STGHOLD and player.prevjumpheld ~= 0 and 
+	if((player.prevjumpheld <= TICS_PRESS_RANGE and player.prevjumpheld ~= 0 and 
 	player.jumpheld == 0 and player.mo.can_stinger == 1)) then
 		player.mo.prevstate = player.mo.state
 		player.mo.state = S_STINGER_AIR_1
 	--Start using Deadly Stinger on the ground
-	elseif(player.prevspinheld <= TICS_TO_STGHOLD and player.prevspinheld ~= 0 and player.spinheld == 0 and P_IsObjectOnGround(player.mo)) then
+	elseif(player.mo.state ~= S_STINGER_GRND_1 and player.spinheld ~= 0 and P_IsObjectOnGround(player.mo)) then
 		player.mo.prevstate = player.mo.state
 		player.mo.state = S_STINGER_GRND_1
 	end
@@ -194,10 +194,38 @@ addHook("MobjMoveCollide", function(stinger, object)
 	if(not stinger.valid or not object.valid) then
 		return nil	
 	end
-
 	--Damage if colided with an enemy
 	if(object.flags&TARGET_DMG_RANGE ~= 0 and object.flags&TARGET_IGNORE_RANGE == 0) then
 		P_DamageMobj(object, stinger, stinger.target)
 	end
 
+end, MT_STGP)
+
+--Used in the Line Collide thinker both for front and back sector
+local function WallBust(stinger, fof)
+	if(fof.valid and fof.flags&FF_BUSTUP and fof.flags&FF_EXISTS) then
+		EV_CrumbleChain(nil, fof)
+		return false
+	end
+end
+
+addHook("MobjLineCollide", function(stinger, line)
+	
+	if(not stinger.valid or not line.valid) then
+		return nil	
+	end
+
+	--Checking the front side of the line
+	for fof in line.frontsector.ffloors() do
+		WallBust(stinger, fof)
+	end
+	--Checking the backside of the line if there's one
+	if(line.backsector ~= nil) then
+		for fof in line.backsector.ffloors() do
+			WallBust(stinger, fof)
+		end
+	end
+	-- print(line.frontside.special)
+	-- print(line.backside.special)
+	
 end, MT_STGP)
