@@ -32,14 +32,15 @@ addHook("PlayerThink", function(player)
 	end
 
 	--If holding or pressing spin in the air
-	if(player.mo.hasjumped == 1 and player.spinheld ~= 0 and 
-	not P_IsObjectOnGround(player.mo)) then
+	if(player.mo.hasjumped == 1 and not P_IsObjectOnGround(player.mo) and player.spinheld ~= 0) then
 		--Continuous behavior 
-		if(player.mo.state == S_BLADE_THURST) then
+		if(player.spinheld > TICS_PRESS_RANGE and player.mo.state == S_BLADE_THURST) then
+			-- print("down: "..player.mo.momz)
 			P_SetObjectMomZ(player.mo, BLADE_FALL_SPEED, true)
 		--switch to blade attack if not already attacking already
-		elseif((player.mo.state == S_BLADE_THURST_HIT and player.mo.tics < states[S_BLADE_THURST_HIT].tics/2*3) or
-		player.mo.state ~= S_BLADE_THURST) then
+		elseif(player.spinheld <= TICS_PRESS_RANGE and player.mo.state ~= S_BLADE_THURST or 
+		(player.mo.state == S_BLADE_THURST_HIT and player.mo.tics < states[S_BLADE_THURST_HIT].tics/2*3)) then
+			-- print("move: "..player.mo.momz)
 			player.mo.prevstate = player.mo.state
 			player.mo.state = S_BLADE_THURST
 		end
@@ -64,7 +65,7 @@ addHook("PlayerThink", function(player)
 		]]--
 		--Damage the enemy and enter a state of hitting an enemy only if the target is valid and in the hit distance in all 3 directions
 		if(distcheck < BLADE_HIT_DISTANCE and L_ZCollide(playmo, checkmo, BLADE_HIT_DISTANCE-checkmo.height) 
-		and checkmo.flags & TARGET_DMG_RANGE ~= 0 and checkmo.flags & TARGET_IGNORE_RANGE == 0) then
+		and checkmo.valid and checkmo.health > 0 and  checkmo.flags & TARGET_DMG_RANGE ~= 0 and checkmo.flags & TARGET_IGNORE_RANGE == 0) then
 			P_DamageMobj(checkmo, player.mo, player.mo, 1)
 			playmo.prevstate = playmo.state 
 			playmo.state = S_BLADE_THURST_HIT
