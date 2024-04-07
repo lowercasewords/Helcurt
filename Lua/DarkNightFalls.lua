@@ -103,7 +103,7 @@ addHook("PlayerThink", function(player)
 	end
     
     --Calling the night!
-    if(player.cmd.buttons & BT_SPIN and (P_IsObjectOnGround(player.mo)) and player.night_timer == 0) then
+    if(player.cmd.buttons & BT_SPIN and player.cmd.buttons & BT_JUMP and (P_IsObjectOnGround(player.mo)) and player.night_timer == 0) then
         player.night_timer = NIGHT_MAX_TIC
         StartTheNight(player)
     --Proceeding with the countdown
