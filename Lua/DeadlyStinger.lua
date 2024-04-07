@@ -7,10 +7,6 @@
 ---CONSTANTS
 -------------------------------------
 
---Angle adjustment for each stinger at their spawn
-local STINGER_ANGLE_ADJ = 10*FRACUNIT
---DEPRECATED
-local STINGER_SPAWN_DISTANCE = -100	
 --Maximum distance for the stinger to lock-on and track the enemy
 local MAX_HOMING_DISTANCE = 100*FRACUNIT
 
@@ -19,111 +15,160 @@ addHook("PlayerThink", function(player)
 		return
 	end
 
-	-- if(P_IsObjectOnGround(player.mo)) then
-	-- 	player.mo.stingers = 2
-	-- end
-
-	--Using Deadly Stinger 
-	if(player.mo.state == S_BLADE_HIT and (not (player.cmd.buttons & BT_SPIN)) and player.spinheld > 10)-- and player.mo.stingers > 0)
-	-- if(player.mo.state == S_PRE_TRANSITION and player.cmd.buttons & BT_SPIN)-- and player.mo.stingers > 0)
-		-- if(player.cmd.buttons & BT_SPIN)
-			
-		-- print("Release "..player.mo.stingers.." deadly stingers!")
+	--Start using Deadly Stinger in the Air
+	if((player.prevjumpheld <= TICS_PRESS_RANGE and player.prevjumpheld ~= 0 and 
+	player.jumpheld == 0 and player.mo.can_stinger == 1)) then
+		player.mo.prevstate = player.mo.state
+		player.mo.state = S_STINGER_AIR_1
 		
-		--Make sure capped stinger gives you same vertical boost as the one before cap, 
-		--but additionally iproving your teleport
-		local adj_stingers = player.mo.stingers
-		if(player.mo.stingers == MAX_STINGERS) then
-			adj_stingers = $-1
-			print("make enhanced")
-			player.mo.enhanced_teleport = 1
-			-- states[S_PRE]
-		end
-		
-		--Player's vertical boost
-		P_SetObjectMomZ(player.mo, FixedSqrt(adj_stingers*(100*FRACUNIT)), false)
-		
-		--Releasing damaging stingers one by one
-		local angle = player.mo.angle - FixedAngle((player.mo.stingers-1)*STINGER_ANGLE_ADJ/2)
-		for i = 1, player.mo.stingers, 1 do
-			if(i ~= 1) then
-				angle = $+FixedAngle(STINGER_ANGLE_ADJ)
-			end
-			local stinger = SpawnDistance(player.mo.x, player.mo.y, player.mo.z, 0, angle, MT_STGP)
-			stinger.target = player.mo
-			stinger.homing = 0
-			
-			P_InstaThrust(stinger, angle, stinger.info.speed)
-		end
-
-		--Reset stingers after usage
-		RemoveStingers(player.mo, MAX_STINGERS)
-		player.mo.can_teleport = 1
-		player.can_bladeattack = true
+	--Start using Deadly Stinger on the ground
+	elseif(player.mo.state ~= S_STINGER_GRND_1 and player.mo.state ~= S_STINGER_GRND_2 and player.spinheld ~= 0 and 
+	P_IsObjectOnGround(player.mo) and player.mo.ground_tic_cd <= 0) then
+		player.mo.prevstate = player.mo.state
+		player.mo.state = S_STINGER_GRND_1
 	end
-	
-	--Loose a stinger when the chain is broken (hit the floor)
-	--[[
-	if(player.mo.stingers > 0 and player.mo.eflags & MFE_JUSTHITFLOOR) then
-		player.mo.stingers = $-1
+
+	--Allow to perform a stinger ability once when tapping jump button in the midair after a jump (or holding it for a little bit to avoid annoying controls)
+	if(player.mo.hasjumped and player.jumpheld == 0 and player.mo.stung == 0) then
+		player.mo.can_stinger = 1
+	--Not allow when landed when landed
+	elseif(player.mo.eflags&MFE_JUSTHITFLOOR) then
+		player.mo.can_stinger = 0
+		player.mo.stung = 0
 	end
-	]]--
+
+	-- print(player.mo.ground_tic_cd)
+	--Recharge the ground stinger ability
+	if(player.mo.ground_tic_cd > 0) then
+		player.mo.ground_tic_cd = $-1
+	end
 end)
+
+-- addHoook("PreThinkFrame"), function(stinger)
+-- end, MT_STGP)
 
 --Handle the Stinger Projectile
 addHook("MobjThinker", function(stinger)
 	if(not stinger or not stinger.valid) then
 		return
 	end
-	--Do not lock-on if already locked-n
-	if(stinger.homing == 0) then
-		local enemy = nil
-		local enemydistx = nil
-		local enemydisty = nil
-		local enemydistz = nil
-		local enemydist3d = 0
-		
-		--Scan the area for the enemies
-		searchBlockmap("objects", function(stinger_projectile, destmo)
-			local distx = destmo.x - stinger_projectile.x
-			local disty = destmo.y - stinger_projectile.y
-			local distz = destmo.z - stinger_projectile.z
-			local dist3d = FixedSqrt(abs(FixedMul(distx, distx) + FixedMul(disty, disty) + FixedMul(distz, distz)))
+	
+	SpawnAfterImage(stinger)
 
+	if(stinger.state == S_AIR_2 and stinger.eflags&MFE_JUSTHITFLOOR) then
+		stinger.state = S_AIR_3
+	end
+	
+	-- print("A "..stinger.rollcounter/ANG1)
+	--Stinger Charging behavior 
+	if(stinger.state == S_AIR_1 or stinger.state == S_GRND_1 and stinger.target ~= nil and stinger.target.valid and
+stinger.target.state ~= nil) then
+		local pivotx = stinger.target.x
+		local pivoty = stinger.target.y
+		local pivotz = stinger.target.z + stinger.target.height/3
+		local radius = 0
+		local yawangle = 0
+
+		--Radius of stinger's trajectory around helcurt
+		if(stinger.state == S_AIR_1) then
+			radius = stinger.target.radius*2
+		elseif(stinger.state == S_GRND_1) then
+			radius = stinger.target.radius*4
+		end
+		
+		
+		if(stinger.state == S_AIR_1) then
+			--Starting with the base angle of 0, each added stinger would be moved by 45 degrees to the left
+			yawangle = (stinger.num-1)*SEPARATION_AIR_ANGLE
+			--Correcting stingers to be behind the player 
+			yawangle = $-(stinger.released-1)*(SEPARATION_AIR_ANGLE/2)
+		elseif(stinger.state == S_GRND_1) then
+			--Starting with the base angle of 0, each added stinger would be moved by 45 degrees to the left
+			yawangle = (stinger.num-1)*SEPARATION_GRND_ANGLE
+			--Correcting stingers to be behind the player 
+			yawangle = $-(stinger.released-1)*(SEPARATION_GRND_ANGLE/2)
+		end
+		
+		
+		--[[
+		Circle's around the player where's stinger's location is reset (I forgot how I did it but it works AHHAAHAHAHAHAHAAHAH)
+		This is what is happening below to the coordinates of each stinger
+			x′=𝑟cos𝜃cos𝛼
+			𝑦′=𝑟sin𝜃
+			𝑧′=𝑟cos𝜃sin𝛼
+		]]--
+		local x = FixedMul(FixedMul(radius, cos(stinger.rollcounter)),cos(yawangle)) + stinger.target.x
+		local y = FixedMul(FixedMul(radius, cos(stinger.rollcounter)),sin(yawangle)) + stinger.target.y
+		local z = FixedMul(radius, sin(stinger.rollcounter)) + stinger.target.z
+		--Corrects the stingers to be relative the player's facing direction horizontal angle
+		CorrectRotationHoriz(stinger, pivotx, pivoty, x, y, z, stinger.target.angle)
+
+		
+		--The direction of rolling, and yes I know this is not the best way to change directions
+		--depending on the state
+		if(stinger.state == S_AIR_1) then
+			--Divide total angle distance to travel by the time it needs to take to travel, meaning that we just provide angular velocity.
+			--in this case angular distance and time used area HALF of the true value because anything above 180 is negative and messes it up!
+			stinger.rollcounter = $+((HALF_AIR_ANGLE)/(states[stinger.state].tics/2))
+		elseif(stinger.state == S_GRND_1) then
+			--Divide total angle distance to travel by the time it needs to take to travel, meaning that we just provide angular velocity.
+			--in this case angular distance and time used area HALF of the true value because anything above 180 is negative and messes it up!
+			stinger.rollcounter = $+((-HALF_GRND_ANGLE)/(states[stinger.state].tics/2))
+		end
+		
+
+		--Each rojectile must:
+		--Spawn above the player (all of them in the same spot)
+		--Circle around the player (player's center is the pivot point)
+		--Shoot out in their respective directions downwards
+	
+		
+		return
+	end
+
+	--[[
+	--Redirects towards the direction of the enemy ALMOST immediately when stinger thrust starts,
+	--but doesn't actually tracks the enemy continuously to avoid bugs I have neither time nor 
+	--desire to fix :3
+	if(stinger.state == S_AIR_2 and stinger.tics < (states[stinger.state].tics)/2*3 and stinger.homing_enemy == nil) then
+		--Distance from the enemy to attack
+		local enemydist3d = nil
+		--Enemy to attack
+		local enemy = nil
+		--Scan the area for the enemies by retrieving the closest enemy in range
+		searchBlockmap("objects", function(stinger_projectile, destmo)
+			--Gettings the distance between the stinger and currently scanning enemy
+			local dist3d = FixedSqrt(abs(
+				FixedMul(destmo.x - stinger_projectile.x, destmo.x - stinger_projectile.x) + 
+				FixedMul(destmo.y - stinger_projectile.y, destmo.y - stinger_projectile.y) + 
+				FixedMul(destmo.z - stinger_projectile.z, destmo.z - stinger_projectile.z)))
 			-- print(FixedMul(distx, distx) + FixedMul(disty, disty) + FixedMul(distz, distz))
 			if((destmo.flags & TARGET_DMG_RANGE) and (destmo.flags & MF_MISSILE ~= MF_MISSILE)
+			and stinger_projectile.target ~= nil
 			and destmo ~= stinger_projectile.target 
-			and (enemydist3d == 0 or enemydist3d >= dist3d) 
-			and (destmo.stingerhoming == nil or destmo.stingerhoming == 0)) then
+			and (enemy == nil or enemy.homing_source == nil)
+			and (enemydist3d == nil or enemydist3d >= dist3d
+			and MAX_HOMING_DISTANCE >= enemydist3d)) then
 				-- print(enemydist3d/FRACUNIT.." = "..dist3d/FRACUNIT)
-				enemydistx = distx
-				enemydisty = disty
-				enemydistz = distz
 				enemydist3d = dist3d
 				enemy = destmo
-				
 				-- print("m:"..MAX_HOMING_DISTANCE/FRACUNIT.."\nd:"..dist/FRACUNIT)
 				-- print("x:"..distx/FRACUNIT.."\ny:"..disty/FRACUNIT.."\nz:"..distz/FRACUNIT)
 			end
 		end, stinger, stinger.x-500*FRACUNIT, stinger.x+500*FRACUNIT, stinger.y-500*FRACUNIT, stinger.y+500*FRACUNIT)
 
 		--Move towards the enemy
-		if(enemydist3d ~= 0 and MAX_HOMING_DISTANCE >= enemydist3d) then
-			-- print(MAX_HOMING_DISTANCE/FRACUNIT.." vs "..enemydist3d/FRACUNIT)
-			stinger.homing = 1
-			enemy.stingerhoming = 1
-
-			local time = FixedMul(FixedDiv(stinger.info.speed, enemydist3d), TICRATE) --THIS IS WRONG
-			stinger.momx = enemydistx/time
-			stinger.momy = enemydisty/time
-			stinger.momz = enemydistz/time
-			-- print("Time:"..time)
-			-- print("Speed:"..FixedSqrt(abs(FixedMul(stinger.momx, stinger.momx) + 
-			-- FixedMul(stinger.momy, stinger.momy) + FixedMul(stinger.momz, stinger.momz)))/FRACUNIT)			
+		if(enemy ~= nil and enemydist3d ~= nil and enemy.homing_source == nil) then
+			--Make it so that the target remembers who is the owner of the stinger that is homing on it
+			enemy.homing_source = stinger.target
+			stinger.homing_enemy = enemy
+			stinger.momx = (enemy.x-stinger.x)/TICRATE
+			stinger.momy = (enemy.y-stinger.y)/TICRATE
+			stinger.momz = (enemy.z-stinger.z)/TICRATE
 		end
 	end
+	]]--
 end, MT_STGP)
-
 
 
 --Handle the Stinger Projectile damage registration (damage itself is performed through MF_MISSILE flag)
@@ -141,29 +186,64 @@ addHook("MobjDamage", function(target, inflictor, source, damage, damagetype)
 end)
 
 
-addHook("SpinSpecial", function(player)
-	if(not player or not player.mo or player.mo.skin ~= "helcurt") then
-		return
+--Handle's the clean-up of stinger's object removal
+addHook("MobjRemoved", function(stinger)
+	if(not stinger.valid) then
+		return nil	
 	end
 
-	--[[
-	--Perform Deadly Stinger Attack!
-	if(player.spinheld >= 10 and player.can_stinger and player.mo.stingers > 0 and P_IsObjectOnGround(player.mo)) then
- 		player.can_bladeattack = false
-		player.can_stinger = false
-		
-		local angle = player.mo.angle - FixedAngle((player.mo.stingers-1)*STINGER_ANGLE_ADJ/2)
-		
-		for i = 1, player.mo.stingers, 1 do
-			if(i ~= 1) then
-				angle = $+FixedAngle(STINGER_ANGLE_ADJ)
-			end
-			local stinger = SpawnDistance(player.mo.x, player.mo.y, player.mo.z, STINGER_SPAWN_DISTANCE, angle, MT_STGP)
-			stinger.target = player.mo
-			P_InstaThrust(stinger, stinger.angle, stinger.info.speed)
+	-- print(stinger.state.."vs"..S_GRND_2)
+	--Allow other stingers to home-in onto target that was
+	--homed-in by this stinger
+	if(stinger.homing_enemy ~= nil and stinger.homing_enemy.valid and stinger.homing_enemy.homing_source ~= nil and stinger.homing_enemy.homing_source.valid) then
+		stinger.homing_enemy.homing_source = nil
+	end
+	
+end, MT_STGP)
+
+--Defines behavior when a stinger collides with an object
+addHook("MobjMoveCollide", function(stinger, object)
+	if(not stinger.valid or not object.valid) then
+		return nil	
+	end
+	
+	--Damage if collided with an enemy
+	if(object.flags&TARGET_DMG_RANGE ~= 0 and object.flags&TARGET_IGNORE_RANGE == 0) then
+		P_DamageMobj(object, stinger, stinger.target)
+	-- elseif(object.type == TARGET_KILL_RANGE) then
+	--Kill if collided with a spike or some of its variants
+	elseif(object.type == MT_SPIKE or object.type == MT_WALLSPIKE or object.type == MT_POINTYBALL) then
+		P_KillMobj(object, stinger, stinger.target)
+	end
+	
+
+end, MT_STGP)
+
+--Used in the Line Collide thinker both for front and back sector
+local function WallBust(stinger, fof)
+	if(fof.valid and fof.flags&FF_BUSTUP and fof.flags&FF_EXISTS) then
+		EV_CrumbleChain(nil, fof)
+		return false
+	end
+end
+
+addHook("MobjLineCollide", function(stinger, line)
+	
+	if(not stinger.valid or not line.valid) then
+		return nil	
+	end
+	
+	--Checking the front side of the line
+	for fof in line.frontsector.ffloors() do
+		WallBust(stinger, fof)
+	end
+	--Checking the backside of the line if there's one
+	if(line.backsector ~= nil) then
+		for fof in line.backsector.ffloors() do
+			WallBust(stinger, fof)
 		end
-		player.mo.stingers = 0
 	end
-	]]--
-end)
-
+	-- print(line.frontside.special)
+	-- print(line.backside.special)
+	
+end, MT_STGP)
