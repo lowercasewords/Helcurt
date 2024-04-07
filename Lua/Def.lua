@@ -14,7 +14,7 @@ freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRAN
 "S_STINGER_AIR_1", "S_STINGER_AIR_2", 
 "S_STINGER_GRND_1", "S_STINGER_GRND_2")
 freeslot("MT_STGP", "MT_STGS", "MT_LOCK")
-freeslot("SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_LOCK")
+freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK")
 freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", 
 "sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1",
 "sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05")
@@ -40,6 +40,7 @@ rawset(_G, "BLADE_THURST_JUMP", 4*FRACUNIT)
 rawset(_G, "BLADE_FALL_SPEED", -FRACUNIT)
 rawset(_G, "STINGER_VERT_BOOST", 10*FRACUNIT)
 rawset(_G, "STINGER_HORIZ_BOOST", 15*FRACUNIT)
+rawset(_G, "STINGER_GRND_COOLDOWN", TICRATE)
 --Half of the stinger's angular trajectory a it needs to travel
 rawset(_G, "HALF_AIR_ANGLE", ANGLE_135)
 --Half of the stinger's angular trajectory a it needs to travel
@@ -365,6 +366,8 @@ addHook("PlayerSpawn", function(player)
 	player.mo.enhanced_teleport = 0
 
 	player.mo.can_stinger = 0
+	--Cooldown for a ground stinger cooldown
+	player.mo.ground_tic_cd = 0 
 	player.mo.stung = 0
 	player.mo.stingers = 0
 	player.sting_timer = 0
@@ -415,6 +418,7 @@ addHook("PreThinkFrame", function()
 		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt") then
 			continue
 		end
+		--[[
 		-- AddStingers(player.mo, MAX_STINGERS)
 		-- print(player.mo.state)
 		--Special input players input
@@ -430,7 +434,7 @@ addHook("PreThinkFrame", function()
 		elseif(debug_timer > 0) then
 			debug_timer = 0
 		end
-
+		]]--
 		
 		--Not allow to move during these states
 		if(player.mo.state == S_IN_TRANSITION or 
@@ -760,6 +764,8 @@ local function A_StingerGrnd1(actor, var1, var2)
 	-- P_Thurst(pla)
 	Stinger(actor, var1, var2)
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
+
+	actor.ground_tic_cd = STINGER_GRND_COOLDOWN
 	P_SetObjectMomZ(actor, 2*FRACUNIT, false)
 	P_Thrust(actor, actor.player.inputangle, ownerspeed + STINGER_HORIZ_BOOST)
 end
@@ -770,7 +776,7 @@ local function A_StingerAir2(actor, var1, var2)
 end
 
 local function A_StingerGrnd2(actor, var1, var2)
-	
+	print("Ground!")
 end
 
 
@@ -793,6 +799,17 @@ mobjinfo[MT_STGP] = {
 	speed = 2*FRACUNIT,
 	flags = MF_NOGRAVITY
 }
+
+--[[
+--A stinger Projectile
+mobjinfo[MT_STGA] = {
+	spawnstate = S_GHOST,
+	deathstate = S_NULL,
+	height = 1,
+	radius = 1,
+	flags = MF_NOGRAVITY
+}
+]]--
 
 --A stinger hud Stack 
 mobjinfo[MT_STGS] = {
@@ -909,16 +926,25 @@ states[S_LOCK] = {
 }
 ]]--
 
+--[[
+states[S_GHOST] = {
+	sprite = SPR_STGA,
+	frame = FF_FULLBRIGHT,
+	tics = -1,
+	nextstate = S_NULL
+}
+]]--
+
 states[S_AIR_1] = {
 	sprite = SPR_STGP,
-	frame = FF_FULLBRIGHT,
+	frame = FF_FULLBRIGHT|B,
 	tics = 6,
 	nextstate = S_AIR_2
 }
 
 states[S_AIR_2] = {
 	sprite = SPR_STGP,
-	frame = FF_FULLBRIGHT,
+	frame = FF_FULLBRIGHT|B,
 	tics = TICRATE,
 	action = A_Air2,
 	nextstate = S_AIR_3
@@ -926,20 +952,20 @@ states[S_AIR_2] = {
 
 states[S_GRND_1] = {
 	sprite = SPR_STGP,
-	frame = FF_FULLBRIGHT,
+	frame = FF_FULLBRIGHT|A,
 	tics = 10,
 	nextstate = S_GRND_2
 }
 
 states[S_GRND_2] = {
 	sprite = SPR_STGP,
-	frame = FF_FULLBRIGHT,
-	tics = TICRATE/2,
+	frame = FF_FULLBRIGHT|A,
+	tics = TICRATE,
 	action = A_Grnd2,
 	nextstate = S_NULL
 }
 
-states[S_AIR_3] = {
+states[S_AIR_3|A] = {
 	sprite = SPR_STGP,
 	frame = FF_FULLBRIGHT,
 	tics = TICRATE,
@@ -971,7 +997,7 @@ states[S_STINGER_GRND_1] = {
 
 states[S_STINGER_AIR_2] = {
 	sprite = SPR_PLAY,
-	frame = SPR2_JUMP,
+	frame = SPR2_STNG,
 	action = A_StingerAir2,
 	tics = 20,
 	nextstate = S_PLAY_FALL

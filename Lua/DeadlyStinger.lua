@@ -23,7 +23,7 @@ addHook("PlayerThink", function(player)
 		
 	--Start using Deadly Stinger on the ground
 	elseif(player.mo.state ~= S_STINGER_GRND_1 and player.mo.state ~= S_STINGER_GRND_2 and player.spinheld ~= 0 and 
-	P_IsObjectOnGround(player.mo)) then
+	P_IsObjectOnGround(player.mo) and player.mo.ground_tic_cd <= 0) then
 		player.mo.prevstate = player.mo.state
 		player.mo.state = S_STINGER_GRND_1
 	end
@@ -37,6 +37,11 @@ addHook("PlayerThink", function(player)
 		player.mo.stung = 0
 	end
 
+	-- print(player.mo.ground_tic_cd)
+	--Recharge the ground stinger ability
+	if(player.mo.ground_tic_cd > 0) then
+		player.mo.ground_tic_cd = $-1
+	end
 end)
 
 -- addHoook("PreThinkFrame"), function(stinger)
