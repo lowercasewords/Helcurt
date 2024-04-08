@@ -422,11 +422,11 @@ addHook("PreThinkFrame", function()
 		if(player.mo.state == S_IN_TRANSITION or 
 		player.mo.state == S_STINGER_GRND_1 or 
 		player.mo.state == S_STINGER_GRND_2) then
-		-- if(player.mo.state == S_STINGER_GRND_2) then
 			player.cmd.forwardmove = 0
 			player.cmd.sidemove = 0
 		end
 		
+			
 		--Retrieves the current input
 		if(player.cmd.buttons & BT_SPIN) then
 			player.spinheld = $+1
@@ -445,8 +445,7 @@ addHook("PreThinkFrame", function()
 	-- 	player.mo.x = player.mo.x*cos(player.mo.angle) - player.mo.y*sin(player.mo.angle)
 	-- 	player.mo.y = player.mo.y*cos(player.mo.angle) + player.mo.x*sin(player.mo.angle)
 
-	
-
+		
 	--Detect voluntery jumping
 		if(player.mo.state == S_PLAY_JUMP and player.mo.hasjumped == 0) then
 			player.mo.hasjumped = 1
@@ -494,12 +493,19 @@ addHook("PostThinkFrame", function()
 
 			-- Pitch(player.mo.hudstingers[i], player.mo.x, player.mo.z, player.mo.angle)
 		end
-
-		--Allow for the next state of a stinger attack (stinger release)
-		if(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0 and player.mo.prevstate == S_STINGER_GRND_1) then
-			player.mo.prevstate = player.mo.state
-			player.mo.state = S_STINGER_GRND_2
+		--player.mo.y+player.mo.radius/4-((i-1)*32/2
+		--[[
+		if(player.cmd.buttons & BT_SPIN) then
+			player.spinheld = $+1
+		elseif(player.spinheld ~= 0 and player.cmd.buttons ~= BT_SPIN) then
+			player.spinheld = 0
 		end
+		if(player.cmd.buttons & BT_JUMP) then
+			player.jumpheld = $+1
+		elseif(player.jumpheld ~= 0 and player.cmd.buttons ~= BT_JUMP) then
+			player.jumpheld = 0
+		end
+		]]--
 
 		player.prevjumpheld = player.jumpheld
 		player.prevspinheld = player.spinheld
@@ -677,7 +683,9 @@ end
 
 --Perform single time once in transition
 local function A_In_Transition(actor, par1, par2)
-	actor.flags = $|MF_NOCLIPTHING
+-- 	actor.flags = $|MF_NOCLIPTHING
+	-- print("in")
+	
 end
 
 --End the transition
@@ -687,7 +695,6 @@ local function A_End_Transition(actor, par1, par2)
 		-- actor.can_bladeattack = true
 -- 	end
 	-- print("end!")
-
 	actor.flags = $&~MF_NOCLIPTHING
 	--Regular teleport (momentum is decreased)
 	if(actor.enhanced_teleport == 0) then
