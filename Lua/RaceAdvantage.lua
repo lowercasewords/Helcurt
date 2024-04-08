@@ -1,5 +1,5 @@
 --How dark the area has to be to activate his passive
-local CONCEAL_DARKNESS_LEVEL = 180
+local CONCEAL_DARKNESS_LEVEL = 210
 --How dark the area has to be to activate his passive
 local CONCEAL_SHADOW_DIFFERENCE = 20
 --Default time to wait for a single stinger to charge  
@@ -55,59 +55,26 @@ addHook("PostThinkFrame", function()
 			return
 		end
 		
-		local should_conceal = 0
+		
 		
 		--Ensure a valid sector
 		if(player.mo and player.mo.subsector and player.mo.subsector.sector) then
 			local sector = player.mo.subsector.sector 
-			-- print("level:         " ..sector.lightlevel)
-			local num = 0
-			local line = 0
-			for i = 0, #sector.lines-1 do
-				line = sector.lines[i]
-				-- if(sector == line.frontside) then
-				-- 	print("front")
-				-- end
-				-- if(sector == line.backside) then
-				-- 	print("back")
-				-- end
-					-- print("in   : "..sector.lightlevel)
-				if(line.frontsector ~= nil) then
-					-- print("front: "..line.frontsector.lightlevel)
-				end
-				if(line.backsector ~= nil) then
-					-- print("back : "..line.backsector.lightlevel)
-				end
-				-- num = $+1
-				-- line.frontside.lightlevel
-				-- line.backlineside.lightlevel
-			end
-			-- print("num: "..num)
-			
-			-- print(#sector.lines)
-			-- print()
+			local should_conceal = 0
+
 			--Check for overall lightlevel to conceal if dark enough
 			if(sector.lightlevel <= CONCEAL_DARKNESS_LEVEL) then
 				should_conceal = 1
-				
 			else
 				--Finds all floor-over-floor to check for lightlevel of shadows under blocks 
 				for fof in sector.ffloors() do
-					-- print(fof.flags&FF_REVERSEPLATFORM)--FF_PLATFORM)
 					
-					-- print("fov-level:     " ..fof.toplightlevel)
-					-- print("diff: "..sector.lightlevel-fof.toplightlevel)
-					-- print(sector.lightlevel - fof.toplightlevel >= CONCEAL_SHADOW_LEVEL)
-					-- print((fof.flags&FF_SWIMMABLE) == 0)
-					
-					print(sector.lightlevel.." - "..fof.toplightlevel..": "..sector.lightlevel-fof.toplightlevel)
 					--Check for lightlevel under blocks to conceal if dark enough
 					--Ignore certain fof's since they trigger conceal when it is not dark enough
 					--(standing above water would have triggered this affect)
-					if(fof.toplightlevel ~= nil and
-					(fof.toplightlevel <= CONCEAL_DARKNESS_LEVEL or sector.lightlevel ~= fof.toplightlevelE) and
-					(fof.flags&FF_SWIMMABLE) == 0) then
+					if(player.mo.z < fof.bottomheight and fof.toplightlevel < CONCEAL_DARKNESS_LEVEL and fof.flags&FF_SWIMMABLE == 0) then
 						should_conceal = 1
+						print(sector.lightlevel.." - "..fof.toplightlevel..": "..CONCEAL_DARKNESS_LEVEL)
 						break
 					end
 				end
