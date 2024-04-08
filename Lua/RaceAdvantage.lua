@@ -5,16 +5,19 @@ local CONCEAL_SHADOW_DIFFERENCE = 20
 --Default time to wait for a single stinger to charge  
 local STINGER_CHARGE_TIMER = 5*TICRATE
 
---Conceals the player in the darkness
---Called every tic to maintain frame preferences!
-local function Conceal(player)
-	-- print("Conceal!")
+--Conceals the player in the darkness (called once)
+local function Conceal(mo)
+	S_StartSound(mo, sfx_hide1)
+	mo.unconceal_timer = UNCONCEAL_MAX_TICS
+end
 
-	if(player.mo.isconcealed == 0) then
-		S_StartSound(player.mo, sfx_hide1)
-	end
-	player.mo.isconcealed = 1
-	player.mo.frame = $|FF_TRANS50--|FF_FULLBRIGHT
+--Conceal effects to be put every tic 
+local function ConcealEffects(mo)
+	mo.frame = $|FF_TRANS50--|FF_FULLBRIGHT
+end
+
+--Stops concealing the player in the darkness (called once)
+local function Unconceal(mo)
 end
 
 
@@ -23,6 +26,8 @@ addHook("PlayerThink", function(player)
 		return
 	end
 	
+	
+
 	--[[
 	Stinger recharge is removed because the player cannot control and track stingers,
 	and since they change your momentum on release, it is important for a player track them
@@ -30,7 +35,7 @@ addHook("PlayerThink", function(player)
 	--Code below automatically recharges the stingers (faster in darkness)
 	-- print(player.mo.stinger_charge_countdown)
 	--Have max stingers ALL THE TIME if concealed
-	if(player.mo.isconcealed == 1 and player.mo.stingers < MAX_STINGERS) then
+	if(player.mo.unconceal_timer == 1 and player.mo.stingers < MAX_STINGERS) then
 		AddStingers(player.mo, MAX_STINGERS)
 	--Recharge stingers over time normally
 	else
@@ -54,41 +59,48 @@ addHook("PostThinkFrame", function()
 		if(not player or not player.mo or player.mo.skin ~= "helcurt") then
 			return
 		end
+		local dark_enough = 0
 		
-		
-		
-		--Ensure a valid sector
-		if(player.mo and player.mo.subsector and player.mo.subsector.sector) then
+		--Try to find a place dark enough to be concealed in
+		if(player.mo.subsector and player.mo.subsector.sector) then
 			local sector = player.mo.subsector.sector 
-			local should_conceal = 0
 
 			--Check for overall lightlevel to conceal if dark enough
 			if(sector.lightlevel <= CONCEAL_DARKNESS_LEVEL) then
-				should_conceal = 1
+				dark_enough = 1
+
+			--Finds all floor-over-floor to check for lightlevel of shadows under blocks 
 			else
-				--Finds all floor-over-floor to check for lightlevel of shadows under blocks 
 				for fof in sector.ffloors() do
 					
 					--Check for lightlevel under blocks to conceal if dark enough
 					--Ignore certain fof's since they trigger conceal when it is not dark enough
 					--(standing above water would have triggered this affect)
 					if(player.mo.z < fof.bottomheight and fof.toplightlevel < CONCEAL_DARKNESS_LEVEL and fof.flags&FF_SWIMMABLE == 0) then
-						should_conceal = 1
-						print(sector.lightlevel.." - "..fof.toplightlevel..": "..CONCEAL_DARKNESS_LEVEL)
+						dark_enough = 1
 						break
 					end
 				end
-				print("---")
-				-- print(player.mo.isconcealed)
-				--Checking if its concealed is uncessessary
-				-- player.mo.isconcealed = 0
 			end
-			if(should_conceal == 1) then
-				Conceal(player)
-			else 
-				player.mo.isconcealed = 0
+
+			--Conceal if possible and not concealed already
+			if(dark_enough == 1 and player.mo.unconceal_timer <= 0) then
+				Conceal(player.mo)
+			--If time is up on concealment -> Unconceal
+			elseif(player.mo.unconceal_timer == 0) then
+				Unconceal(player.mo)
 			end
 		end
+		
+		--While concealed
+		if(player.mo.unconceal_timer >= 0) then
+		 	ConcealEffects(player.mo)
+			--Counting down the timer to be concealed when not dark enough
+			if(dark_enough == 0) then
+				player.mo.unconceal_timer = $-1
+			end
+		end
+
 	end
 end)
 

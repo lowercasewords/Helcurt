@@ -51,6 +51,8 @@ rawset(_G, "SEPARATION_GRND_ANGLE", ANG30)
 rawset(_G, "EXTRA_CHARGE_BOOST", 10*FRACUNIT)
 --Slow down Helcurt by this factor once when started charging stingers
 rawset(_G, "CHARGE_SLOWDOWN_FACTOR", 3)
+--Maximum tics for a player's passive to be active after the player exited the dark area
+rawset(_G, "UNCONCEAL_MAX_TICS", TICRATE)
 
 --Adds stingers to the (player's) helcurt mobject 
 --mo (mobj_t): the mobject to add stingers
@@ -369,14 +371,16 @@ addHook("PlayerSpawn", function(player)
 	--Cooldown for a ground stinger cooldown
 	player.mo.ground_tic_cd = 0 
 	player.mo.stung = 0
+	--Amount of extra stingers Helcurt has currently (not counting the current one)
 	player.mo.stingers = 0
 	player.mo.stinger_charge_countdown = -1
 	player.mo.hudstingers = {} --keeping track of HUD elements that represent the string
 
 	player.killcount = 0
 	player.lockon = nil
-	--Amount of extra stingers Helcurt has currently (not counting the current one)
-	player.mo.isconcealed = 0
+	
+	--Time for the conceal to last after leaving the darkness (decreases 'till hits zero to unconceal)
+	player.mo.unconceal_timer = -1
 	
 	-- if(player.night_timer ~= nil) then
 	-- 	EndHelcurtNightBuff(originplayer)
