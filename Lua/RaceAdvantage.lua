@@ -17,6 +17,10 @@ addHook("PlayerThink", function(player)
 		return
 	end
 	
+	--[[
+	Stinger recharge is removed because the player cannot control and track stingers,
+	and since they change your momentum on release, it is important for a player track them
+	
 	--Code below automatically recharges the stingers (faster in darkness)
 	-- print(player.mo.stinger_charge_countdown)
 	--Have max stingers ALL THE TIME if concealed
@@ -36,6 +40,7 @@ addHook("PlayerThink", function(player)
 			player.mo.stinger_charge_countdown = $-1
 		end
 	end
+	]]--
 end)
 
 addHook("PostThinkFrame", function()

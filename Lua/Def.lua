@@ -370,7 +370,6 @@ addHook("PlayerSpawn", function(player)
 	player.mo.ground_tic_cd = 0 
 	player.mo.stung = 0
 	player.mo.stingers = 0
-	player.sting_timer = 0
 	player.mo.stinger_charge_countdown = -1
 	player.mo.hudstingers = {} --keeping track of HUD elements that represent the string
 
@@ -604,6 +603,9 @@ local function A_Air2(actor, var1, var2)
 	P_SetObjectMomZ(actor, -STINGER_VERT_BOOST, false)
 	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST)
 
+	--Contribute to the vertical boost of hte player
+	P_SetObjectMomZ(actor.target, STINGER_VERT_BOOST/5, true)	
+
 end
 
 --Action performed by a stinger when charging is complete on the ground
@@ -706,8 +708,9 @@ end
 
 --Perform single time once in transition
 local function A_In_Transition(actor, par1, par2)
--- 	print("IN)"
 -- 	actor.flags = $|MF_NOCLIPTHING
+	-- print("in")
+	
 end
 
 --End the transition
@@ -720,10 +723,16 @@ local function A_End_Transition(actor, par1, par2)
 	actor.flags = $&~MF_NOCLIPTHING
 	actor.momy = $/TELEPORT_STOP_SPEED
 	actor.momx = $/TELEPORT_STOP_SPEED
-	
+
+	--Add a stinger only if already stung (to avoid teleport spamming to get free stacks)
+	if(actor.stung == 1) then
+		--Add a stinger for a teleport
+		AddStingers(actor, 1)
+	end
+
 	--Recharge the stinger ability (technically just air stinger you're in the air)
 	actor.can_stinger = 1
-	actor.stung = 0
+	
 end
 
 --Not an action by itself by is called by different actions that do a very similar job 
