@@ -370,7 +370,6 @@ addHook("PlayerSpawn", function(player)
 	player.mo.ground_tic_cd = 0 
 	player.mo.stung = 0
 	player.mo.stingers = 0
-	player.sting_timer = 0
 	player.mo.stinger_charge_countdown = -1
 	player.mo.hudstingers = {} --keeping track of HUD elements that represent the string
 
@@ -418,24 +417,7 @@ addHook("PreThinkFrame", function()
 		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt") then
 			continue
 		end
-		--[[
-		-- AddStingers(player.mo, MAX_STINGERS)
-		-- print(player.mo.state)
-		--Special input players input
-		if(player.cmd.buttons & BT_CUSTOM1) then
-			if(debug_timer == 1) then
-				print("Kill count: "..player.killcount)
-				print("Can stinger: "..tostring(player.mo.can_stinger))
-				print("Stingers: "..player.mo.stingers)
-				debug_timer = $+1
-			else
-				debug_timer = $+1
-			end
-		elseif(debug_timer > 0) then
-			debug_timer = 0
-		end
-		]]--
-		
+
 		--Not allow to move during these states
 		if(player.mo.state == S_IN_TRANSITION or 
 		player.mo.state == S_STINGER_GRND_1 or 
@@ -469,11 +451,6 @@ addHook("PreThinkFrame", function()
 			player.mo.hasjumped = 1
 		elseif(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0) then
 			player.mo.hasjumped = 0
-
-			--Allow for the next state of a stinger attack (stinger release)
-			if(player.mo.state == S_STINGER_GRND_1) then
-				player.mo.state = S_STINGER_GRND_2
-			end
 		end
 	end
 end)
@@ -604,6 +581,9 @@ local function A_Air2(actor, var1, var2)
 	P_SetObjectMomZ(actor, -STINGER_VERT_BOOST, false)
 	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST)
 
+	--Contribute to the vertical boost of hte player
+	P_SetObjectMomZ(actor.target, STINGER_VERT_BOOST/5, true)	
+
 end
 
 --Action performed by a stinger when charging is complete on the ground
@@ -629,7 +609,7 @@ local function A_Air3(actor, var1, var2)
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
 
 	actor.angle = R_PointToAngle2(actor.x, actor.y, actor.target.x, actor.target.y)
-	P_InstaThrust(actor, actor.angle, ownerspeed+STINGER_HORIZ_BOOST)
+	P_InstaThrust(actor, actor.angle, ownerspeed+STINGER_HORIZ_BOOST*2)
 	
 end
 
@@ -644,8 +624,10 @@ local function A_BladeThrust(actor, par1, par2)
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
 	-- P_InstaThrust(actor, actor.player.inputangle, ownerspeed/3+BLADE_THURST_SPEED)
 	P_SetObjectMomZ(actor, BLADE_THURST_JUMP/2, false)
-	P_InstaThrust(actor, actor.player.inputangle, ownerspeed)
-	-- P_Thrust(actor, actor.player.inputangle, BLADE_THURST_SPEED)
+	P_InstaThrust(actor, actor.player.inputangle, ownerspeed/2+BLADE_THURST_SPEED)
+	
+	--Empower springs
+	actor.player.powers[pw_strong] = $|STR_SPRING
 end
 
 local function A_BladeThrustHit(actor, par1, par2)
@@ -664,8 +646,11 @@ local function A_BladeThrustHit(actor, par1, par2)
 	--Recharge the stinger ability (technically just air stinger you're in the air)
 	actor.can_stinger = 1
 	actor.stung = 0
+
+	--Allow to teleport
 	actor.can_teleport = 1
-	actor.teleported = 0
+	--Allow to performed an enhanced teleport
+	actor.enhanced_teleport = 1
 end
 
 local function A_Pre_Transition(actor, par1, par2)
@@ -675,14 +660,6 @@ local function A_Pre_Transition(actor, par1, par2)
 	actor.momz = $/10
 	actor.momy = $/2
 	actor.momx = $/2
-	if(actor.enhanced_teleport ~= nil and actor.enhanced_teleport == 1) then
-		if(actor.state == S_PRE_TRANSITION) then
-			actor.state = states[S_PRE_TRANSITION].nextstate
-			
-			actor.enhanced_teleport = 0
-			print("enhanced!")
-		end
-	end
 end
 
 --Start the teleportation transition
@@ -706,8 +683,9 @@ end
 
 --Perform single time once in transition
 local function A_In_Transition(actor, par1, par2)
--- 	print("IN)"
 -- 	actor.flags = $|MF_NOCLIPTHING
+	-- print("in")
+	
 end
 
 --End the transition
@@ -718,12 +696,24 @@ local function A_End_Transition(actor, par1, par2)
 -- 	end
 	-- print("end!")
 	actor.flags = $&~MF_NOCLIPTHING
-	actor.momy = $/TELEPORT_STOP_SPEED
-	actor.momx = $/TELEPORT_STOP_SPEED
-	
+	--Regular teleport (momentum is decreased)
+	if(actor.enhanced_teleport == 0) then
+		actor.momy = $/TELEPORT_STOP_SPEED
+		actor.momx = $/TELEPORT_STOP_SPEED
+	--Enhanced teleport
+	else
+		actor.enhanced_teleport = 0
+	end
+
+	--Add a stinger only if already stung (to avoid teleport spamming to get free stacks)
+	if(actor.stung == 1) then
+		--Add a stinger for a teleport
+		AddStingers(actor, 1)
+	end
+
 	--Recharge the stinger ability (technically just air stinger you're in the air)
 	actor.can_stinger = 1
-	actor.stung = 0
+	
 end
 
 --Not an action by itself by is called by different actions that do a very similar job 
@@ -776,7 +766,7 @@ local function A_StingerAir2(actor, var1, var2)
 end
 
 local function A_StingerGrnd2(actor, var1, var2)
-	print("Ground!")
+	
 end
 
 
@@ -965,7 +955,7 @@ states[S_GRND_2] = {
 	nextstate = S_NULL
 }
 
-states[S_AIR_3|A] = {
+states[S_AIR_3] = {
 	sprite = SPR_STGP,
 	frame = FF_FULLBRIGHT,
 	tics = TICRATE,
@@ -1005,9 +995,10 @@ states[S_STINGER_AIR_2] = {
 
 states[S_STINGER_GRND_2] = {
 	sprite = SPR_PLAY,
-	frame = SPR2_JUMP,
+	frame = SPR2_RUN_,
 	action = A_StingerGrnd2,
-	tics = states[S_GRND_2].tics,
+	-- tics = states[S_GRND_2].tics,
+	tics = 10,
 	nextstate = S_PLAY_STND
 }
 

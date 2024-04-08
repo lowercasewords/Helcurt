@@ -44,6 +44,8 @@ addHook("PlayerThink", function(player)
 	end
 end)
 
+
+
 -- addHoook("PreThinkFrame"), function(stinger)
 -- end, MT_STGP)
 
@@ -55,6 +57,7 @@ addHook("MobjThinker", function(stinger)
 	
 	SpawnAfterImage(stinger)
 
+	--Redirect air stinger towards a horizontal thrust when hit the floor
 	if(stinger.state == S_AIR_2 and stinger.eflags&MFE_JUSTHITFLOOR) then
 		stinger.state = S_AIR_3
 	end
