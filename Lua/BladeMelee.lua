@@ -31,12 +31,19 @@ addHook("PlayerThink", function(player)
 		return
 	end
 
+	--Cancel spring empowerment if not in the state
+	if(player.powers[pw_strong]&STR_SPRING ~= 0 and player.mo.state ~= S_BLADE_THURST) then
+		player.powers[pw_strong] = $&~STR_SPRING
+	end
+
 	--If holding or pressing spin in the air
 	if(player.mo.hasjumped == 1 and not P_IsObjectOnGround(player.mo) and player.spinheld ~= 0) then
+		
 		--Continuous behavior 
 		if(player.spinheld > TICS_PRESS_RANGE and player.mo.state == S_BLADE_THURST) then
 			-- print("down: "..player.mo.momz)
 			P_SetObjectMomZ(player.mo, BLADE_FALL_SPEED, true)
+		
 		--switch to blade attack if not already attacking already
 		elseif(player.spinheld <= TICS_PRESS_RANGE and player.mo.state ~= S_BLADE_THURST or 
 		(player.mo.state == S_BLADE_THURST_HIT and player.mo.tics < states[S_BLADE_THURST_HIT].tics/2*3)) then

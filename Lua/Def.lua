@@ -631,7 +631,7 @@ local function A_Air3(actor, var1, var2)
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
 
 	actor.angle = R_PointToAngle2(actor.x, actor.y, actor.target.x, actor.target.y)
-	P_InstaThrust(actor, actor.angle, ownerspeed+STINGER_HORIZ_BOOST)
+	P_InstaThrust(actor, actor.angle, ownerspeed+STINGER_HORIZ_BOOST*2)
 	
 end
 
@@ -646,8 +646,10 @@ local function A_BladeThrust(actor, par1, par2)
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
 	-- P_InstaThrust(actor, actor.player.inputangle, ownerspeed/3+BLADE_THURST_SPEED)
 	P_SetObjectMomZ(actor, BLADE_THURST_JUMP/2, false)
-	P_InstaThrust(actor, actor.player.inputangle, ownerspeed)
-	-- P_Thrust(actor, actor.player.inputangle, BLADE_THURST_SPEED)
+	P_InstaThrust(actor, actor.player.inputangle, ownerspeed/2+BLADE_THURST_SPEED)
+	
+	--Empower springs
+	actor.player.powers[pw_strong] = $|STR_SPRING
 end
 
 local function A_BladeThrustHit(actor, par1, par2)
