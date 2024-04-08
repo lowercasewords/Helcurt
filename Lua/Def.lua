@@ -417,33 +417,16 @@ addHook("PreThinkFrame", function()
 		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt") then
 			continue
 		end
-		--[[
-		-- AddStingers(player.mo, MAX_STINGERS)
-		-- print(player.mo.state)
-		--Special input players input
-		if(player.cmd.buttons & BT_CUSTOM1) then
-			if(debug_timer == 1) then
-				print("Kill count: "..player.killcount)
-				print("Can stinger: "..tostring(player.mo.can_stinger))
-				print("Stingers: "..player.mo.stingers)
-				debug_timer = $+1
-			else
-				debug_timer = $+1
-			end
-		elseif(debug_timer > 0) then
-			debug_timer = 0
-		end
-		]]--
-		
+
 		--Not allow to move during these states
 		if(player.mo.state == S_IN_TRANSITION or 
 		player.mo.state == S_STINGER_GRND_1 or 
 		player.mo.state == S_STINGER_GRND_2) then
+		-- if(player.mo.state == S_STINGER_GRND_2) then
 			player.cmd.forwardmove = 0
 			player.cmd.sidemove = 0
 		end
 		
-			
 		--Retrieves the current input
 		if(player.cmd.buttons & BT_SPIN) then
 			player.spinheld = $+1
@@ -462,17 +445,13 @@ addHook("PreThinkFrame", function()
 	-- 	player.mo.x = player.mo.x*cos(player.mo.angle) - player.mo.y*sin(player.mo.angle)
 	-- 	player.mo.y = player.mo.y*cos(player.mo.angle) + player.mo.x*sin(player.mo.angle)
 
-		
+	
+
 	--Detect voluntery jumping
 		if(player.mo.state == S_PLAY_JUMP and player.mo.hasjumped == 0) then
 			player.mo.hasjumped = 1
 		elseif(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0) then
 			player.mo.hasjumped = 0
-
-			--Allow for the next state of a stinger attack (stinger release)
-			if(player.mo.state == S_STINGER_GRND_1) then
-				player.mo.state = S_STINGER_GRND_2
-			end
 		end
 	end
 end)
@@ -515,19 +494,12 @@ addHook("PostThinkFrame", function()
 
 			-- Pitch(player.mo.hudstingers[i], player.mo.x, player.mo.z, player.mo.angle)
 		end
-		--player.mo.y+player.mo.radius/4-((i-1)*32/2
-		--[[
-		if(player.cmd.buttons & BT_SPIN) then
-			player.spinheld = $+1
-		elseif(player.spinheld ~= 0 and player.cmd.buttons ~= BT_SPIN) then
-			player.spinheld = 0
+
+		--Allow for the next state of a stinger attack (stinger release)
+		if(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0 and player.mo.prevstate == S_STINGER_GRND_1) then
+			player.mo.prevstate = player.mo.state
+			player.mo.state = S_STINGER_GRND_2
 		end
-		if(player.cmd.buttons & BT_JUMP) then
-			player.jumpheld = $+1
-		elseif(player.jumpheld ~= 0 and player.cmd.buttons ~= BT_JUMP) then
-			player.jumpheld = 0
-		end
-		]]--
 
 		player.prevjumpheld = player.jumpheld
 		player.prevspinheld = player.spinheld
@@ -668,8 +640,11 @@ local function A_BladeThrustHit(actor, par1, par2)
 	--Recharge the stinger ability (technically just air stinger you're in the air)
 	actor.can_stinger = 1
 	actor.stung = 0
+
+	--Allow to teleport
 	actor.can_teleport = 1
-	actor.teleported = 0
+	--Allow to performed an enhanced teleport
+	actor.enhanced_teleport = 1
 end
 
 local function A_Pre_Transition(actor, par1, par2)
@@ -679,14 +654,6 @@ local function A_Pre_Transition(actor, par1, par2)
 	actor.momz = $/10
 	actor.momy = $/2
 	actor.momx = $/2
-	if(actor.enhanced_teleport ~= nil and actor.enhanced_teleport == 1) then
-		if(actor.state == S_PRE_TRANSITION) then
-			actor.state = states[S_PRE_TRANSITION].nextstate
-			
-			actor.enhanced_teleport = 0
-			print("enhanced!")
-		end
-	end
 end
 
 --Start the teleportation transition
@@ -710,9 +677,7 @@ end
 
 --Perform single time once in transition
 local function A_In_Transition(actor, par1, par2)
--- 	actor.flags = $|MF_NOCLIPTHING
-	-- print("in")
-	
+	actor.flags = $|MF_NOCLIPTHING
 end
 
 --End the transition
@@ -722,9 +687,16 @@ local function A_End_Transition(actor, par1, par2)
 		-- actor.can_bladeattack = true
 -- 	end
 	-- print("end!")
+
 	actor.flags = $&~MF_NOCLIPTHING
-	actor.momy = $/TELEPORT_STOP_SPEED
-	actor.momx = $/TELEPORT_STOP_SPEED
+	--Regular teleport (momentum is decreased)
+	if(actor.enhanced_teleport == 0) then
+		actor.momy = $/TELEPORT_STOP_SPEED
+		actor.momx = $/TELEPORT_STOP_SPEED
+	--Enhanced teleport
+	else
+		actor.enhanced_teleport = 0
+	end
 
 	--Add a stinger only if already stung (to avoid teleport spamming to get free stacks)
 	if(actor.stung == 1) then
@@ -787,7 +759,7 @@ local function A_StingerAir2(actor, var1, var2)
 end
 
 local function A_StingerGrnd2(actor, var1, var2)
-	print("Ground!")
+	
 end
 
 
@@ -976,7 +948,7 @@ states[S_GRND_2] = {
 	nextstate = S_NULL
 }
 
-states[S_AIR_3|A] = {
+states[S_AIR_3] = {
 	sprite = SPR_STGP,
 	frame = FF_FULLBRIGHT,
 	tics = TICRATE,
@@ -1016,9 +988,10 @@ states[S_STINGER_AIR_2] = {
 
 states[S_STINGER_GRND_2] = {
 	sprite = SPR_PLAY,
-	frame = SPR2_JUMP,
+	frame = SPR2_RUN_,
 	action = A_StingerGrnd2,
-	tics = states[S_GRND_2].tics,
+	-- tics = states[S_GRND_2].tics,
+	tics = 10,
 	nextstate = S_PLAY_STND
 }
 
