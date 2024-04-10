@@ -27,8 +27,8 @@ local BLADE_HIT_DISTANCE = 100*FRACUNIT
 --/--------------------------
 
 addHook("PlayerThink", function(player)
-	if(not player or not player.mo.valid or not player.mo or player.mo.skin ~= "helcurt") then
-		return
+	if(not Valid(player.mo, "helcurt") or not PAlive(player)) then
+		return nil
 	end
 
 	--Cancel spring empowerment if not in the state
@@ -37,7 +37,7 @@ addHook("PlayerThink", function(player)
 	end
 
 	--If holding or pressing spin in the air
-	if(player.mo.hasjumped == 1 and not P_IsObjectOnGround(player.mo) and player.spinheld ~= 0) then
+	if(player.mo.hasjumped == 1 and P_IsObjectOnGround(player.mo) == false and player.spinheld ~= 0) then
 		
 		--Continuous behavior 
 		if(player.spinheld > TICS_PRESS_RANGE and player.mo.state == S_BLADE_THURST) then

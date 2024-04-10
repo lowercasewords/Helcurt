@@ -9,12 +9,19 @@ local NIGHT_SKYBOX = 6
 local NIGHT_LIGHT_MULTIPLYER = 3/4
 
 local function StartHelcurtNightBuff(originplayer)
-    --Increase in speed
-    originplayer.acceleration = $+$/4
-    originplayer.normalspeed = $+$/2
+    if(not Valid(originplayer.mo, "helcurt") or not PAlive(originplayer)) then
+        return nil
+    end
+        --Increase in speed
+        originplayer.acceleration = $+$/4
+        originplayer.normalspeed = $+$/2
 end
 
 local function EndHelcurtNightBuff(originplayer)
+    if(not Valid(originplayer.mo, "helcurt") or not PAlive(originplayer)) then
+        return nil
+    end
+
     local skin = skins[originplayer.skin]
     
     --Changes the speed back
@@ -23,11 +30,14 @@ local function EndHelcurtNightBuff(originplayer)
 end
 
 local function StartTheNight(originplayer)
-    
+    if(not Valid(originplayer.mo, "helcurt")) then
+        return nil
+    end
+
     StartHelcurtNightBuff(originplayer)
     
     --Changes the background for the Night Fall
-    P_SetupLevelSky(6)
+    P_SetupLevelSky(NIGHT_SKYBOX)
     P_SetSkyboxMobj(nil)  
     -- P_SwitchWeather(PRECIP_STORM)
 
@@ -50,6 +60,9 @@ end
 
 --Call this function ONLY IF THE NIGHT ABILITY IS ON, 
 local function EndTheNight(originplayer, skybox, skynum)
+    if(not Valid(originplayer.mo, "helcurt")) then
+        return nil
+    end
 
     EndHelcurtNightBuff(originplayer)
 
@@ -74,8 +87,6 @@ local function EndTheNight(originplayer, skybox, skynum)
 end
 
 addHook("MapLoad", function(mapnum)
-    -- print(mapthing.skynum)
-    -- print(mapheader)
     current_mapinfo = mapheaderinfo[mapnum]
     --Searces for the skybox type to retrieve it
     for mp in mapthings.iterate do
@@ -98,7 +109,7 @@ end)
 -- end)
 
 addHook("PlayerThink", function(player)
-    if(not player or not player.mo or player.mo.skin ~= "helcurt") then
+    if(not Valid(player.mo, "helcurt") or not PAlive(player)) then
 		return
 	end
     
@@ -110,7 +121,7 @@ addHook("PlayerThink", function(player)
     elseif(player.night_timer > 1) then
             player.night_timer = $-1
             --Keep playing the repeating night sound 
-            if(not S_SoundPlaying(player.mo, sfx_ult01) and not S_SoundPlaying(player.mo, sfx_ult02)) then
+            if(S_SoundPlaying(player.mo, sfx_ult01) == nil and S_SoundPlaying(player.mo, sfx_ult02) == nil) then
                 S_StartSound(player.mo, sfx_ult02)
             end
     --Clearing up after the night ends
