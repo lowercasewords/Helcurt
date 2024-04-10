@@ -27,8 +27,8 @@ local BLADE_HIT_DISTANCE = 100*FRACUNIT
 --/--------------------------
 
 addHook("PlayerThink", function(player)
-	if(not player or not player.mo.valid or not player.mo or player.mo.skin ~= "helcurt") then
-		return
+	if(not Valid(player.mo, "helcurt") or not PAlive(player)) then
+		return nil
 	end
 
 	--Cancel spring empowerment if not in the state
@@ -37,17 +37,17 @@ addHook("PlayerThink", function(player)
 	end
 
 	--If holding or pressing spin in the air
-	if(player.mo.hasjumped == 1 and not P_IsObjectOnGround(player.mo) and player.spinheld ~= 0) then
+	if(player.mo.hasjumped == 1 and P_IsObjectOnGround(player.mo) == false and player.spinheld ~= 0) then
 		
 		--Continuous behavior 
 		if(player.spinheld > TICS_PRESS_RANGE and player.mo.state == S_BLADE_THURST) then
 			-- print("down: "..player.mo.momz)
 			P_SetObjectMomZ(player.mo, BLADE_FALL_SPEED, true)
 		
-		--switch to blade attack if not already attacking already
-		elseif(player.spinheld <= TICS_PRESS_RANGE and player.mo.state ~= S_BLADE_THURST or 
-		(player.mo.state == S_BLADE_THURST_HIT and player.mo.tics < states[S_BLADE_THURST_HIT].tics/2*3)) then
-			-- print("move: "..player.mo.momz)
+		--switch to blade attack when player wants
+		elseif(player.spinheld <= 1 and (player.mo.state ~= S_BLADE_THURST or 
+		player.mo.state == S_BLADE_THURST_HIT and player.mo.tics < states[S_BLADE_THURST_HIT].tics/2*3)) then
+			
 			player.mo.prevstate = player.mo.state
 			player.mo.state = S_BLADE_THURST
 		end

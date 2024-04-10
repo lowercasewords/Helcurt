@@ -11,8 +11,9 @@
 local MAX_HOMING_DISTANCE = 100*FRACUNIT
 
 addHook("PlayerThink", function(player)
-	if(not player or not player.mo or player.mo.skin ~= "helcurt") then
-		return
+
+	if(not Valid(player.mo, "helcurt") or not PAlive(player)) then
+		return nil
 	end
 
 	--Start using Deadly Stinger in the Air
@@ -51,8 +52,8 @@ end)
 
 --Handle the Stinger Projectile
 addHook("MobjThinker", function(stinger)
-	if(not stinger or not stinger.valid) then
-		return
+	if(not Valid(stinger) or not Valid(stinger.target, "helcurt") or not PAlive(stinger.target.player)) then
+		return nil
 	end
 	
 	SpawnAfterImage(stinger)
@@ -176,38 +177,17 @@ end, MT_STGP)
 
 --Handle the Stinger Projectile damage registration (damage itself is performed through MF_MISSILE flag)
 addHook("MobjDamage", function(target, inflictor, source, damage, damagetype)
-	-- if(not inflictor.skin == "helcurt" or not source or not source.valid or not source) then
-	-- 	return
-	-- end
-	--Pass through only if helcurt damages targets in damage-range with the stinger 
-	if(not inflictor.skin == "helcurt" or not source or not source.valid or not source.player
-	or not source.player.target == inflictor or not target or not (target.flags & TARGET_DMG_RANGE)) then
-			return nil
-		end
+	if(not Valid(source, "helcurt") or not PAlive(source.player)) then
+		return
+	end
+
 	AddStingers(source, 1)
-
 end)
-
-
---Handle's the clean-up of stinger's object removal
-addHook("MobjRemoved", function(stinger)
-	if(not stinger.valid) then
-		return nil	
-	end
-
-	-- print(stinger.state.."vs"..S_GRND_2)
-	--Allow other stingers to home-in onto target that was
-	--homed-in by this stinger
-	if(stinger.homing_enemy ~= nil and stinger.homing_enemy.valid and stinger.homing_enemy.homing_source ~= nil and stinger.homing_enemy.homing_source.valid) then
-		stinger.homing_enemy.homing_source = nil
-	end
-	
-end, MT_STGP)
 
 --Defines behavior when a stinger collides with an object
 addHook("MobjMoveCollide", function(stinger, object)
-	if(not stinger.valid or not object.valid) then
-		return nil	
+	if(not Valid(stinger) or not Valid(object) or not Valid(stinger.target, "helcurt")) then
+		return nil
 	end
 	
 	--Damage if collided with an enemy
@@ -218,7 +198,6 @@ addHook("MobjMoveCollide", function(stinger, object)
 	elseif(object.type == MT_SPIKE or object.type == MT_WALLSPIKE or object.type == MT_POINTYBALL) then
 		P_KillMobj(object, stinger, stinger.target)
 	end
-	
 
 end, MT_STGP)
 
@@ -232,8 +211,11 @@ end
 
 addHook("MobjLineCollide", function(stinger, line)
 	
-	if(not stinger.valid or not line.valid) then
-		return nil	
+	-- if(stinger.valid == false or line.valid == false) then
+	-- 	return nil	
+	-- end
+	if(not Valid(stinger) or not Valid(stinger.target, "helcurt") or not line.valid) then
+		return nil
 	end
 	
 	--Checking the front side of the line
@@ -246,7 +228,4 @@ addHook("MobjLineCollide", function(stinger, line)
 			WallBust(stinger, fof)
 		end
 	end
-	-- print(line.frontside.special)
-	-- print(line.backside.special)
-	
 end, MT_STGP)

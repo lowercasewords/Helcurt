@@ -8,10 +8,8 @@
 
 addHook("AbilitySpecial",
 		function(player)
-			if(not player or
-			not player.mo or
-			player.mo.skin ~= "helcurt") then
-				return
+			if(not Valid(player.mo, "helcurt") or not PAlive(player)) then
+				return nil
 			end
 			-- if(player.mo.can_teleport) then
 			-- 	player.mo.prevstate = player.mo.state
@@ -29,11 +27,8 @@ addHook("AbilitySpecial",
 
 addHook("PlayerThink",
 		function(player)
-			if(not player or
-			not player.mo or
-			not player.mo.valid or
-			player.mo.skin ~= "helcurt") then
-				return
+			if(not Valid(player.mo, "helcurt") or not PAlive(player)) then
+				return nil
 			end
 			-- print(player.jumpheld)
 			--Recharge teleport only when pressing jump button in the air
