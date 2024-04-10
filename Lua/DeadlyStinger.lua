@@ -189,16 +189,16 @@ addHook("MobjMoveCollide", function(stinger, object)
 	if(not Valid(stinger) or not Valid(object) or not Valid(stinger.target, "helcurt")) then
 		return nil
 	end
-	
-	--Damage if collided with an enemy
-	if(object.flags&TARGET_DMG_RANGE ~= 0 and object.flags&TARGET_IGNORE_RANGE == 0) then
-		P_DamageMobj(object, stinger, stinger.target)
+
 	-- elseif(object.type == TARGET_KILL_RANGE) then
 	--Kill if collided with a spike or some of its variants
-	elseif(object.type == MT_SPIKE or object.type == MT_WALLSPIKE or object.type == MT_POINTYBALL) then
+	if(object.type == MT_SPIKE or object.type == MT_WALLSPIKE or object.type == MT_POINTYBALL) then
 		P_KillMobj(object, stinger, stinger.target)
+	
+	--Damage if collided with an enemy
+	elseif(object.flags&TARGET_DMG_RANGE ~= 0 and object.flags&TARGET_IGNORE_RANGE == 0) then
+		P_DamageMobj(object, stinger, stinger.target)
 	end
-
 end, MT_STGP)
 
 --Used in the Line Collide thinker both for front and back sector
