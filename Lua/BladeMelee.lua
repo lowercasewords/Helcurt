@@ -44,10 +44,11 @@ addHook("PlayerThink", function(player)
 			-- print("down: "..player.mo.momz)
 			P_SetObjectMomZ(player.mo, BLADE_FALL_SPEED, true)
 		
-		--switch to blade attack if not already attacking already
-		elseif(player.spinheld <= TICS_PRESS_RANGE and player.mo.state ~= S_BLADE_THURST or 
-		(player.mo.state == S_BLADE_THURST_HIT and player.mo.tics < states[S_BLADE_THURST_HIT].tics/2*3)) then
-			-- print("move: "..player.mo.momz)
+		--switch to blade attack when player wants
+		elseif(player.spinheld <= 1 and (player.mo.state ~= S_BLADE_THURST or 
+		player.mo.state == S_BLADE_THURST_HIT and player.mo.tics < states[S_BLADE_THURST_HIT].tics/2*3)) then
+			print("move: "..player.mo.momz)
+			
 			player.mo.prevstate = player.mo.state
 			player.mo.state = S_BLADE_THURST
 		end
