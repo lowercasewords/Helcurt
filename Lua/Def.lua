@@ -1089,7 +1089,7 @@ states[S_BLADE_LAUNCH] = {
 
 states[S_BLADE_THURST] = {
 	sprite = SPR_PLAY,
-	frame = SPR2_STND,
+	frame = SPR2_BLDE,
 	tics = 10*TICRATE,
 	action = A_BladeThrust,
 	nextstate = S_PLAY_FALL
@@ -1097,7 +1097,7 @@ states[S_BLADE_THURST] = {
 
 states[S_BLADE_THURST_HIT] = {
 	sprite = SPR_PLAY,
-	frame = SPR2_RUN,
+	frame = SPR2_JUMP,
 	tics = TICRATE,
 	action = A_BladeThrustHit,
 	nextstate = S_PLAY_FALL

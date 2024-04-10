@@ -47,7 +47,6 @@ addHook("PlayerThink", function(player)
 		--switch to blade attack when player wants
 		elseif(player.spinheld <= 1 and (player.mo.state ~= S_BLADE_THURST or 
 		player.mo.state == S_BLADE_THURST_HIT and player.mo.tics < states[S_BLADE_THURST_HIT].tics/2*3)) then
-			print("move: "..player.mo.momz)
 			
 			player.mo.prevstate = player.mo.state
 			player.mo.state = S_BLADE_THURST
