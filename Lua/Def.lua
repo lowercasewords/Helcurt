@@ -8,13 +8,13 @@
 --/
 --/--------------------------
 
-freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRANSITION",
+freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRANSITION", "S_TRNS",
 "S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK",
 "S_AIR_1", "S_GRND_1", "S_AIR_2", "S_GRND_2", "S_AIR_3",
 "S_STINGER_AIR_1", "S_STINGER_AIR_2", 
 "S_STINGER_GRND_1", "S_STINGER_GRND_2")
-freeslot("MT_STGP", "MT_STGS", "MT_LOCK")
-freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK")
+freeslot("MT_STGP", "MT_STGS", "MT_LOCK", "MT_TRNS")
+freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK", "SPR_TRNS")
 freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", 
 "sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1",
 "sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05")
@@ -415,7 +415,7 @@ local function SetUp(player)
 		player.mo.hudstingers[i] = P_SpawnMobjFromMobj(player.mo, 0,0,0,MT_STGS)
 		player.mo.hudstingers[i].frame = $|FF_FULLDARK
 	end
-	
+
 	return true
 	
 end
@@ -469,7 +469,6 @@ addHook("PlayerSpawn", function(player)
 	SetUp(player)
 end)
 
-
 --The Base Thinker that plays before others,
 --mostly used to record players input  before interacting with the abilities
 addHook("PreThinkFrame", function()
@@ -506,7 +505,7 @@ addHook("PreThinkFrame", function()
 	-- 	player.mo.y = player.mo.y*cos(player.mo.angle) + player.mo.x*sin(player.mo.angle)
 
 		
-	--Detect voluntery jumping
+		--Detect voluntery jumping
 		if(player.mo.state == S_PLAY_JUMP and player.mo.hasjumped == 0) then
 			player.mo.hasjumped = 1
 		elseif(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0) then
@@ -523,28 +522,28 @@ end)
 addHook("PostThinkFrame", function()
 	for player in players.iterate() do
 		if(Valid(player.mo, "helcurt")) then
-		
-		--Setting positions of HUD stingers 
-		for i = 0, MAX_STINGERS-1, 1 do
-			--How Desired y-coordinate should depend on amount of maximum stingers 
-			--So their position should be dependant on number of maximum stingers (in case we want to change it)
-			--But right now it only works with 3 stingers because I neither have time nor skills :(
-			--   1 
-			--  1 2 
-			-- 1 2 3
+			
+			--Setting positions of HUD stingers 
+			for i = 0, MAX_STINGERS-1, 1 do
+				--How Desired y-coordinate should depend on amount of maximum stingers 
+				--So their position should be dependant on number of maximum stingers (in case we want to change it)
+				--But right now it only works with 3 stingers because I neither have time nor skills :(
+				--   1 
+				--  1 2 
+				-- 1 2 3
 
-			CorrectRotationHoriz(player.mo.hudstingers[i], player.mo.x, player.mo.y,
-								player.mo.x-player.mo.radius, 
-								-- player.mo.y+player.mo.radius-player.mo.radius*i, 
-								player.mo.y - (player.mo.radius*i) + (player.mo.radius/3) * MAX_STINGERS, 
-								player.mo.z+player.mo.height, player.mo.angle)
+				CorrectRotationHoriz(player.mo.hudstingers[i], player.mo.x, player.mo.y,
+									player.mo.x-player.mo.radius, 
+									-- player.mo.y+player.mo.radius-player.mo.radius*i, 
+									player.mo.y - (player.mo.radius*i) + (player.mo.radius/3) * MAX_STINGERS, 
+									player.mo.z+player.mo.height, player.mo.angle)
 			end
 
 
 			if(PAlive(player)) then
-		player.prevjumpheld = player.jumpheld
-		player.prevspinheld = player.spinheld
-		player.mo.prevstate = player.mo.state
+				player.prevjumpheld = player.jumpheld
+				player.prevspinheld = player.spinheld
+				player.mo.prevstate = player.mo.state
 			end
 		end
 	end
@@ -567,6 +566,8 @@ addHook("MobjDeath", function(target, inflictor, source, dmgtype)
 	end
 
 end)
+
+
 
 --/--------------------------
 --/ ACTIONS
@@ -692,6 +693,9 @@ local function A_Start_Transition(actor, par1, par2)
 		return nil
 	end
 	
+	P_SpawnMobj(actor.x, actor.y, actor.z, MT_TRNS)
+
+
 	--Thrusts forward, increased with the nightfall.
 	--NOTE: consider making teleport's speed relative to helcurt's, the faster he moves
 	--the fastere teleport is, but give the teleport the base speed so that Helcurt can teleport
@@ -699,7 +703,7 @@ local function A_Start_Transition(actor, par1, par2)
 	P_InstaThrust(actor, actor.angle, (actor.player.night_timer == 0 and TELEPORT_SPEED or TELEPORT_SPEED + TELEPORT_SPEED/3))
 	P_SetObjectMomZ(actor, 0, false)
 
-	P_SpawnMobj(actor.x, actor.y, actor.z, MT_TRNS)
+	
 end
 
 --[[
@@ -721,6 +725,9 @@ local function A_End_Transition(actor, par1, par2)
 	end
 
 	S_StartSound(actor, sfx_trns2)
+	P_SpawnMobj(actor.x, actor.y, actor.z, MT_TRNS)
+
+
 -- 	if(actor.player and actor.player.valid) then
 		-- actor.can_bladeattack = true
 -- 	end
@@ -743,6 +750,7 @@ local function A_End_Transition(actor, par1, par2)
 
 	--Recharge the stinger ability (technically just air stinger you're in the air)
 	actor.can_stinger = 1
+	
 	
 end
 
@@ -821,6 +829,14 @@ end
 
 mobjinfo[MT_LOCK] = {
 	spawnstate = S_LOCK,
+	deathstate = S_NULL,
+	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY
+}
+
+mobjinfo[MT_TRNS] = {
+	spawnstate = S_TRNS,
+	height = FRACUNIT,
+	radius = FRACUNIT,
 	deathstate = S_NULL,
 	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY
 }
@@ -952,6 +968,12 @@ states[S_STACK] = {
 	sprite = SPR_STGS,
 	tics = -1
 }
+
+states[S_TRNS] = {
+	sprite = SPR_TRNS,
+	tics = TICRATE
+}
+
 
 --[[
 states[S_LOCK] = {
