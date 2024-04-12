@@ -90,5 +90,6 @@ addHook("PlayerThink",
 			if(player.mo.eflags & MFE_JUSTHITFLOOR) then
 				player.mo.can_teleport = 0
 				player.mo.teleported = 0
+				player.mo.enhanced_teleport = 0
 			end
 		end)
