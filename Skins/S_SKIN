@@ -18,3 +18,4 @@ contspeed = 7
 // height = 72
 dcontangle = 3
 highresscale = 1.2
+followitem = MT_FOLLOW
