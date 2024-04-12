@@ -42,7 +42,7 @@ addHook("PlayerThink", function(player)
 		--Continuous behavior 
 		if(player.spinheld > TICS_PRESS_RANGE and player.mo.state == S_BLADE_THURST) then
 			-- print("down: "..player.mo.momz)
-			P_SetObjectMomZ(player.mo, BLADE_FALL_SPEED, true)
+			P_SetObjectMomZ(player.mo, BLADE_THRUST_FALL, true)
 		
 		--switch to blade attack when player wants
 		elseif(player.spinheld <= 1 and (player.mo.state ~= S_BLADE_THURST or 
