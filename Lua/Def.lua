@@ -39,7 +39,7 @@ rawset(_G, "BLADE_THURST_SPEED", 15*FRACUNIT)
 rawset(_G, "BLADE_THURST_JUMP", 4*FRACUNIT)
 rawset(_G, "BLADE_THRUST_FALL", -FRACUNIT*3)
 rawset(_G, "STINGER_VERT_BOOST", 10*FRACUNIT)
-rawset(_G, "STINGER_HORIZ_BOOST", 15*FRACUNIT)
+rawset(_G, "STINGER_HORIZ_BOOST", 20*FRACUNIT)
 rawset(_G, "STINGER_GRND_COOLDOWN", TICRATE)
 --Half of the stinger's angular trajectory a it needs to travel
 rawset(_G, "HALF_AIR_ANGLE", ANGLE_135)
@@ -522,7 +522,6 @@ end)
 addHook("PostThinkFrame", function()
 	for player in players.iterate() do
 		if(Valid(player.mo, "helcurt")) then
-			
 			--Setting positions of HUD stingers 
 			for i = 0, MAX_STINGERS-1, 1 do
 				--How Desired y-coordinate should depend on amount of maximum stingers 
@@ -605,8 +604,10 @@ local function A_Grnd2(actor, var1, var2)
 		return nil
 	end
 	
+	--How far ahead the stingers are going to cross each other
 	local forward = 150*FRACUNIT
-	
+	local ownerspeed = FixedHypot(actor.target.momx, actor.target.momy)
+
 	local c = cos(actor.target.angle) 
 	local s = sin(actor.target.angle)
 	
@@ -616,7 +617,7 @@ local function A_Grnd2(actor, var1, var2)
 	actor.angle = R_PointToAngle2(actor.x, actor.y, x, y)
 
 	--Fixed momentum change for the stinger
-	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST*2)
+	P_Thrust(actor, actor.angle, ownerspeed+STINGER_HORIZ_BOOST)
 end
 
 local function A_Air3(actor, var1, var2)
@@ -627,7 +628,7 @@ local function A_Air3(actor, var1, var2)
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
 
 	actor.angle = R_PointToAngle2(actor.x, actor.y, actor.target.x, actor.target.y)
-	P_InstaThrust(actor, actor.angle, ownerspeed+STINGER_HORIZ_BOOST*2)
+	P_InstaThrust(actor, actor.angle, ownerspeed+STINGER_HORIZ_BOOST*3)
 	
 end
 
