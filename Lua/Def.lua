@@ -38,7 +38,7 @@ rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "BLADE_THURST_SPEED", 15*FRACUNIT)
 rawset(_G, "BLADE_THURST_JUMP", 4*FRACUNIT)
 rawset(_G, "BLADE_THRUST_FALL", -FRACUNIT*3)
-rawset(_G, "STINGER_VERT_BOOST", 10*FRACUNIT)
+rawset(_G, "STINGER_VERT_BOOST", 5*FRACUNIT)
 rawset(_G, "STINGER_HORIZ_BOOST", 20*FRACUNIT)
 rawset(_G, "STINGER_GRND_COOLDOWN", TICRATE)
 --Half of the stinger's angular trajectory a it needs to travel
@@ -590,11 +590,11 @@ local function A_Air2(actor, var1, var2)
 		actor.target.player.inputangle
 
 	--Fixed momentum change for the stinger
-	P_SetObjectMomZ(actor, -STINGER_VERT_BOOST, false)
+	P_SetObjectMomZ(actor, -STINGER_VERT_BOOST*5, false)
 	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST)
 
-	--Contribute to the vertical boost of hte player
-	P_SetObjectMomZ(actor.target, STINGER_VERT_BOOST/5, true)	
+	--Contribute to the vertical boost of the player
+	P_SetObjectMomZ(actor.target, STINGER_VERT_BOOST, true)	
 
 end
 
@@ -814,7 +814,7 @@ local function A_StingerAir2(actor, var1, var2)
 		return nil
 	end
 
-	P_SetObjectMomZ(actor, STINGER_VERT_BOOST, false)
+	P_SetObjectMomZ(actor, 0, false)
 	P_Thrust(actor, actor.player.inputangle, STINGER_HORIZ_BOOST)
 end
 
