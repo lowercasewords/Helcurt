@@ -30,10 +30,10 @@ addHook("PlayerThink", function(player)
 	end
 
 	--Allow to perform a stinger ability once when tapping jump button in the midair after a jump (or holding it for a little bit to avoid annoying controls)
-	if(player.mo.hasjumped and player.jumpheld == 0 and player.mo.stung == 0) then
+	if(player.mo.hasjumped == 1 and player.jumpheld == 0 and player.mo.stung == 0 and player.mo.can_stinger == 0) then
 		player.mo.can_stinger = 1
 	--Not allow when landed when landed
-	elseif(player.mo.eflags&MFE_JUSTHITFLOOR) then
+	elseif(player.mo.hasjumped == 0) then
 		player.mo.can_stinger = 0
 		player.mo.stung = 0
 	end

@@ -371,10 +371,14 @@ local function SetUp(player)
 	player.prevspinheld = 0
 	--Did player jump? Resets to 0 when hits the floor
 	player.mo.hasjumped = 0
+	--Carried by anything last tic
+	player.mo.prevcarried = 0
 
 	player.mo.can_teleport = 0
 	player.mo.teleported = 0
 	player.mo.enhanced_teleport = 0
+
+	player.mo.can_blade = 1
 
 	player.mo.can_stinger = 0
 	--Cooldown for a ground stinger cooldown
@@ -477,6 +481,26 @@ addHook("PreThinkFrame", function()
 			continue
 		end
 
+		-- if(player.mo)
+
+		--[[
+		if(P_IsObjectOnGround(player.mo) and (player.powers[pw_justsprung] ~= 0 or player.powers[pw_carry] ~= 0)) then
+			player.mo.hasjumped = 1
+			-- player.mo.can_teleport = 1
+			-- player.mo.teleported = 0
+
+			-- player.mo.can_blade = 1
+
+			-- player.mo.stung = 0
+			-- player.mo.can_stinger = 1
+		end 
+		]]--
+		
+
+		--Can detect:
+			--When 
+
+
 		--Not allow to move during these states
 		if(player.mo.state == S_IN_TRANSITION or 
 		player.mo.state == S_STINGER_GRND_1 or 
@@ -504,13 +528,26 @@ addHook("PreThinkFrame", function()
 	-- 	player.mo.x = player.mo.x*cos(player.mo.angle) - player.mo.y*sin(player.mo.angle)
 	-- 	player.mo.y = player.mo.y*cos(player.mo.angle) + player.mo.x*sin(player.mo.angle)
 
-		
-		--Detect voluntery jumping
-		if(player.mo.state == S_PLAY_JUMP and player.mo.hasjumped == 0) then
+		-- print(player.mo.hasjumped)
+		-- print(player.mo.prevcarried.." vs "..player.powers[pw_carry])
+		-- print("tpan"..player.mo.can_teleport.."	tped"..player.mo.teleported)
+		-- print("sted"..player.mo.stung.."	stcn"..player.mo.can_stinger)
+		-- print("blcn"..player.mo.can_blade)
+		-- Detect voluntery jumping
+		if(((P_IsObjectOnGround(player.mo) and player.jumpheld == 1) or player.powers[pw_justsprung] ~= 0) and player.mo.hasjumped == 0) then
+		-- if(not P_IsObjectOnGround(player.mo) and ) then
 			player.mo.hasjumped = 1
-		elseif(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0) then
+		elseif(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0 or player.powers[pw_carry] ~= 0) then
 			player.mo.hasjumped = 0
 		end
+
+	end
+end)
+
+addHook("PlayerThink", function(p)
+	--Detect when the player has left the carry in order to allow to perform the abilities
+	if((p.mo.prevcarried ~= 0 and p.powers[pw_carry] == 0)) then
+		p.mo.hasjumped = 1
 	end
 end)
 
@@ -539,10 +576,14 @@ addHook("PostThinkFrame", function()
 			end
 
 
+		
+
 			if(PAlive(player)) then
 				player.prevjumpheld = player.jumpheld
 				player.prevspinheld = player.spinheld
 				player.mo.prevstate = player.mo.state
+				-- print("prev: "..player.mo.prevcarried.." vs "..player.powers[pw_carry])
+				player.mo.prevcarried = player.powers[pw_carry]
 			end
 		end
 	end
@@ -647,6 +688,7 @@ local function A_BladeThrust(actor, par1, par2)
 	
 	--Empower springs
 	actor.player.powers[pw_strong] = $|STR_SPRING
+	actor.can_blade = 0
 end
 
 local function A_BladeThrustHit(actor, par1, par2)
@@ -655,12 +697,11 @@ local function A_BladeThrustHit(actor, par1, par2)
 	end
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
 	
-	-- P_InstaThrust(actor, actor.player.inputangle, ownerspeed-BLADE_THURST_SPEED/2)
+	
 	P_Thrust(actor, actor.player.inputangle + ANGLE_180, ownerspeed/5)
 	P_SetObjectMomZ(actor, 2*BLADE_THURST_JUMP, false)
-	-- P_Thrust(actor, actor.player.inputangle, -BLADE_THURST_SPEED)
-	-- actor.momx = $*cos(actor.angle)-BLADE_THURST_SPEED
-	-- actor.momy = $*sin(actor.angle)-BLADE_THURST_SPEED
+	
+	S_StartSound(actor, sfx_blde1)
 
 	--Recharge the stinger ability (technically just air stinger you're in the air)
 	actor.can_stinger = 1
@@ -729,7 +770,7 @@ local function A_End_Transition(actor, par1, par2)
 
 
 -- 	if(actor.player and actor.player.valid) then
-		-- actor.can_bladeattack = true
+		-- actor.can_blade = true
 -- 	end
 	-- print("end!")
 	actor.flags = $&~MF_NOCLIPTHING
