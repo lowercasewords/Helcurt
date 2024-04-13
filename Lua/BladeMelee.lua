@@ -31,21 +31,28 @@ addHook("PlayerThink", function(player)
 		return nil
 	end
 
+	--Allow to use blade ability
+	if(player.mo.can_blade == 0 and player.mo.hasjumped == 1) then
+		player.mo.can_blade = 1
+	elseif(player.mo.hasjumped == 0) then
+		player.mo.can_blade = 0 
+	end
+
 	--Cancel spring empowerment if not in the state
 	if(player.powers[pw_strong]&STR_SPRING ~= 0 and player.mo.state ~= S_BLADE_THURST) then
 		player.powers[pw_strong] = $&~STR_SPRING
 	end
 
-	--If holding or pressing spin in the air
-	if(player.mo.hasjumped == 1 and P_IsObjectOnGround(player.mo) == false and player.spinheld ~= 0) then
+	--If holding or pressing spin when able to attack (in the air)
+	if(P_IsObjectOnGround(player.mo) == false and player.spinheld ~= 0) then
 		
 		--Continuous behavior 
 		if(player.spinheld > TICS_PRESS_RANGE and player.mo.state == S_BLADE_THURST) then
 			-- print("down: "..player.mo.momz)
-			P_SetObjectMomZ(player.mo, BLADE_FALL_SPEED, true)
+			P_SetObjectMomZ(player.mo, BLADE_THRUST_FALL, true)
 		
 		--switch to blade attack when player wants
-		elseif(player.spinheld <= 1 and (player.mo.state ~= S_BLADE_THURST or 
+		elseif(player.mo.can_blade == 1 and player.spinheld <= 1 and (player.mo.state ~= S_BLADE_THURST or 
 		player.mo.state == S_BLADE_THURST_HIT and player.mo.tics < states[S_BLADE_THURST_HIT].tics/2*3)) then
 			
 			player.mo.prevstate = player.mo.state
