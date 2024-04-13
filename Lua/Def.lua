@@ -37,9 +37,9 @@ rawset(_G, "TELEPORT_STOP_SPEED", 3)
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "BLADE_THURST_SPEED", 15*FRACUNIT)
 rawset(_G, "BLADE_THURST_JUMP", 4*FRACUNIT)
-rawset(_G, "BLADE_FALL_SPEED", -FRACUNIT*2)
-rawset(_G, "STINGER_VERT_BOOST", 10*FRACUNIT)
-rawset(_G, "STINGER_HORIZ_BOOST", 15*FRACUNIT)
+rawset(_G, "BLADE_THRUST_FALL", -FRACUNIT*3)
+rawset(_G, "STINGER_VERT_BOOST", 5*FRACUNIT)
+rawset(_G, "STINGER_HORIZ_BOOST", 20*FRACUNIT)
 rawset(_G, "STINGER_GRND_COOLDOWN", TICRATE)
 --Half of the stinger's angular trajectory a it needs to travel
 rawset(_G, "HALF_AIR_ANGLE", ANGLE_135)
@@ -371,10 +371,14 @@ local function SetUp(player)
 	player.prevspinheld = 0
 	--Did player jump? Resets to 0 when hits the floor
 	player.mo.hasjumped = 0
+	--Carried by anything last tic
+	player.mo.prevcarried = 0
 
 	player.mo.can_teleport = 0
 	player.mo.teleported = 0
 	player.mo.enhanced_teleport = 0
+
+	player.mo.can_blade = 1
 
 	player.mo.can_stinger = 0
 	--Cooldown for a ground stinger cooldown
@@ -475,6 +479,26 @@ addHook("PreThinkFrame", function()
 			continue
 		end
 
+		-- if(player.mo)
+
+		--[[
+		if(P_IsObjectOnGround(player.mo) and (player.powers[pw_justsprung] ~= 0 or player.powers[pw_carry] ~= 0)) then
+			player.mo.hasjumped = 1
+			-- player.mo.can_teleport = 1
+			-- player.mo.teleported = 0
+
+			-- player.mo.can_blade = 1
+
+			-- player.mo.stung = 0
+			-- player.mo.can_stinger = 1
+		end 
+		]]--
+		
+
+		--Can detect:
+			--When 
+
+
 		--Not allow to move during these states
 		if(player.mo.state == S_IN_TRANSITION or 
 		player.mo.state == S_STINGER_GRND_1 or 
@@ -502,13 +526,26 @@ addHook("PreThinkFrame", function()
 	-- 	player.mo.x = player.mo.x*cos(player.mo.angle) - player.mo.y*sin(player.mo.angle)
 	-- 	player.mo.y = player.mo.y*cos(player.mo.angle) + player.mo.x*sin(player.mo.angle)
 
-		
-		--Detect voluntery jumping
-		if(player.mo.state == S_PLAY_JUMP and player.mo.hasjumped == 0) then
+		-- print(player.mo.hasjumped)
+		-- print(player.mo.prevcarried.." vs "..player.powers[pw_carry])
+		-- print("tpan"..player.mo.can_teleport.."	tped"..player.mo.teleported)
+		-- print("sted"..player.mo.stung.."	stcn"..player.mo.can_stinger)
+		-- print("blcn"..player.mo.can_blade)
+		-- Detect voluntery jumping
+		if(((P_IsObjectOnGround(player.mo) and player.jumpheld == 1) or player.powers[pw_justsprung] ~= 0) and player.mo.hasjumped == 0) then
+		-- if(not P_IsObjectOnGround(player.mo) and ) then
 			player.mo.hasjumped = 1
-		elseif(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0) then
+		elseif(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0 or player.powers[pw_carry] ~= 0) then
 			player.mo.hasjumped = 0
 		end
+
+	end
+end)
+
+addHook("PlayerThink", function(p)
+	--Detect when the player has left the carry in order to allow to perform the abilities
+	if((p.mo.prevcarried ~= 0 and p.powers[pw_carry] == 0)) then
+		p.mo.hasjumped = 1
 	end
 end)
 
@@ -520,7 +557,6 @@ end)
 addHook("PostThinkFrame", function()
 	for player in players.iterate() do
 		if(Valid(player.mo, "helcurt")) then
-			
 			--Setting positions of HUD stingers 
 			for i = 0, MAX_STINGERS-1, 1 do
 				--How Desired y-coordinate should depend on amount of maximum stingers 
@@ -536,10 +572,13 @@ addHook("PostThinkFrame", function()
 									player.mo.y - (player.mo.radius*i) + (player.mo.radius/3) * MAX_STINGERS, 
 									player.mo.z+player.mo.height, player.mo.angle)
 			end
+
 			if(PAlive(player)) then
 				player.prevjumpheld = player.jumpheld
 				player.prevspinheld = player.spinheld
 				player.mo.prevstate = player.mo.state
+				-- print("prev: "..player.mo.prevcarried.." vs "..player.powers[pw_carry])
+				player.mo.prevcarried = player.powers[pw_carry]
 			end
 		end
 	end
@@ -587,11 +626,11 @@ local function A_Air2(actor, var1, var2)
 		actor.target.player.inputangle
 
 	--Fixed momentum change for the stinger
-	P_SetObjectMomZ(actor, -STINGER_VERT_BOOST, false)
+	P_SetObjectMomZ(actor, -STINGER_VERT_BOOST*5, false)
 	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST)
 
-	--Contribute to the vertical boost of hte player
-	P_SetObjectMomZ(actor.target, STINGER_VERT_BOOST/5, true)	
+	--Contribute to the vertical boost of the player
+	P_SetObjectMomZ(actor.target, STINGER_VERT_BOOST, true)	
 
 end
 
@@ -601,8 +640,10 @@ local function A_Grnd2(actor, var1, var2)
 		return nil
 	end
 	
+	--How far ahead the stingers are going to cross each other
 	local forward = 150*FRACUNIT
-	
+	local ownerspeed = FixedHypot(actor.target.momx, actor.target.momy)
+
 	local c = cos(actor.target.angle) 
 	local s = sin(actor.target.angle)
 	
@@ -612,7 +653,7 @@ local function A_Grnd2(actor, var1, var2)
 	actor.angle = R_PointToAngle2(actor.x, actor.y, x, y)
 
 	--Fixed momentum change for the stinger
-	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST*2)
+	P_Thrust(actor, actor.angle, ownerspeed+STINGER_HORIZ_BOOST)
 end
 
 local function A_Air3(actor, var1, var2)
@@ -623,7 +664,7 @@ local function A_Air3(actor, var1, var2)
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
 
 	actor.angle = R_PointToAngle2(actor.x, actor.y, actor.target.x, actor.target.y)
-	P_InstaThrust(actor, actor.angle, ownerspeed+STINGER_HORIZ_BOOST*2)
+	P_InstaThrust(actor, actor.angle, ownerspeed+STINGER_HORIZ_BOOST*3)
 	
 end
 
@@ -637,12 +678,12 @@ local function A_BladeThrust(actor, par1, par2)
 	end
 	
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
-	-- P_InstaThrust(actor, actor.player.inputangle, ownerspeed/3+BLADE_THURST_SPEED)
-	P_SetObjectMomZ(actor, BLADE_THURST_JUMP/2, false)
+	P_SetObjectMomZ(actor, BLADE_THURST_JUMP, false)
 	P_InstaThrust(actor, actor.player.inputangle, ownerspeed/2+BLADE_THURST_SPEED)
 	
 	--Empower springs
 	actor.player.powers[pw_strong] = $|STR_SPRING
+	actor.can_blade = 0
 end
 
 local function A_BladeThrustHit(actor, par1, par2)
@@ -651,12 +692,11 @@ local function A_BladeThrustHit(actor, par1, par2)
 	end
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
 	
-	-- P_InstaThrust(actor, actor.player.inputangle, ownerspeed-BLADE_THURST_SPEED/2)
+	
 	P_Thrust(actor, actor.player.inputangle + ANGLE_180, ownerspeed/5)
 	P_SetObjectMomZ(actor, 2*BLADE_THURST_JUMP, false)
-	-- P_Thrust(actor, actor.player.inputangle, -BLADE_THURST_SPEED)
-	-- actor.momx = $*cos(actor.angle)-BLADE_THURST_SPEED
-	-- actor.momy = $*sin(actor.angle)-BLADE_THURST_SPEED
+	
+	S_StartSound(actor, sfx_blde1)
 
 	--Recharge the stinger ability (technically just air stinger you're in the air)
 	actor.can_stinger = 1
@@ -692,6 +732,8 @@ local function A_Start_Transition(actor, par1, par2)
 	P_SpawnMobj(actor.x, actor.y, actor.z, MT_TRNS)
 
 
+	actor.flags = $|MF_NOCLIPTHING
+	
 	--Thrusts forward, increased with the nightfall.
 	--NOTE: consider making teleport's speed relative to helcurt's, the faster he moves
 	--the fastere teleport is, but give the teleport the base speed so that Helcurt can teleport
@@ -725,7 +767,7 @@ local function A_End_Transition(actor, par1, par2)
 
 
 -- 	if(actor.player and actor.player.valid) then
-		-- actor.can_bladeattack = true
+		-- actor.can_blade = true
 -- 	end
 	-- print("end!")
 	actor.flags = $&~MF_NOCLIPTHING
@@ -810,7 +852,7 @@ local function A_StingerAir2(actor, var1, var2)
 		return nil
 	end
 
-	P_SetObjectMomZ(actor, STINGER_VERT_BOOST, false)
+	P_SetObjectMomZ(actor, 0, false)
 	P_Thrust(actor, actor.player.inputangle, STINGER_HORIZ_BOOST)
 end
 
@@ -1099,7 +1141,7 @@ states[S_BLADE_LAUNCH] = {
 states[S_BLADE_THURST] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_BLDE,
-	tics = 10*TICRATE,
+	tics = 5*TICRATE,
 	action = A_BladeThrust,
 	nextstate = S_PLAY_FALL
 }
