@@ -9,12 +9,12 @@
 --/--------------------------
 
 freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRANSITION", "S_TRNS",
-"S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK",
+"S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK", "S_FOLLOW_STAND",
 "S_AIR_1", "S_GRND_1", "S_AIR_2", "S_GRND_2", "S_AIR_3",
 "S_STINGER_AIR_1", "S_STINGER_AIR_2", 
 "S_STINGER_GRND_1", "S_STINGER_GRND_2")
-freeslot("MT_STGP", "MT_STGS", "MT_LOCK", "MT_TRNS")
-freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK", "SPR_TRNS")
+freeslot("MT_STGP", "MT_STGS", "MT_LOCK", "MT_TRNS", "MT_FOLLOW")
+freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK", "SPR_TRNS", "SPR_FLWS")
 freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", 
 "sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1",
 "sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05")
@@ -410,18 +410,16 @@ local function SetUp(player)
 
 
 	for i = 0, MAX_STINGERS-1, 1 do
-		-- player.mo.hudstingers[i] = P_SpawnMobjFromMobj(player.mo, 
-		-- 											player.mo.radius/3-5*FRACUNIT, 
-		-- 											player.mo.radius/3-((1-1)*32/2)*FRACUNIT, 
-		-- 											player.mo.height, MT_STGS)
 		--The spawn location doesn't matter because the object
 		--will be constantly set to the desired location (locked to the player)
 		player.mo.hudstingers[i] = P_SpawnMobjFromMobj(player.mo, 0,0,0,MT_STGS)
 		player.mo.hudstingers[i].frame = $|FF_FULLDARK
 	end
-
-	return true
 	
+	-- P_SpawnMobj(player.mo.x, player.mo.y, player.mo.z, MT_FOLLOW)
+	-- player.mo.tail.flags2 = MF2_LINKDRAW
+	
+	return true
 end
 local function CleanUp(player)
 	if(not Valid(player.mo)) then
@@ -574,9 +572,6 @@ addHook("PostThinkFrame", function()
 									player.mo.y - (player.mo.radius*i) + (player.mo.radius/3) * MAX_STINGERS, 
 									player.mo.z+player.mo.height, player.mo.angle)
 			end
-
-
-		
 
 			if(PAlive(player)) then
 				player.prevjumpheld = player.jumpheld
@@ -894,6 +889,15 @@ mobjinfo[MT_STGP] = {
 	flags = MF_NOGRAVITY
 }
 
+-- The follow object (the cape and tail)
+mobjinfo[MT_FOLLOW] = {
+	spawnstate = S_FOLLOW_STAND,
+	height = FRACUNIT,
+	radius = FRACUNIT,
+	dispoffset = 2,
+	flags = MF_NOGRAVITY
+}
+
 --[[
 --A stinger Projectile
 mobjinfo[MT_STGA] = {
@@ -1017,6 +1021,10 @@ states[S_TRNS] = {
 	tics = TICRATE
 }
 
+states[S_FOLLOW_STAND] = {
+	sprite = SPR_FLWS,
+	tics = -1
+}
 
 --[[
 states[S_LOCK] = {
