@@ -737,6 +737,8 @@ local function A_Start_Transition(actor, par1, par2)
 	P_SpawnMobj(actor.x, actor.y, actor.z, MT_TRNS)
 
 
+	actor.flags = $|MF_NOCLIPTHING
+	
 	--Thrusts forward, increased with the nightfall.
 	--NOTE: consider making teleport's speed relative to helcurt's, the faster he moves
 	--the fastere teleport is, but give the teleport the base speed so that Helcurt can teleport
