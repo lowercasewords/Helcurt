@@ -9,12 +9,12 @@
 --/--------------------------
 
 freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRANSITION", "S_TRNS",
-"S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK", "S_FOLLOW_STAND",
+"S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK", "S_FOLLOW_STAND", "S_FOLLOW_RUN",
 "S_AIR_1", "S_GRND_1", "S_AIR_2", "S_GRND_2", "S_AIR_3",
 "S_STINGER_AIR_1", "S_STINGER_AIR_2", 
 "S_STINGER_GRND_1", "S_STINGER_GRND_2")
 freeslot("MT_STGP", "MT_STGS", "MT_LOCK", "MT_TRNS", "MT_FOLLOW")
-freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK", "SPR_TRNS", "SPR_FLWS")
+freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK", "SPR_TRNS", "SPR_FLWS", "SPR_FLWR")
 freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", 
 "sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1",
 "sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05")
@@ -573,6 +573,14 @@ addHook("PostThinkFrame", function()
 									player.mo.z+player.mo.height, player.mo.angle)
 			end
 
+			--Rotate the folllow object around the player just a tiny bit to make it appear behind the player
+			if(PAlive(player)) then
+				CorrectRotationHoriz(player.followmobj, player.mo.x, player.mo.y,
+										player.mo.x-FRACUNIT, 
+										player.mo.y, 
+										player.mo.z, player.followmobj.angle)
+			end
+
 			if(PAlive(player)) then
 				player.prevjumpheld = player.jumpheld
 				player.prevspinheld = player.spinheld
@@ -894,8 +902,8 @@ mobjinfo[MT_FOLLOW] = {
 	spawnstate = S_FOLLOW_STAND,
 	height = FRACUNIT,
 	radius = FRACUNIT,
-	dispoffset = 2,
-	flags = MF_NOGRAVITY
+	dispoffset = 1,
+	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY
 }
 
 --[[
@@ -1023,6 +1031,17 @@ states[S_TRNS] = {
 
 states[S_FOLLOW_STAND] = {
 	sprite = SPR_FLWS,
+	frame = FF_ANIMATE,
+	var1 = 2, --Number of frames
+	var2 = 7, --Tics before cycle to a new frame
+	tics = -1
+}
+
+states[S_FOLLOW_RUN] = {
+	sprite = SPR_FLWR,
+	frame = FF_ANIMATE,
+	var1 = 2, --Number of frames - 1
+	var2 = 3, --Tics before cycle to a new frame
 	tics = -1
 }
 
