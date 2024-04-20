@@ -19,10 +19,6 @@ local BLADE_BLOCK_SEARCH = 100*FRACUNIT
 local BLADE_HIT_DISTANCE = 100*FRACUNIT
 
 --/--------------------------
---/ Functinos
---/--------------------------
-
---/--------------------------
 --/ HOOKS
 --/--------------------------
 
@@ -46,11 +42,16 @@ addHook("PlayerThink", function(player)
 	--If holding or pressing spin when able to attack (in the air)
 	if(P_IsObjectOnGround(player.mo) == false and player.spinheld ~= 0) then
 		
-		--Continuous behavior 
-		if(player.spinheld > TICS_PRESS_RANGE and player.mo.state == S_BLADE_THURST) then
-			-- print("down: "..player.mo.momz)
-			P_SetObjectMomZ(player.mo, BLADE_THRUST_FALL, true)
-		
+		if(player.mo.state == S_BLADE_THURST) then
+			--Continuous behavior 
+			
+			if(player.spinheld == TICS_PRESS_RANGE) then
+
+				P_SetObjectMomZ(player.mo, BLADE_THRUST_FALL, false)
+			elseif(player.spinheld > TICS_PRESS_RANGE) then
+				-- print("down: "..player.mo.momz)
+				P_SetObjectMomZ(player.mo, BLADE_THRUST_FALL/3, true)
+			end
 		--switch to blade attack when player wants
 		elseif(player.mo.can_blade == 1 and player.spinheld <= 1 and (player.mo.state ~= S_BLADE_THURST or 
 		player.mo.state == S_BLADE_THURST_HIT and player.mo.tics < states[S_BLADE_THURST_HIT].tics/2*3)) then

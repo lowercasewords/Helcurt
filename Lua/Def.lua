@@ -36,8 +36,8 @@ rawset(_G, "TELEPORT_STOP_SPEED", 3)
 
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "BLADE_THURST_SPEED", 15*FRACUNIT)
-rawset(_G, "BLADE_THURST_JUMP", 4*FRACUNIT)
-rawset(_G, "BLADE_THRUST_FALL", -FRACUNIT*3)
+rawset(_G, "BLADE_THURST_JUMP", 8*FRACUNIT)
+rawset(_G, "BLADE_THRUST_FALL", -FRACUNIT*10)
 rawset(_G, "STINGER_VERT_BOOST", 5*FRACUNIT)
 rawset(_G, "STINGER_HORIZ_BOOST", 20*FRACUNIT)
 rawset(_G, "STINGER_GRND_COOLDOWN", TICRATE)
@@ -686,7 +686,7 @@ local function A_BladeThrust(actor, par1, par2)
 	end
 	
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
-	P_SetObjectMomZ(actor, BLADE_THURST_JUMP, false)
+	P_SetObjectMomZ(actor, 0, false)
 	P_InstaThrust(actor, actor.player.inputangle, ownerspeed/2+BLADE_THURST_SPEED)
 	
 	--Empower springs
@@ -702,7 +702,7 @@ local function A_BladeThrustHit(actor, par1, par2)
 	
 	
 	P_Thrust(actor, actor.player.inputangle + ANGLE_180, ownerspeed/5)
-	P_SetObjectMomZ(actor, 2*BLADE_THURST_JUMP, false)
+	P_SetObjectMomZ(actor, BLADE_THURST_JUMP, false)
 	
 	S_StartSound(actor, sfx_blde1)
 
@@ -1160,7 +1160,7 @@ states[S_BLADE_LAUNCH] = {
 states[S_BLADE_THURST] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_BLDE,
-	tics = 5*TICRATE,
+	tics = 2*TICRATE,
 	action = A_BladeThrust,
 	nextstate = S_PLAY_FALL
 }
