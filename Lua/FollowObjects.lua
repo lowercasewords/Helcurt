@@ -1,15 +1,30 @@
-
-
-local STAND_FRAME_TICS = 5
-
 addHook("FollowMobj", function(player, mo)
 
-    -- if(not Valid(player, "helcurt") or not PAlive(player) or not Valid(mo)) then
-    --     return nil
-    -- end
+    -- CorrectRotationHoriz(mo, player.mo.x, player.mo.y,
+	-- 								player.mo.x-player.mo.radius, 
+	-- 								player.mo.y, 
+	-- 								player.mo.z+player.mo.height*2, mo.angle)
 
-    if(mo.frame_timer == nil) then
-        mo.frame_timer = 0
+
+    if(not Valid(player.mo, "helcurt") or not PAlive(player) or not Valid(mo)) then
+        return nil
+    end
+
+    --Decides whether to switch follow object animation to a running state
+    if(player.mo.state ~= player.mo.prevstate)  then
+        --Regular running
+        if(player.mo.state == S_PLAY_RUN) then
+            states[S_FOLLOW_RUN].frame = FF_ANIMATE
+            mo.state = A|S_FOLLOW_RUN
+        elseif(player.mo.state == S_PLAY_FALL) then
+            -- print("still")
+            mo.state = S_FOLLOW_RUN
+            mo.frame = C
+        end
+    end
+    --Go back to a regular standing follow object state
+    if(mo.state == S_FOLLOW_RUN and not (player.mo.state == S_PLAY_RUN or player.mo.state == S_PLAY_FALL)) then
+        mo.state = S_FOLLOW_STAND
     end
 
     --Temporary solution to setting
@@ -18,16 +33,4 @@ addHook("FollowMobj", function(player, mo)
     
     mo.scale = player.mo.scale
     
-    
-    if(mo.frame_timer <= 0) then
-        if(mo.frame < C) then
-            mo.frame = $+1
-        else 
-            mo.frame = 0
-        end
-        mo.frame_timer = STAND_FRAME_TICS
-    else
-        mo.frame_timer = $-1
-    end
-
 end, MT_FOLLOW)
