@@ -8,13 +8,13 @@
 --/
 --/--------------------------
 
-freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRANSITION",
-"S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK",
+freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRANSITION", "S_TRNS",
+"S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK", "S_FOLLOW_STAND", "S_FOLLOW_RUN",
 "S_AIR_1", "S_GRND_1", "S_AIR_2", "S_GRND_2", "S_AIR_3",
 "S_STINGER_AIR_1", "S_STINGER_AIR_2", 
 "S_STINGER_GRND_1", "S_STINGER_GRND_2")
-freeslot("MT_STGP", "MT_STGS", "MT_LOCK")
-freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK")
+freeslot("MT_STGP", "MT_STGS", "MT_LOCK", "MT_TRNS", "MT_FOLLOW")
+freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK", "SPR_TRNS", "SPR_FLWS", "SPR_FLWR")
 freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", "sfx_hide1",
 "sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1",
 "sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05")
@@ -25,10 +25,11 @@ rawset(_G, "SPAWN_RADIUS_MAX", 10)
 rawset(_G, "TICS_PRESS_RANGE", 5)
 rawset(_G, "SPAWN_TIC_MAX", 1)
 
-rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_SOLID|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MONITOR|MF_SPRING)
+rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MONITOR|MF_SPRING)
 rawset(_G, "TARGET_NONDMG_RANGE", MF_SPRING)
 -- rawset(_G, "TARGET_KILL_RANGE", MT_POINTYBALL|MT_EGGMOBILE_BALL|MT_SPIKEBALL|MT_SPIKE|MT_WALLSPIKE|MT_WALLSPIKEBASE|MT_SMASHINGSPIKEBALL)
 rawset(_G, "TARGET_IGNORE_RANGE", MF_MISSILE)
+
 --Maximum amount of extra stingers (not counting the one you always have)
 rawset(_G, "MAX_STINGERS", 4)
 rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
@@ -36,10 +37,10 @@ rawset(_G, "TELEPORT_STOP_SPEED", 3)
 
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "BLADE_THURST_SPEED", 15*FRACUNIT)
-rawset(_G, "BLADE_THURST_JUMP", 4*FRACUNIT)
-rawset(_G, "BLADE_FALL_SPEED", -FRACUNIT)
-rawset(_G, "STINGER_VERT_BOOST", 10*FRACUNIT)
-rawset(_G, "STINGER_HORIZ_BOOST", 15*FRACUNIT)
+rawset(_G, "BLADE_THURST_JUMP", 8*FRACUNIT)
+rawset(_G, "BLADE_THRUST_FALL", -FRACUNIT*10)
+rawset(_G, "STINGER_VERT_BOOST", 5*FRACUNIT)
+rawset(_G, "STINGER_HORIZ_BOOST", 20*FRACUNIT)
 rawset(_G, "STINGER_GRND_COOLDOWN", TICRATE)
 --Half of the stinger's angular trajectory a it needs to travel
 rawset(_G, "HALF_AIR_ANGLE", ANGLE_135)
@@ -54,12 +55,25 @@ rawset(_G, "CHARGE_SLOWDOWN_FACTOR", 3)
 --Maximum tics for a player's passive to be active after the player exited the dark area
 rawset(_G, "UNCONCEAL_MAX_TICS", TICRATE)
 
+
+--Checks whether the mobject is valid and (optionally) has the correct skin 
+
+rawset(_G, "Valid", function(mo, skin)
+	return mo ~= nil and mo.valid == true and mo.skin == skin and mo.state ~= S_NULL --and mo.state ~= states[mo.state].deathstate
+end)
+
+--Checks if the player is alive (not dead nor just respawned)
+rawset(_G, "PAlive", function(p)
+	return p ~= nil and p.playerstate == PST_LIVE
+end)
+
+
 --Adds stingers to the (player's) helcurt mobject 
 --mo (mobj_t): the mobject to add stingers
 --amount (int): the number of stingers to add (won't exceed the limit)
 rawset(_G, "AddStingers", function(mo, amount)
 	--add a stinger if possible	
-	if(mo and mo.stingers ~= nil and mo.skin == "helcurt") then
+	if(Valid(mo, "helcurt")) then
 		for i = 1, amount, 1 do
 			if(mo.stingers < MAX_STINGERS) then
 				mo.hudstingers[mo.stingers].frame = $&~FF_FULLDARK
@@ -79,7 +93,8 @@ end)
 --mo (mobj_t): the mobject to remove stingers stingers
 --amount (int): the number of stingers to remove (won't exceed the limit)
 rawset(_G, "RemoveStingers", function(mo, amount)
-	if(mo and mo.stingers ~= nil and mo.skin == "helcurt") then
+	-- if(mo and mo.stingers ~= nil and mo.skin == "helcurt") then
+	if(Valid(mo, "helcurt")) then
 		for i = 1, amount, 1 do
 			if(mo.stingers > 0) then
 				mo.hudstingers[mo.stingers - 1].frame = $|FF_FULLDARK
@@ -90,7 +105,7 @@ rawset(_G, "RemoveStingers", function(mo, amount)
 end)
 
 rawset(_G, "SpawnAfterImage", function(mo)
-	if(not mo or not mo.valid) then
+	if(not Valid(mo)) then
 		return false
 	end
 -- 	print("Spawning image")
@@ -347,25 +362,26 @@ end)
 
 ]]--
 
---------------------------
---/ THESE HOOKS ARE RAN FIRST
-----------------------------/
-
---Handle needed variables on spawn
-addHook("PlayerSpawn", function(player)
-	if(not player.mo or not player.mo.skin == "helcurt")  then
-		return
+--Sets up Helcurts attributes when player switches to him
+local function SetUp(player)
+	if(not Valid(player.mo, "helcurt")) then
+		return false
 	end
+	
 	player.spinheld = 0 --Increments each tic it's held IN PRETHINK, use PF_SPINDOWN to get previous update
 	player.jumpheld = 0 --Increments each tic it's held IN PRETHINK, use PF_JUMPDOWN to get previous update
 	player.prevjumpheld = 0 --Value of jumpheld in previous tic
 	player.prevspinheld = 0
 	--Did player jump? Resets to 0 when hits the floor
 	player.mo.hasjumped = 0
+	--Carried by anything last tic
+	player.mo.prevcarried = 0
 
 	player.mo.can_teleport = 0
 	player.mo.teleported = 0
 	player.mo.enhanced_teleport = 0
+
+	player.mo.can_blade = 1
 
 	player.mo.can_stinger = 0
 	--Cooldown for a ground stinger cooldown
@@ -399,28 +415,94 @@ addHook("PlayerSpawn", function(player)
 
 
 	for i = 0, MAX_STINGERS-1, 1 do
-		-- player.mo.hudstingers[i] = P_SpawnMobjFromMobj(player.mo, 
-		-- 											player.mo.radius/3-5*FRACUNIT, 
-		-- 											player.mo.radius/3-((1-1)*32/2)*FRACUNIT, 
-		-- 											player.mo.height, MT_STGS)
 		--The spawn location doesn't matter because the object
 		--will be constantly set to the desired location (locked to the player)
 		player.mo.hudstingers[i] = P_SpawnMobjFromMobj(player.mo, 0,0,0,MT_STGS)
 		player.mo.hudstingers[i].frame = $|FF_FULLDARK
 	end
 	
+	-- P_SpawnMobj(player.mo.x, player.mo.y, player.mo.z, MT_FOLLOW)
+	-- player.mo.tail.flags2 = MF2_LINKDRAW
+	
+	return true
+end
+local function CleanUp(player)
+	if(not Valid(player.mo)) then
+		return false
+	end
+
+	player.spinheld = nil 
+	player.jumpheld = nil 
+	player.prevjumpheld = nil 
+	player.prevspinheld = nil
+	player.mo.hasjumped = nil
+
+	player.mo.can_teleport = nil
+	player.mo.teleported = nil
+	player.mo.enhanced_teleport = nil
+
+	player.mo.can_stinger = nil
+	player.mo.ground_tic_cd = nil 
+	player.mo.stung = nil
+	player.mo.stingers = nil
+	player.mo.stinger_charge_countdown = nil
+
+	for i = 0, #hudstingers-1, 1 do
+		P_KillMobj(player.mo.hudstingers[i])
+	end
+
+	player.mo.hudstingers = nil 
+
+	player.killcount = nil
+	player.lockon = nil
+	player.mo.isconcealed = nil
+	
+	player.night_timer = nil
+	
+	player.particlecolor = nil
+	
+	return true
+end
+--------------------------
+--/ THESE HOOKS ARE RAN FIRST
+----------------------------/
+
+--Handle needed variables on spawn
+addHook("PlayerSpawn", function(player)
+	-- if((not player.mo) or not (player.mo.skin == "helcurt"))  then
+	if(not Valid(player.mo, "helcurt")) then
+		return
+	end
+	SetUp(player)
 end)
 
-
-
-local debug_timer = 0
 --The Base Thinker that plays before others,
 --mostly used to record players input  before interacting with the abilities
 addHook("PreThinkFrame", function()
 	for player in players.iterate() do
-		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt") then
+		if(not Valid(player.mo, "helcurt") or not PAlive(player)) then
 			continue
 		end
+
+		-- if(player.mo)
+
+		--[[
+		if(P_IsObjectOnGround(player.mo) and (player.powers[pw_justsprung] ~= 0 or player.powers[pw_carry] ~= 0)) then
+			player.mo.hasjumped = 1
+			-- player.mo.can_teleport = 1
+			-- player.mo.teleported = 0
+
+			-- player.mo.can_blade = 1
+
+			-- player.mo.stung = 0
+			-- player.mo.can_stinger = 1
+		end 
+		]]--
+		
+
+		--Can detect:
+			--When 
+
 
 		--Not allow to move during these states
 		if(player.mo.state == S_IN_TRANSITION or 
@@ -449,13 +531,26 @@ addHook("PreThinkFrame", function()
 	-- 	player.mo.x = player.mo.x*cos(player.mo.angle) - player.mo.y*sin(player.mo.angle)
 	-- 	player.mo.y = player.mo.y*cos(player.mo.angle) + player.mo.x*sin(player.mo.angle)
 
-		
-	--Detect voluntery jumping
-		if(player.mo.state == S_PLAY_JUMP and player.mo.hasjumped == 0) then
+		-- print(player.mo.hasjumped)
+		-- print(player.mo.prevcarried.." vs "..player.powers[pw_carry])
+		-- print("tpan"..player.mo.can_teleport.."	tped"..player.mo.teleported)
+		-- print("sted"..player.mo.stung.."	stcn"..player.mo.can_stinger)
+		-- print("blcn"..player.mo.can_blade)
+		-- Detect voluntery jumping
+		if(((P_IsObjectOnGround(player.mo) and player.jumpheld == 1) or player.powers[pw_justsprung] ~= 0) and player.mo.hasjumped == 0) then
+		-- if(not P_IsObjectOnGround(player.mo) and ) then
 			player.mo.hasjumped = 1
-		elseif(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0) then
+		elseif(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0 or player.powers[pw_carry] ~= 0) then
 			player.mo.hasjumped = 0
 		end
+
+	end
+end)
+
+addHook("PlayerThink", function(p)
+	--Detect when the player has left the carry in order to allow to perform the abilities
+	if((p.mo.prevcarried ~= 0 and p.powers[pw_carry] == 0)) then
+		p.mo.hasjumped = 1
 	end
 end)
 
@@ -466,114 +561,76 @@ end)
 --and jump and spin button holding
 addHook("PostThinkFrame", function()
 	for player in players.iterate() do
-		if(not player.mo or not player.mo.valid or not player.mo.skin == "helcurt") then
-			continue
-		end
-		
-		--Setting positions of HUD stingers 
-		for i = 0, MAX_STINGERS-1, 1 do
-			--How Desired y-coordinate should depend on amount of maximum stingers 
-			--So their position should be dependant on number of maximum stingers (in case we want to change it)
-			--But right now it only works with 3 stingers because I neither have time nor skills :(
-			--   1 
-			--  1 2 
-			-- 1 2 3
+		if(Valid(player.mo, "helcurt")) then
+			--Setting positions of HUD stingers 
+			for i = 0, MAX_STINGERS-1, 1 do
+				--How Desired y-coordinate should depend on amount of maximum stingers 
+				--So their position should be dependant on number of maximum stingers (in case we want to change it)
+				--But right now it only works with 3 stingers because I neither have time nor skills :(
+				--   1 
+				--  1 2 
+				-- 1 2 3
 
-			CorrectRotationHoriz(player.mo.hudstingers[i], player.mo.x, player.mo.y,
-								player.mo.x-player.mo.radius, 
-								-- player.mo.y+player.mo.radius-player.mo.radius*i, 
-								player.mo.y - (player.mo.radius*i) + (player.mo.radius/3) * MAX_STINGERS, 
-								player.mo.z+player.mo.height, player.mo.angle)
-			
-			--[[
-			Same as correct rotation horiz function, 
-			P_MoveOrigin(player.mo.hudstingers[i], 
-						player.mo.x-player.mo.radius, 
-						player.mo.y+player.mo.radius-player.mo.radius*i, 
-						player.mo.z+player.mo.height)
-			
-			Yaw(player.mo.hudstingers[i], player.mo.x, player.mo.y,player.mo.angle)
-			]]--
+				CorrectRotationHoriz(player.mo.hudstingers[i], player.mo.x, player.mo.y,
+									player.mo.x-player.mo.radius, 
+									-- player.mo.y+player.mo.radius-player.mo.radius*i, 
+									player.mo.y - (player.mo.radius*i) + (player.mo.radius/3) * MAX_STINGERS, 
+									player.mo.z+player.mo.height, player.mo.angle)
+			end
 
-			-- Pitch(player.mo.hudstingers[i], player.mo.x, player.mo.z, player.mo.angle)
-		end
-		--player.mo.y+player.mo.radius/4-((i-1)*32/2
-		--[[
-		if(player.cmd.buttons & BT_SPIN) then
-			player.spinheld = $+1
-		elseif(player.spinheld ~= 0 and player.cmd.buttons ~= BT_SPIN) then
-			player.spinheld = 0
-		end
-		if(player.cmd.buttons & BT_JUMP) then
-			player.jumpheld = $+1
-		elseif(player.jumpheld ~= 0 and player.cmd.buttons ~= BT_JUMP) then
-			player.jumpheld = 0
-		end
-		]]--
+			--Rotate the folllow object around the player just a tiny bit to make it appear behind the player
+			if(PAlive(player)) then
+				CorrectRotationHoriz(player.followmobj, player.mo.x, player.mo.y,
+										player.mo.x-FRACUNIT, 
+										player.mo.y, 
+										player.mo.z, player.followmobj.angle)
+			end
 
-		player.prevjumpheld = player.jumpheld
-		player.prevspinheld = player.spinheld
-		player.mo.prevstate = player.mo.state
+			if(PAlive(player)) then
+				player.prevjumpheld = player.jumpheld
+				player.prevspinheld = player.spinheld
+				player.mo.prevstate = player.mo.state
+				-- print("prev: "..player.mo.prevcarried.." vs "..player.powers[pw_carry])
+				player.mo.prevcarried = player.powers[pw_carry]
+			end
+		end
 	end
 end)
 
 
 --Determines how to handle the killing of targets
 addHook("MobjDeath", function(target, inflictor, source, dmgtype)
-	-- print("T: "..target.type)
-	-- print("I: "..inflictor.type)
-	-- print("S: "..source.type)
-	-- print("D: "..dmgtype)
-
 	--If Helcurt is the death source for targets in defined target-range (enemies, monitors, etc? NOT RINGS)
-	if(not source or not source.valid or not source.skin or not source.skin == "helcurt" or not source.player
-	or not target or not (target.flags & TARGET_DMG_RANGE)) then
+	-- if(source == nil or source.valid == nil or source.skin == nil or source.skin ~= "helcurt" or source.player == nil
+	-- or target == nil or not (target.flags & TARGET_DMG_RANGE)) then
+
+	if(not Valid(source, "helcurt")) then
 		return nil
 	end
 	
 	-- print(source.skin)
-	if(target.flags & MF_ENEMY|MF_BOSS) then
+	if(target.flags & TARGET_DMG_RANGE ~= 0) then
 		source.player.killcount = $+1
 	end
+
 end)
+
+
 
 --/--------------------------
 --/ ACTIONS
 --/--------------------------
 
---[[
-local function A_BladeLaunch(actor, par1, par2)
--- 	P_SetObjectMomZ(actor, -BLADE_THURST_JUMP, true)
--- 	P_Thrust(actor, actor.angle, BLADE_THURST_SPEED)
--- 	actor.can_bladeattack = false
-	if(not actor and not actor.valid and not actor.player) then 
-		return
-	end
-	--allow to break walls and boost springs
-	actor.player.powers[pw_strong] = $|STR_BUST|STR_SPRING
-	--Initial downwards momentum 
-	P_SetObjectMomZ(actor, -5*FRACUNIT, true)
-	
-	-- --If spin is held while in blade attack mode, keep falling
-	-- elseif(actor.player.spinheld >= 1 and actor.player.spinheld < TICRATE/2
-	-- and actor.state == S_BLADE_LAUNCH) then
-	-- 	P_SetObjectMomZ(actor, -FRACUNIT, true)
-	-- end
-	
-end
-
-local function A_BladeHit(actor, par1, par2)
-	
-end
-]]--
 
 ---------------- CUSTOM OBJECT ACTIONS ---------------- 
 
 --Action performed by a stinger when charging is complete in the air
 local function A_Air2(actor, var1, var2)
-	if(actor.target == nil or actor.target.player == nil) then
+	-- if(actor.target == nil or actor.target.player == nil) then
+	if(not Valid(actor) or not Valid(actor.target, "helcurt") or actor.target.player == nil) then
 		return nil
 	end
+	
 	--Point away from the player
 	actor.angle = 
 		ANGLE_180 + 
@@ -582,21 +639,24 @@ local function A_Air2(actor, var1, var2)
 		actor.target.player.inputangle
 
 	--Fixed momentum change for the stinger
-	P_SetObjectMomZ(actor, -STINGER_VERT_BOOST, false)
+	P_SetObjectMomZ(actor, -STINGER_VERT_BOOST*5, false)
 	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST)
 
-	--Contribute to the vertical boost of hte player
-	P_SetObjectMomZ(actor.target, STINGER_VERT_BOOST/5, true)	
+	--Contribute to the vertical boost of the player
+	P_SetObjectMomZ(actor.target, STINGER_VERT_BOOST, true)	
 
 end
 
 --Action performed by a stinger when charging is complete on the ground
 local function A_Grnd2(actor, var1, var2)
-	--Point away from the player
-	-- actor.angle = actor.target.angle
+	if(not Valid(actor) or not Valid(actor.target, "helcurt")) then
+		return nil
+	end
 	
+	--How far ahead the stingers are going to cross each other
 	local forward = 150*FRACUNIT
-	
+	local ownerspeed = FixedHypot(actor.target.momx, actor.target.momy)
+
 	local c = cos(actor.target.angle) 
 	local s = sin(actor.target.angle)
 	
@@ -606,14 +666,18 @@ local function A_Grnd2(actor, var1, var2)
 	actor.angle = R_PointToAngle2(actor.x, actor.y, x, y)
 
 	--Fixed momentum change for the stinger
-	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST*2)
+	P_Thrust(actor, actor.angle, ownerspeed+STINGER_HORIZ_BOOST)
 end
 
 local function A_Air3(actor, var1, var2)
+	if(not Valid(actor) or not Valid(actor.target, "helcurt")) then
+		return nil
+	end
+
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
 
 	actor.angle = R_PointToAngle2(actor.x, actor.y, actor.target.x, actor.target.y)
-	P_InstaThrust(actor, actor.angle, ownerspeed+STINGER_HORIZ_BOOST*2)
+	P_InstaThrust(actor, actor.angle, ownerspeed+STINGER_HORIZ_BOOST*3)
 	
 end
 
@@ -622,30 +686,31 @@ end
 
 --Thursts in the direction of the movement input while canceling all vertical momentum
 local function A_BladeThrust(actor, par1, par2)
-	if(actor == nil or actor.player == nil or actor.player.inputangle == 0 or actor.player.inputangle == nil) then
-		return
+	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
+		return nil
 	end
+	
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
-	-- P_InstaThrust(actor, actor.player.inputangle, ownerspeed/3+BLADE_THURST_SPEED)
-	P_SetObjectMomZ(actor, BLADE_THURST_JUMP/2, false)
+	P_SetObjectMomZ(actor, 0, false)
 	P_InstaThrust(actor, actor.player.inputangle, ownerspeed/2+BLADE_THURST_SPEED)
 	
+	-- actor.player.pflags = $|PF_SPINNING
 	--Empower springs
 	actor.player.powers[pw_strong] = $|STR_SPRING
+	actor.can_blade = 0
 end
 
 local function A_BladeThrustHit(actor, par1, par2)
-	if(actor == nil) then
-		return 
+	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
+		return nil
 	end
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
 	
-	-- P_InstaThrust(actor, actor.player.inputangle, ownerspeed-BLADE_THURST_SPEED/2)
+	
 	P_Thrust(actor, actor.player.inputangle + ANGLE_180, ownerspeed/5)
-	P_SetObjectMomZ(actor, 2*BLADE_THURST_JUMP, false)
-	-- P_Thrust(actor, actor.player.inputangle, -BLADE_THURST_SPEED)
-	-- actor.momx = $*cos(actor.angle)-BLADE_THURST_SPEED
-	-- actor.momy = $*sin(actor.angle)-BLADE_THURST_SPEED
+	P_SetObjectMomZ(actor, BLADE_THURST_JUMP, false)
+	
+	S_StartSound(actor, sfx_blde1)
 
 	--Recharge the stinger ability (technically just air stinger you're in the air)
 	actor.can_stinger = 1
@@ -658,9 +723,15 @@ local function A_BladeThrustHit(actor, par1, par2)
 end
 
 local function A_Pre_Transition(actor, par1, par2)
+	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
+		return nil
+	end
+
 	actor.can_teleport = 0
 	actor.teleported = 1
+
 	S_StartSound(actor, sfx_trns1)
+
 	actor.momz = $/10
 	actor.momy = $/2
 	actor.momx = $/2
@@ -668,14 +739,14 @@ end
 
 --Start the teleportation transition
 local function A_Start_Transition(actor, par1, par2)
--- 	actor.flags = $|MF_NOCLIPTHING
--- 	actor.angle = actor.player.inputangle
--- 	actor.can_teleport = false
--- 	actor.mo.can_bladeattack = true
+	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
+		return nil
+	end
 	
-	-- if(player.night_timer > 0) then
-	-- 	P_InstaThrust(actor, actor.angle, TELEPORT_SPEED * )
-	-- end
+	P_SpawnMobj(actor.x, actor.y, actor.z, MT_TRNS)
+
+
+	actor.flags = $|MF_NOCLIPTHING
 	
 	--Thrusts forward, increased with the nightfall.
 	--NOTE: consider making teleport's speed relative to helcurt's, the faster he moves
@@ -683,20 +754,34 @@ local function A_Start_Transition(actor, par1, par2)
 	--from stand still
 	P_InstaThrust(actor, actor.angle, (actor.player.night_timer == 0 and TELEPORT_SPEED or TELEPORT_SPEED + TELEPORT_SPEED/3))
 	P_SetObjectMomZ(actor, 0, false)
+
+	
 end
 
+--[[
 --Perform single time once in transition
 local function A_In_Transition(actor, par1, par2)
+	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
+		return nil
+	end
 -- 	actor.flags = $|MF_NOCLIPTHING
 	-- print("in")
 	
 end
+]]--
 
 --End the transition
 local function A_End_Transition(actor, par1, par2)
+	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
+		return nil
+	end
+
 	S_StartSound(actor, sfx_trns2)
+	P_SpawnMobj(actor.x, actor.y, actor.z, MT_TRNS)
+
+
 -- 	if(actor.player and actor.player.valid) then
-		-- actor.can_bladeattack = true
+		-- actor.can_blade = true
 -- 	end
 	-- print("end!")
 	actor.flags = $&~MF_NOCLIPTHING
@@ -718,10 +803,15 @@ local function A_End_Transition(actor, par1, par2)
 	--Recharge the stinger ability (technically just air stinger you're in the air)
 	actor.can_stinger = 1
 	
+	
 end
 
 --Not an action by itself by is called by different actions that do a very similar job 
 local function Stinger(playmo, startrollangle, stingerstate)
+	if(not Valid(playmo, "helcurt") or not PAlive(playmo.player)) then
+		return nil
+	end
+	
 	playmo.can_stinger = 0
 	playmo.stung = 1
 	-- print("Release "..playmo.stingers.." deadly stingers!")
@@ -749,12 +839,19 @@ local function Stinger(playmo, startrollangle, stingerstate)
 end
 
 local function A_StingerAir1(actor, var1, var2)
+	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
+		return nil
+	end
 	--Helcurt's when he started charging his stinger attack (that circly thing process around Helcurt)
 	P_SetObjectMomZ(actor, EXTRA_CHARGE_BOOST, false)
 	Stinger(actor, var1, var2)
 end
 
 local function A_StingerGrnd1(actor, var1, var2)
+	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
+		return nil
+	end
+	
 	-- P_Thurst(pla)
 	Stinger(actor, var1, var2)
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
@@ -765,7 +862,11 @@ local function A_StingerGrnd1(actor, var1, var2)
 end
 
 local function A_StingerAir2(actor, var1, var2)
-	P_SetObjectMomZ(actor, STINGER_VERT_BOOST, false)
+	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
+		return nil
+	end
+
+	P_SetObjectMomZ(actor, 0, false)
 	P_Thrust(actor, actor.player.inputangle, STINGER_HORIZ_BOOST)
 end
 
@@ -784,6 +885,14 @@ mobjinfo[MT_LOCK] = {
 	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY
 }
 
+mobjinfo[MT_TRNS] = {
+	spawnstate = S_TRNS,
+	height = FRACUNIT,
+	radius = FRACUNIT,
+	deathstate = S_NULL,
+	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY
+}
+
 --A stinger Projectile
 mobjinfo[MT_STGP] = {
 	spawnstate = S_AIR_1,
@@ -791,7 +900,17 @@ mobjinfo[MT_STGP] = {
 	height = 16*FRACUNIT,
 	radius = 32*FRACUNIT,
 	speed = 2*FRACUNIT,
-	flags = MF_NOGRAVITY
+	flags = MF2_SUPERFIRE|MF_NOGRAVITY|MF_MISSILE
+
+}
+
+-- The follow object (the cape and tail)
+mobjinfo[MT_FOLLOW] = {
+	spawnstate = S_FOLLOW_STAND,
+	height = FRACUNIT,
+	radius = FRACUNIT,
+	dispoffset = 1,
+	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY
 }
 
 --[[
@@ -942,6 +1061,27 @@ states[S_STACK] = {
 	tics = -1
 }
 
+states[S_TRNS] = {
+	sprite = SPR_TRNS,
+	tics = TICRATE
+}
+
+states[S_FOLLOW_STAND] = {
+	sprite = SPR_FLWS,
+	frame = FF_ANIMATE,
+	var1 = 2, --Number of frames
+	var2 = 7, --Tics before cycle to a new frame
+	tics = -1
+}
+
+states[S_FOLLOW_RUN] = {
+	sprite = SPR_FLWR,
+	frame = FF_ANIMATE,
+	var1 = 2, --Number of frames - 1
+	var2 = 3, --Tics before cycle to a new frame
+	tics = -1
+}
+
 --[[
 states[S_LOCK] = {
 	sprite = SPR_LOCK,
@@ -1056,15 +1196,15 @@ states[S_BLADE_LAUNCH] = {
 
 states[S_BLADE_THURST] = {
 	sprite = SPR_PLAY,
-	frame = SPR2_STND,
-	tics = 10*TICRATE,
+	frame = SPR2_BLDE,
+	tics = 2*TICRATE,
 	action = A_BladeThrust,
 	nextstate = S_PLAY_FALL
 }
 
 states[S_BLADE_THURST_HIT] = {
 	sprite = SPR_PLAY,
-	frame = SPR2_RUN,
+	frame = SPR2_JUMP,
 	tics = TICRATE,
 	action = A_BladeThrustHit,
 	nextstate = S_PLAY_FALL
@@ -1088,7 +1228,7 @@ states[S_START_TRANSITION] = {
 
 states[S_IN_TRANSITION] = {
 	tics = 10,
-	action = A_In_Transition,
+	-- action = A_In_Transition,
 	nextstate = S_END_TRANSITION
 }
 

@@ -22,7 +22,7 @@ end
 
 
 addHook("PlayerThink", function(player)
-	if(not player or not player.mo or player.mo.skin ~= "helcurt") then
+	if(not Valid(player.mo, "helcurt") or not PAlive(player)) then
 		return
 	end
 	
@@ -56,7 +56,7 @@ end)
 
 addHook("PostThinkFrame", function()
 	for player in players.iterate() do
-		if(not player or not player.mo or player.mo.skin ~= "helcurt") then
+		if(not Valid(player.mo, "helcurt") or not PAlive(player)) then
 			return
 		end
 		local dark_enough = 0

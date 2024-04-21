@@ -28,7 +28,7 @@ mobjinfo[MT_SHDW] = {
 addHook("PlayerThink", function(player)
 -- 	if(player.valid and player.mo and player.mo.valid and player.mo.skin and player.mo.skin.valid
 -- 	and player.mo.skin == "helcurt")
-	if(player.mo.skin == "helcurt" and player.mo.unconceal_timer > 0) then
+	if(Valid(player.mo, "helcurt") and PAlive(player) and player.mo.isconcealed) then
 		local particle = P_SpawnMobj(player.mo.x+P_RandomRange(SPAWN_RADIUS_MAX, -SPAWN_RADIUS_MAX)*FRACUNIT, 
 									player.mo.y+P_RandomRange(SPAWN_RADIUS_MAX, -SPAWN_RADIUS_MAX)*FRACUNIT,  
 									player.mo.z+P_RandomRange(0, player.mo.height/FRACUNIT/2)*FRACUNIT,
