@@ -16,7 +16,7 @@ local LOCK_HEIGHT_MUL = 2
 --Range system used in searchblock function to find targets
 local BLADE_BLOCK_SEARCH = 100*FRACUNIT
 --Maximum distance between enemy and Helcurt for latter to blade attack 
-local BLADE_HIT_DISTANCE = 100*FRACUNIT
+local BLADE_HIT_DISTANCE = 50*FRACUNIT
 
 --/--------------------------
 --/ HOOKS
@@ -79,7 +79,7 @@ addHook("PlayerThink", function(player)
 			FixedMul(checkmo.z - playmo.z, checkmo.z - playmo.z)))
 		]]--
 		--Damage the enemy and enter a state of hitting an enemy only if the target is valid and in the hit distance in all 3 directions
-		if(distcheck < BLADE_HIT_DISTANCE and L_ZCollide(playmo, checkmo, BLADE_HIT_DISTANCE-checkmo.height) 
+		if(distcheck < checkmo.radius*3 and L_ZCollide(playmo, checkmo, checkmo.height) 
 		and checkmo.valid and checkmo.health > 0 and  checkmo.flags & TARGET_DMG_RANGE ~= 0 and checkmo.flags & TARGET_IGNORE_RANGE == 0) then
 			P_DamageMobj(checkmo, player.mo, player.mo, 1)
 			playmo.prevstate = playmo.state 
