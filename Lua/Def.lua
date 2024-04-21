@@ -29,6 +29,7 @@ rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MO
 rawset(_G, "TARGET_NONDMG_RANGE", MF_SPRING)
 -- rawset(_G, "TARGET_KILL_RANGE", MT_POINTYBALL|MT_EGGMOBILE_BALL|MT_SPIKEBALL|MT_SPIKE|MT_WALLSPIKE|MT_WALLSPIKEBASE|MT_SMASHINGSPIKEBALL)
 rawset(_G, "TARGET_IGNORE_RANGE", MF_MISSILE)
+
 --Maximum amount of extra stingers (not counting the one you always have)
 rawset(_G, "MAX_STINGERS", 4)
 rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
@@ -689,6 +690,7 @@ local function A_BladeThrust(actor, par1, par2)
 	P_SetObjectMomZ(actor, 0, false)
 	P_InstaThrust(actor, actor.player.inputangle, ownerspeed/2+BLADE_THURST_SPEED)
 	
+	-- actor.player.pflags = $|PF_SPINNING
 	--Empower springs
 	actor.player.powers[pw_strong] = $|STR_SPRING
 	actor.can_blade = 0
@@ -894,7 +896,8 @@ mobjinfo[MT_STGP] = {
 	height = 16*FRACUNIT,
 	radius = 32*FRACUNIT,
 	speed = 2*FRACUNIT,
-	flags = MF_NOGRAVITY
+	flags = MF2_SUPERFIRE|MF_NOGRAVITY|MF_MISSILE
+
 }
 
 -- The follow object (the cape and tail)

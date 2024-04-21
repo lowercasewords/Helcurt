@@ -14,7 +14,7 @@ local BLADE_VERT_BOOST = 6*FRACUNIT
 --Vertical lockon spawn multipler offset to appear above the target
 local LOCK_HEIGHT_MUL = 2
 --Range system used in searchblock function to find targets
-local BLADE_BLOCK_SEARCH = 100*FRACUNIT
+local BLADE_BLOCK_SEARCH = 500*FRACUNIT
 --Maximum distance between enemy and Helcurt for latter to blade attack 
 local BLADE_HIT_DISTANCE = 50*FRACUNIT
 
@@ -79,9 +79,14 @@ addHook("PlayerThink", function(player)
 			FixedMul(checkmo.z - playmo.z, checkmo.z - playmo.z)))
 		]]--
 		--Damage the enemy and enter a state of hitting an enemy only if the target is valid and in the hit distance in all 3 directions
-		if(distcheck < checkmo.radius*3 and L_ZCollide(playmo, checkmo, checkmo.height) 
-		and checkmo.valid and checkmo.health > 0 and  checkmo.flags & TARGET_DMG_RANGE ~= 0 and checkmo.flags & TARGET_IGNORE_RANGE == 0) then
+		if(distcheck < checkmo.radius+playmo.radius+BLADE_HIT_DISTANCE and L_ZCollide(playmo, checkmo, checkmo.height+BLADE_HIT_DISTANCE) 
+		and checkmo.valid and checkmo.health > 0 
+		and checkmo.state ~= checkmo.info.painstate
+		and checkmo.flags2 & (MF2_BOSSFLEE|MF2_FRET|MF2_BOSSDEAD|MF2_INVERTAIMABLE) == 0
+		and checkmo.flags & MF_SHOOTABLE ~= 0
+		and checkmo.flags & TARGET_DMG_RANGE ~= 0 and checkmo.flags & TARGET_IGNORE_RANGE == 0) then
 			P_DamageMobj(checkmo, player.mo, player.mo, 1)
+			-- P_KillMobj(checkmo, player.mo, player.mo)
 			playmo.prevstate = playmo.state 
 			playmo.state = S_BLADE_THURST_HIT
 			return true
