@@ -29,6 +29,7 @@ rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MO
 rawset(_G, "TARGET_NONDMG_RANGE", MF_SPRING)
 -- rawset(_G, "TARGET_KILL_RANGE", MT_POINTYBALL|MT_EGGMOBILE_BALL|MT_SPIKEBALL|MT_SPIKE|MT_WALLSPIKE|MT_WALLSPIKEBASE|MT_SMASHINGSPIKEBALL)
 rawset(_G, "TARGET_IGNORE_RANGE", MF_MISSILE)
+
 --Maximum amount of extra stingers (not counting the one you always have)
 rawset(_G, "MAX_STINGERS", 4)
 rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
@@ -36,8 +37,8 @@ rawset(_G, "TELEPORT_STOP_SPEED", 3)
 
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "BLADE_THURST_SPEED", 15*FRACUNIT)
-rawset(_G, "BLADE_THURST_JUMP", 4*FRACUNIT)
-rawset(_G, "BLADE_THRUST_FALL", -FRACUNIT*3)
+rawset(_G, "BLADE_THURST_JUMP", 8*FRACUNIT)
+rawset(_G, "BLADE_THRUST_FALL", -FRACUNIT*10)
 rawset(_G, "STINGER_VERT_BOOST", 5*FRACUNIT)
 rawset(_G, "STINGER_HORIZ_BOOST", 20*FRACUNIT)
 rawset(_G, "STINGER_GRND_COOLDOWN", TICRATE)
@@ -686,9 +687,10 @@ local function A_BladeThrust(actor, par1, par2)
 	end
 	
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
-	P_SetObjectMomZ(actor, BLADE_THURST_JUMP, false)
+	P_SetObjectMomZ(actor, 0, false)
 	P_InstaThrust(actor, actor.player.inputangle, ownerspeed/2+BLADE_THURST_SPEED)
 	
+	-- actor.player.pflags = $|PF_SPINNING
 	--Empower springs
 	actor.player.powers[pw_strong] = $|STR_SPRING
 	actor.can_blade = 0
@@ -702,7 +704,7 @@ local function A_BladeThrustHit(actor, par1, par2)
 	
 	
 	P_Thrust(actor, actor.player.inputangle + ANGLE_180, ownerspeed/5)
-	P_SetObjectMomZ(actor, 2*BLADE_THURST_JUMP, false)
+	P_SetObjectMomZ(actor, BLADE_THURST_JUMP, false)
 	
 	S_StartSound(actor, sfx_blde1)
 
@@ -894,7 +896,8 @@ mobjinfo[MT_STGP] = {
 	height = 16*FRACUNIT,
 	radius = 32*FRACUNIT,
 	speed = 2*FRACUNIT,
-	flags = MF_NOGRAVITY
+	flags = MF2_SUPERFIRE|MF_NOGRAVITY|MF_MISSILE
+
 }
 
 -- The follow object (the cape and tail)
@@ -1160,7 +1163,7 @@ states[S_BLADE_LAUNCH] = {
 states[S_BLADE_THURST] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_BLDE,
-	tics = 5*TICRATE,
+	tics = 2*TICRATE,
 	action = A_BladeThrust,
 	nextstate = S_PLAY_FALL
 }

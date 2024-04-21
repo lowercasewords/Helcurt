@@ -14,13 +14,9 @@ local BLADE_VERT_BOOST = 6*FRACUNIT
 --Vertical lockon spawn multipler offset to appear above the target
 local LOCK_HEIGHT_MUL = 2
 --Range system used in searchblock function to find targets
-local BLADE_BLOCK_SEARCH = 100*FRACUNIT
+local BLADE_BLOCK_SEARCH = 500*FRACUNIT
 --Maximum distance between enemy and Helcurt for latter to blade attack 
-local BLADE_HIT_DISTANCE = 100*FRACUNIT
-
---/--------------------------
---/ Functinos
---/--------------------------
+local BLADE_HIT_DISTANCE = 50*FRACUNIT
 
 --/--------------------------
 --/ HOOKS
@@ -46,11 +42,16 @@ addHook("PlayerThink", function(player)
 	--If holding or pressing spin when able to attack (in the air)
 	if(P_IsObjectOnGround(player.mo) == false and player.spinheld ~= 0) then
 		
-		--Continuous behavior 
-		if(player.spinheld > TICS_PRESS_RANGE and player.mo.state == S_BLADE_THURST) then
-			-- print("down: "..player.mo.momz)
-			P_SetObjectMomZ(player.mo, BLADE_THRUST_FALL, true)
-		
+		if(player.mo.state == S_BLADE_THURST) then
+			--Continuous behavior 
+			
+			if(player.spinheld == TICS_PRESS_RANGE) then
+
+				P_SetObjectMomZ(player.mo, BLADE_THRUST_FALL, false)
+			elseif(player.spinheld > TICS_PRESS_RANGE) then
+				-- print("down: "..player.mo.momz)
+				P_SetObjectMomZ(player.mo, BLADE_THRUST_FALL/3, true)
+			end
 		--switch to blade attack when player wants
 		elseif(player.mo.can_blade == 1 and player.spinheld <= 1 and (player.mo.state ~= S_BLADE_THURST or 
 		player.mo.state == S_BLADE_THURST_HIT and player.mo.tics < states[S_BLADE_THURST_HIT].tics/2*3)) then
@@ -78,9 +79,14 @@ addHook("PlayerThink", function(player)
 			FixedMul(checkmo.z - playmo.z, checkmo.z - playmo.z)))
 		]]--
 		--Damage the enemy and enter a state of hitting an enemy only if the target is valid and in the hit distance in all 3 directions
-		if(distcheck < BLADE_HIT_DISTANCE and L_ZCollide(playmo, checkmo, BLADE_HIT_DISTANCE-checkmo.height) 
-		and checkmo.valid and checkmo.health > 0 and  checkmo.flags & TARGET_DMG_RANGE ~= 0 and checkmo.flags & TARGET_IGNORE_RANGE == 0) then
+		if(distcheck < checkmo.radius+playmo.radius+BLADE_HIT_DISTANCE and L_ZCollide(playmo, checkmo, checkmo.height+BLADE_HIT_DISTANCE) 
+		and checkmo.valid and checkmo.health > 0 
+		and checkmo.state ~= checkmo.info.painstate
+		and checkmo.flags2 & (MF2_BOSSFLEE|MF2_FRET|MF2_BOSSDEAD|MF2_INVERTAIMABLE) == 0
+		and checkmo.flags & MF_SHOOTABLE ~= 0
+		and checkmo.flags & TARGET_DMG_RANGE ~= 0 and checkmo.flags & TARGET_IGNORE_RANGE == 0) then
 			P_DamageMobj(checkmo, player.mo, player.mo, 1)
+			-- P_KillMobj(checkmo, player.mo, player.mo)
 			playmo.prevstate = playmo.state 
 			playmo.state = S_BLADE_THURST_HIT
 			return true
