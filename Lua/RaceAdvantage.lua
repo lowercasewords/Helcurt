@@ -1,6 +1,4 @@
 --How dark the area has to be to activate his passive
-local CONCEAL_DARKNESS_LEVEL = 210
---How dark the area has to be to activate his passive
 local CONCEAL_SHADOW_DIFFERENCE = 20
 --Default time to wait for a single stinger to charge  
 local STINGER_CHARGE_TIMER = 5*TICRATE
@@ -54,37 +52,24 @@ addHook("PlayerThink", function(player)
 	]]--
 end)
 
+
+
+
 addHook("PostThinkFrame", function()
 	for player in players.iterate() do
 		if(not Valid(player.mo, "helcurt") or not PAlive(player)) then
 			return
 		end
-		local dark_enough = 0
+		local dark_enough = nil
 		
 		--Try to find a place dark enough to be concealed in
 		if(player.mo.subsector and player.mo.subsector.sector) then
 			local sector = player.mo.subsector.sector 
 
-			--Check for overall lightlevel to conceal if dark enough
-			if(sector.lightlevel <= CONCEAL_DARKNESS_LEVEL) then
-				dark_enough = 1
-
-			--Finds all floor-over-floor to check for lightlevel of shadows under blocks 
-			else
-				for fof in sector.ffloors() do
-					
-					--Check for lightlevel under blocks to conceal if dark enough
-					--Ignore certain fof's since they trigger conceal when it is not dark enough
-					--(standing above water would have triggered this affect)
-					if(player.mo.z < fof.bottomheight and fof.toplightlevel < CONCEAL_DARKNESS_LEVEL and fof.flags&FF_SWIMMABLE == 0) then
-						dark_enough = 1
-						break
-					end
-				end
-			end
+			dark_enough = GetDarkArea(sector, CONCEAL_DARKNESS_LEVEL, player.mo.z)
 
 			--Conceal if possible and not concealed already
-			if(dark_enough == 1 and player.mo.unconceal_timer <= 0) then
+			if(dark_enough ~= nil and player.mo.unconceal_timer <= 0) then
 				Conceal(player.mo)
 			--If time is up on concealment -> Unconceal
 			elseif(player.mo.unconceal_timer == 0) then
@@ -96,7 +81,7 @@ addHook("PostThinkFrame", function()
 		if(player.mo.unconceal_timer >= 0) then
 		 	ConcealEffects(player.mo)
 			--Counting down the timer to be concealed when not dark enough
-			if(dark_enough == 0) then
+			if(dark_enough == nil) then
 				player.mo.unconceal_timer = $-1
 			end
 		end

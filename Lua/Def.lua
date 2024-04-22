@@ -18,6 +18,9 @@ freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STG
 freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", "sfx_hide1",
 "sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1",
 "sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05")
+--Particle slots
+freeslot("MT_SHDW", "SPR_SHDW", "S_SHDW_PRT", "S_SHDW_HINT")
+
 
 --constants and functions used throghout the project (rest are defined in other files too)
 rawset(_G, "SPAWN_RADIUS_MAX", 10)
@@ -34,6 +37,9 @@ rawset(_G, "TARGET_IGNORE_RANGE", MF_MISSILE)
 rawset(_G, "MAX_STINGERS", 4)
 rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
 rawset(_G, "TELEPORT_STOP_SPEED", 3)
+
+--How dark the area has to be to activate his passive
+rawset(_G, "CONCEAL_DARKNESS_LEVEL", 210)
 
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "BLADE_THURST_SPEED", 15*FRACUNIT)
@@ -102,6 +108,29 @@ rawset(_G, "RemoveStingers", function(mo, amount)
 			end 
 		end
 	end
+end)
+
+rawset(_G, "GetDarkArea", function(sector, dark_level, relative_z)
+	local dark_enough = nil
+	--Check for overall lightlevel to conceal if dark enough
+	if(sector.lightlevel <= dark_level) then
+		dark_enough = sector
+
+	--Finds all floor-over-floor to check for lightlevel of shadows under blocks 
+	else
+		for fof in sector.ffloors() do
+			
+			--Check for lightlevel under blocks to conceal if dark enough
+			--Ignore certain fof's since they trigger conceal when it is not dark enough
+			--(standing above water would have triggered this affect)
+			if(relative_z < fof.bottomheight and fof.toplightlevel < dark_level and fof.flags&FF_SWIMMABLE == 0) then
+				dark_enough = fof
+				break
+			end
+		end
+	end
+
+	return dark_enough
 end)
 
 rawset(_G, "SpawnAfterImage", function(mo)
@@ -213,6 +242,7 @@ rawset(_G, "CorrectRotationHoriz", function(rotatemo, pivotx, pivoty, desiredx, 
 	P_MoveOrigin(rotatemo, x, y, z)
 	
 end)
+
 
 --Rotates the mobject around the pivot, think of a circle with pivot as a center and
 --torotate being on the edge of the circle (distance between pivot and torotate is the radius of a circle)
@@ -455,7 +485,6 @@ local function CleanUp(player)
 
 	player.killcount = nil
 	player.lockon = nil
-	player.mo.isconcealed = nil
 	
 	player.night_timer = nil
 	
@@ -890,7 +919,7 @@ mobjinfo[MT_TRNS] = {
 	height = FRACUNIT,
 	radius = FRACUNIT,
 	deathstate = S_NULL,
-	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY
+	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY--|MF_SCENERY
 }
 
 --A stinger Projectile
@@ -910,6 +939,14 @@ mobjinfo[MT_FOLLOW] = {
 	height = FRACUNIT,
 	radius = FRACUNIT,
 	dispoffset = 1,
+	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY
+}
+
+
+mobjinfo[MT_SHDW] = {
+	spawnstate = S_SHDW_PRT,
+	height = 16*FRACUNIT,
+	radius = 8*FRACUNIT,
 	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY
 }
 
@@ -1064,6 +1101,18 @@ states[S_STACK] = {
 states[S_TRNS] = {
 	sprite = SPR_TRNS,
 	tics = TICRATE
+}
+
+
+states[S_SHDW_PRT] = {
+	sprite = SPR_SHDW,
+	tics = 4
+}
+
+states[S_SHDW_HINT] = {
+	sprite = SPR_TRNS,
+	frame = FF_TRANS40,
+	tics = TICRATE*2
 }
 
 states[S_FOLLOW_STAND] = {
