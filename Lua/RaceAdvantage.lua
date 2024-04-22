@@ -6,7 +6,13 @@ local STINGER_CHARGE_TIMER = 5*TICRATE
 --Conceals the player in the darkness (called once)
 local function Conceal(mo)
 	S_StartSound(mo, sfx_hide1)
+
 	mo.unconceal_timer = UNCONCEAL_MAX_TICS
+
+	-- print("Conceal!")
+	mo.player.acceleration = $+CONCEAL_ACCELERATION_BOOST
+	mo.player.normalspeed = $+CONCEAL_NORMALSPEED_BOOST
+	mo.player.jumpfactor = $+CONCEAL_JUMPFACTOR_BOOST
 end
 
 --Conceal effects to be put every tic 
@@ -16,6 +22,13 @@ end
 
 --Stops concealing the player in the darkness (called once)
 local function Unconceal(mo)
+	
+	local skin = skins[mo.player.skin]
+
+	-- print("UnConceal!")
+    mo.player.acceleration = skin.acceleration
+    mo.player.normalspeed =  skin.normalspeed
+	mo.player.jumpfactor = skin.jumpfactor
 end
 
 
@@ -23,8 +36,6 @@ addHook("PlayerThink", function(player)
 	if(not Valid(player.mo, "helcurt") or not PAlive(player)) then
 		return
 	end
-	
-	
 
 	--[[
 	Stinger recharge is removed because the player cannot control and track stingers,

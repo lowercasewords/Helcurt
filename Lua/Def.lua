@@ -28,23 +28,25 @@ rawset(_G, "SPAWN_RADIUS_MAX", 10)
 rawset(_G, "TICS_PRESS_RANGE", 5)
 rawset(_G, "SPAWN_TIC_MAX", 1)
 
+
 rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MONITOR|MF_SPRING)
 rawset(_G, "TARGET_NONDMG_RANGE", MF_SPRING)
 -- rawset(_G, "TARGET_KILL_RANGE", MT_POINTYBALL|MT_EGGMOBILE_BALL|MT_SPIKEBALL|MT_SPIKE|MT_WALLSPIKE|MT_WALLSPIKEBASE|MT_SMASHINGSPIKEBALL)
 rawset(_G, "TARGET_IGNORE_RANGE", MF_MISSILE)
 
---Maximum amount of extra stingers (not counting the one you always have)
-rawset(_G, "MAX_STINGERS", 4)
+
 rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
 rawset(_G, "TELEPORT_STOP_SPEED", 3)
 
---How dark the area has to be to activate his passive
-rawset(_G, "CONCEAL_DARKNESS_LEVEL", 210)
 
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "BLADE_THURST_SPEED", 15*FRACUNIT)
 rawset(_G, "BLADE_THURST_JUMP", 8*FRACUNIT)
 rawset(_G, "BLADE_THRUST_FALL", -FRACUNIT*10)
+
+
+--Maximum amount of extra stingers (not counting the one you always have)
+rawset(_G, "MAX_STINGERS", 4)
 rawset(_G, "STINGER_VERT_BOOST", 5*FRACUNIT)
 rawset(_G, "STINGER_HORIZ_BOOST", 20*FRACUNIT)
 rawset(_G, "STINGER_GRND_COOLDOWN", TICRATE)
@@ -58,6 +60,13 @@ rawset(_G, "SEPARATION_GRND_ANGLE", ANG30)
 rawset(_G, "EXTRA_CHARGE_BOOST", 10*FRACUNIT)
 --Slow down Helcurt by this factor once when started charging stingers
 rawset(_G, "CHARGE_SLOWDOWN_FACTOR", 3)
+
+
+--How dark the area has to be to activate his passive
+rawset(_G, "CONCEAL_DARKNESS_LEVEL", 210)
+rawset(_G, "CONCEAL_ACCELERATION_BOOST", 5*FRACUNIT)
+rawset(_G, "CONCEAL_NORMALSPEED_BOOST",  25*FRACUNIT)
+rawset(_G, "CONCEAL_JUMPFACTOR_BOOST",  FRACUNIT/2)
 --Maximum tics for a player's passive to be active after the player exited the dark area
 rawset(_G, "UNCONCEAL_MAX_TICS", TICRATE)
 
