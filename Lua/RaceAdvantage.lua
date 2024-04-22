@@ -9,10 +9,17 @@ local function Conceal(mo)
 
 	mo.unconceal_timer = UNCONCEAL_MAX_TICS
 
-	-- print("Conceal!")
+	--Immediate extra stinger upon concealing
+	if(mo.stingers < MAX_STINGERS) then
+		AddStingers(mo, 1)
+	end
+
+	--Attribute increase
 	mo.player.acceleration = $+CONCEAL_ACCELERATION_BOOST
 	mo.player.normalspeed = $+CONCEAL_NORMALSPEED_BOOST
 	mo.player.jumpfactor = $+CONCEAL_JUMPFACTOR_BOOST
+
+	
 end
 
 --Conceal effects to be put every tic 
@@ -37,18 +44,9 @@ addHook("PlayerThink", function(player)
 		return
 	end
 
-	--[[
-	Stinger recharge is removed because the player cannot control and track stingers,
-	and since they change your momentum on release, it is important for a player track them
-	
-	--Code below automatically recharges the stingers (faster in darkness)
-	-- print(player.mo.stinger_charge_countdown)
-	--Have max stingers ALL THE TIME if concealed
-	if(player.mo.unconceal_timer == 1 and player.mo.stingers < MAX_STINGERS) then
-		AddStingers(player.mo, MAX_STINGERS)
-	--Recharge stingers over time normally
-	else
-		--IF less than maxinteger stingers: start the countdown
+	--Recharge stingers over time while concealed
+	if(player.mo.unconceal_timer > 0 and player.mo.stingers < MAX_STINGERS) then
+		--If less than maxinteger stingers: start the countdown
 		if(player.mo.stingers < MAX_STINGERS and player.mo.stinger_charge_countdown <= -1) then
 			player.mo.stinger_charge_countdown = STINGER_CHARGE_TIMER
 		--Keep counting if the countdown has not ended
@@ -59,8 +57,9 @@ addHook("PlayerThink", function(player)
 			AddStingers(player.mo, 1)
 			player.mo.stinger_charge_countdown = $-1
 		end
+		
 	end
-	]]--
+	
 end)
 
 
