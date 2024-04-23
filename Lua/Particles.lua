@@ -34,49 +34,65 @@ addHook("PlayerThink", function(player)
 		counter = MAX_TICS
 		searchBlockmap("lines", function(playmo, line)
 			
-			--Checks if the area is dark, retrieves either a fof or sector
-			local area = GetDarkArea(line.frontsector, CONCEAL_DARKNESS_LEVEL, line.frontsector.floorheight)
-
-			--If dark area (either sector or fof was found)
-			if(area ~= nil) then
-				local linesarr = nil
-				local bottom = nil
-				local top = nil
-
-				if(area.bottomheight ~= nil) then --If a FOF (floor over floor)
-					linesarr = area.target.lines
-					bottom = area.target.floorheight
-					top = area.bottomheight
-				else -- if a sector
-					linesarr = area.lines
-					bottom = area.floorheight
-					top = area.ceilingheight
+			for i = 0, 1, 1 do
+				local area = nil
+				if(i == 0) then
+				--Checks if the area is dark, retrieves either a fof or sector
+					area = GetDarkArea(line.frontsector, CONCEAL_DARKNESS_LEVEL, line.frontsector.floorheight)
+				elseif(line.backsector ~= nil) then
+					area = GetDarkArea(line.backsector, CONCEAL_DARKNESS_LEVEL, line.backsector.floorheight)
 				end
 
-					--Spawning behavior (chooses between current and random line of the sector)
-					if(linesarr ~= nil and #linesarr >= 3) then
+				--If dark area (either sector or fof was found)
+				if(area ~= nil) then
+					local linesarr = nil
+					local bottom = nil
+					local top = nil
 
-						local l1 = line --CAN'T THE FIRST LINE BE THE LINE IN THE BLOCKMAP FUNCTINO???
-						local l2 = linesarr[P_RandomRange(0, #linesarr-1)]
-
-						local x = P_RandomRange(l1.v1.x/FRACUNIT, l2.v1.x/FRACUNIT)*FRACUNIT
-						local y = P_RandomRange(l1.v1.y/FRACUNIT, l2.v1.y/FRACUNIT)*FRACUNIT
-
-						--Spawn with immediate state change (look in the end of the line I hope it's not changed in the end bc I would look dumb)
-						P_SpawnMobj(x, y, P_RandomRange(bottom/FRACUNIT, top/FRACUNIT)*FRACUNIT, MT_SHDW).state = S_SHDW_HINT
-						P_SpawnMobj(x, y, P_RandomRange(bottom/FRACUNIT, top/FRACUNIT)*FRACUNIT, MT_SHDW).state = S_SHDW_HINT
-						
+					if(area.bottomheight ~= nil) then --If a FOF (floor over floor)
+						linesarr = area.target.lines
+						bottom = area.target.floorheight
+						top = area.bottomheight
+					else -- if a sector
+						linesarr = area.lines
+						bottom = area.floorheight
+						top = area.ceilingheight
 					end
 
-					return false
-				
+						--Spawning behavior (chooses between current and random line of the sector)
+						if(linesarr ~= nil and #linesarr >= 3) then
+
+							local l1 = line --CAN'T THE FIRST LINE BE THE LINE IN THE BLOCKMAP FUNCTINO???
+							local l2 = linesarr[P_RandomRange(0, #linesarr-1)]
+
+							local x = P_RandomRange(l1.v1.x/FRACUNIT, l2.v1.x/FRACUNIT)*FRACUNIT
+							local y = P_RandomRange(l1.v1.y/FRACUNIT, l2.v1.y/FRACUNIT)*FRACUNIT
+
+							local subsector = R_PointInSubsectorOrNil(x, y)
+
+
+							if(subsector ~= nil and subsector.sector ~= nil and ((subsector.sector == area) or (area.target ~= nil and subsector.sector == area.target))) then
+								--Spawn with immediate state change (look in the end of the line I hope it's not changed in the end bc I would look dumb)
+								P_SpawnMobj(x, y, P_RandomRange(bottom/FRACUNIT, top/FRACUNIT)*FRACUNIT, MT_SHDW).state = S_SHDW_HINT
+								P_SpawnMobj(x, y, P_RandomRange(bottom/FRACUNIT, top/FRACUNIT)*FRACUNIT, MT_SHDW).state = S_SHDW_HINT
+							
+							end
+							
+						end
+
+						return false
+					
+				end
+
+				area = nil
 			end
-			end, 
-			player.mo, 
-			player.mo.x-2000*FRACUNIT, 
-			player.mo.x+2000*FRACUNIT, 
-			player.mo.y-2000*FRACUNIT, 
-			player.mo.y+2000*FRACUNIT)
+		end, 
+		player.mo, 
+		player.mo.x-2000*FRACUNIT, 
+		player.mo.x+2000*FRACUNIT, 
+		player.mo.y-2000*FRACUNIT, 
+		player.mo.y+2000*FRACUNIT)
+			
 		else 
 			counter = $ - 1
 	end

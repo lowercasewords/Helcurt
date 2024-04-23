@@ -3,6 +3,25 @@ local CONCEAL_SHADOW_DIFFERENCE = 20
 --Default time to wait for a single stinger to charge  
 local STINGER_CHARGE_TIMER = 5*TICRATE
 
+--[[
+COM_AddCommand("la", function(player, lightlevel)
+	for sector in sectors.iterate do
+       sector.lightlevel = lightlevel
+    end
+end)
+
+COM_AddCommand("l", function(player, lightlevel)
+	local sector = player.mo.subsector.sector 
+	sector.lightlevel = lightlevel
+end)
+]]--
+
+--GLOBAL: Edits the lightlevel requirements for a sector/fof to be considered as dark enough to trigger passive effects
+COM_AddCommand("debug_dark", function(player, lightlevel)
+	print("Changing Darkness lightlevel requirements from "..CONCEAL_DARKNESS_LEVEL.." to "..lightlevel)
+	CONCEAL_DARKNESS_LEVEL = tonumber(lightlevel)
+end)
+
 
 addHook("PlayerThink", function(player)
 	if(not Valid(player.mo, "helcurt") or not PAlive(player)) then
@@ -38,7 +57,7 @@ addHook("PostThinkFrame", function()
 		local dark_enough = nil
 		
 		--Try to find a place dark enough to be concealed in
-		if(player.mo.subsector and player.mo.subsector.sector) then
+		if(player.mo.subsector ~= nil and player.mo.subsector.sector ~= nil) then
 			local sector = player.mo.subsector.sector 
 
 			dark_enough = GetDarkArea(sector, CONCEAL_DARKNESS_LEVEL, player.mo.z)
@@ -63,13 +82,3 @@ addHook("PostThinkFrame", function()
 
 	end
 end)
-
--- COM_AddCommand("la", function(player, lightlevel)
--- 	for sector in sectors.iterate do
---        sector.lightlevel = lightlevel
---     end
--- end)
--- COM_AddCommand("l", function(player, lightlevel)
--- 	local sector = player.mo.subsector.sector 
--- 	sector.lightlevel = lightlevel
--- end)

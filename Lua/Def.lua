@@ -63,7 +63,7 @@ rawset(_G, "CHARGE_SLOWDOWN_FACTOR", 3)
 
 
 --How dark the area has to be to activate his passive
-rawset(_G, "CONCEAL_DARKNESS_LEVEL", 210)
+rawset(_G, "CONCEAL_DARKNESS_LEVEL", 180)
 rawset(_G, "CONCEAL_ACCELERATION_BOOST", 5*FRACUNIT)
 rawset(_G, "CONCEAL_NORMALSPEED_BOOST",  25*FRACUNIT)
 rawset(_G, "CONCEAL_JUMPFACTOR_BOOST",  FRACUNIT/2)
@@ -122,9 +122,9 @@ end)
 rawset(_G, "GetDarkArea", function(sector, dark_level, relative_z)
 	local dark_enough = nil
 	--Check for overall lightlevel to conceal if dark enough
+	-- print("S: "..sector.lightlevel)
 	if(sector.lightlevel <= dark_level) then
 		dark_enough = sector
-
 	--Finds all floor-over-floor to check for lightlevel of shadows under blocks 
 	else
 		for fof in sector.ffloors() do
@@ -136,6 +136,7 @@ rawset(_G, "GetDarkArea", function(sector, dark_level, relative_z)
 				dark_enough = fof
 				break
 			end
+			-- print("F	: "..fof.toplightlevel)
 		end
 	end
 
@@ -538,7 +539,7 @@ local function CleanUp(player)
 	player.particlecolor = nil
 	
 	Unconceal(player.mo)
-	
+
 	return true
 end
 --------------------------
