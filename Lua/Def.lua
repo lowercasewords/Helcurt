@@ -142,6 +142,42 @@ rawset(_G, "GetDarkArea", function(sector, dark_level, relative_z)
 	return dark_enough
 end)
 
+
+--Conceals the player in the darkness (called once)
+rawset(_G, "Conceal", function(mo)
+	S_StartSound(mo, sfx_hide1)
+
+	mo.unconceal_timer = UNCONCEAL_MAX_TICS
+
+	--Immediate extra stinger upon concealing
+	if(mo.stingers < MAX_STINGERS) then
+		AddStingers(mo, 1)
+	end
+
+	--Attribute increase
+	mo.player.acceleration = $+CONCEAL_ACCELERATION_BOOST
+	mo.player.normalspeed = $+CONCEAL_NORMALSPEED_BOOST
+	mo.player.jumpfactor = $+CONCEAL_JUMPFACTOR_BOOST
+end)
+
+--Conceal effects to be put every tic 
+rawset(_G, "ConcealEffects", function(mo)
+	mo.frame = $|FF_TRANS50--|FF_FULLBRIGHT
+end)
+
+--Stops concealing the player in the darkness (called once)
+rawset(_G, "Unconceal", function(mo)
+	
+	local skin = skins[mo.player.skin]
+
+	-- print("UnConceal!")
+    mo.player.acceleration = skin.acceleration
+    mo.player.normalspeed =  skin.normalspeed
+	mo.player.jumpfactor = skin.jumpfactor
+end)
+
+
+
 rawset(_G, "SpawnAfterImage", function(mo)
 	if(not Valid(mo)) then
 		return false
@@ -460,6 +496,8 @@ local function SetUp(player)
 		player.mo.hudstingers[i].frame = $|FF_FULLDARK
 	end
 	
+	Unconceal(player.mo)
+
 	-- P_SpawnMobj(player.mo.x, player.mo.y, player.mo.z, MT_FOLLOW)
 	-- player.mo.tail.flags2 = MF2_LINKDRAW
 	
@@ -498,6 +536,8 @@ local function CleanUp(player)
 	player.night_timer = nil
 	
 	player.particlecolor = nil
+	
+	Unconceal(player.mo)
 	
 	return true
 end

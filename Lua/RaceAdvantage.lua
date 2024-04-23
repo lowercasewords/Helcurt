@@ -3,41 +3,6 @@ local CONCEAL_SHADOW_DIFFERENCE = 20
 --Default time to wait for a single stinger to charge  
 local STINGER_CHARGE_TIMER = 5*TICRATE
 
---Conceals the player in the darkness (called once)
-local function Conceal(mo)
-	S_StartSound(mo, sfx_hide1)
-
-	mo.unconceal_timer = UNCONCEAL_MAX_TICS
-
-	--Immediate extra stinger upon concealing
-	if(mo.stingers < MAX_STINGERS) then
-		AddStingers(mo, 1)
-	end
-
-	--Attribute increase
-	mo.player.acceleration = $+CONCEAL_ACCELERATION_BOOST
-	mo.player.normalspeed = $+CONCEAL_NORMALSPEED_BOOST
-	mo.player.jumpfactor = $+CONCEAL_JUMPFACTOR_BOOST
-
-	
-end
-
---Conceal effects to be put every tic 
-local function ConcealEffects(mo)
-	mo.frame = $|FF_TRANS50--|FF_FULLBRIGHT
-end
-
---Stops concealing the player in the darkness (called once)
-local function Unconceal(mo)
-	
-	local skin = skins[mo.player.skin]
-
-	-- print("UnConceal!")
-    mo.player.acceleration = skin.acceleration
-    mo.player.normalspeed =  skin.normalspeed
-	mo.player.jumpfactor = skin.jumpfactor
-end
-
 
 addHook("PlayerThink", function(player)
 	if(not Valid(player.mo, "helcurt") or not PAlive(player)) then
