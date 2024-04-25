@@ -872,6 +872,10 @@ end
 
 
 local function A_NightCharge(actor, par1, par2)
+
+	--Prevents activation of other abilities during and after
+	actor.can_teleport = 0
+	actor.can_blade = 0
 	
 end
 
@@ -892,7 +896,7 @@ local function A_BladeThrust(actor, par1, par2)
 	end
 	
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
-	P_SetObjectMomZ(actor, 0, false)
+	P_SetObjectMomZ(actor, -2*FRACUNIT, false)
 	P_InstaThrust(actor, actor.player.inputangle, ownerspeed/2+BLADE_THURST_SPEED)
 	
 	-- actor.player.pflags = $|PF_SPINNING

@@ -18,7 +18,7 @@ addHook("PlayerThink", function(player)
 
 	--Start using Deadly Stinger in the Air
 	if((player.prevjumpheld <= TICS_PRESS_RANGE and player.prevjumpheld ~= 0 and 
-	player.jumpheld == 0 and player.mo.can_stinger == 1 and player.mo.state ~= S_NIGHT_CHARGE)) then
+	player.jumpheld == 0 and player.mo.can_stinger == 1)) then
 		player.mo.prevstate = player.mo.state
 		player.mo.state = S_STINGER_AIR_1
 		
