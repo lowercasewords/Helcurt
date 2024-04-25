@@ -40,7 +40,7 @@ addHook("PlayerThink", function(player)
 	end
 
 	--If holding or pressing spin when able to attack (in the air)
-	if(P_IsObjectOnGround(player.mo) == false and player.spinheld ~= 0) then
+	if(P_IsObjectOnGround(player.mo) == false and player.mo.state ~= S_NIGHT_CHARGE and player.spinheld ~= 0) then
 		
 		if(player.mo.state == S_BLADE_THURST) then
 			--Continuous behavior 
@@ -53,7 +53,7 @@ addHook("PlayerThink", function(player)
 				P_SetObjectMomZ(player.mo, BLADE_THRUST_FALL/3, true)
 			end
 		--switch to blade attack when player wants
-		elseif(player.mo.can_blade == 1 and player.spinheld <= 1 and (player.mo.state ~= S_BLADE_THURST or 
+		elseif(player.mo.can_blade == 1 and player.spinheld <= 1 and player.jumpheld == 0 and (player.mo.state ~= S_BLADE_THURST or 
 		player.mo.state == S_BLADE_THURST_HIT and player.mo.tics < states[S_BLADE_THURST_HIT].tics/2*3)) then
 			
 			player.mo.prevstate = player.mo.state
