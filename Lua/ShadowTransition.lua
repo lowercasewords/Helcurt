@@ -12,7 +12,7 @@ addHook("PlayerThink",
 
 
 			--Perform a teleport when one is available by HOLDING the jump button
-			if(player.mo.can_teleport == 1 and player.jumpheld > TICS_PRESS_RANGE) then
+			if(player.mo.can_teleport == 1 and player.mo.state ~= S_NIGHT_CHARGE and player.jumpheld > TICS_PRESS_RANGE) then
 				player.mo.prevstate = player.mo.state
 				player.mo.state = S_PRE_TRANSITION
 			end
