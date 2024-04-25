@@ -15,9 +15,12 @@ freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRAN
 "S_STINGER_GRND_1", "S_STINGER_GRND_2")
 freeslot("MT_STGP", "MT_STGS", "MT_LOCK", "MT_TRNS", "MT_FOLLOW")
 freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK", "SPR_TRNS", "SPR_FLWS", "SPR_FLWR")
-freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", 
+freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", "sfx_hide1",
 "sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1",
 "sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05")
+--Particle slots
+freeslot("MT_SHDW", "SPR_SHDW", "S_SHDW_PRT", "S_SHDW_HINT")
+
 
 --constants and functions used throghout the project (rest are defined in other files too)
 rawset(_G, "SPAWN_RADIUS_MAX", 10)
@@ -25,20 +28,25 @@ rawset(_G, "SPAWN_RADIUS_MAX", 10)
 rawset(_G, "TICS_PRESS_RANGE", 5)
 rawset(_G, "SPAWN_TIC_MAX", 1)
 
+
 rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MONITOR|MF_SPRING)
 rawset(_G, "TARGET_NONDMG_RANGE", MF_SPRING)
 -- rawset(_G, "TARGET_KILL_RANGE", MT_POINTYBALL|MT_EGGMOBILE_BALL|MT_SPIKEBALL|MT_SPIKE|MT_WALLSPIKE|MT_WALLSPIKEBASE|MT_SMASHINGSPIKEBALL)
 rawset(_G, "TARGET_IGNORE_RANGE", MF_MISSILE)
 
---Maximum amount of extra stingers (not counting the one you always have)
-rawset(_G, "MAX_STINGERS", 4)
+
 rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
 rawset(_G, "TELEPORT_STOP_SPEED", 3)
+
 
 rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "BLADE_THURST_SPEED", 15*FRACUNIT)
 rawset(_G, "BLADE_THURST_JUMP", 8*FRACUNIT)
 rawset(_G, "BLADE_THRUST_FALL", -FRACUNIT*10)
+
+
+--Maximum amount of extra stingers (not counting the one you always have)
+rawset(_G, "MAX_STINGERS", 4)
 rawset(_G, "STINGER_VERT_BOOST", 5*FRACUNIT)
 rawset(_G, "STINGER_HORIZ_BOOST", 20*FRACUNIT)
 rawset(_G, "STINGER_GRND_COOLDOWN", TICRATE)
@@ -52,6 +60,15 @@ rawset(_G, "SEPARATION_GRND_ANGLE", ANG30)
 rawset(_G, "EXTRA_CHARGE_BOOST", 10*FRACUNIT)
 --Slow down Helcurt by this factor once when started charging stingers
 rawset(_G, "CHARGE_SLOWDOWN_FACTOR", 3)
+
+
+--How dark the area has to be to activate his passive
+rawset(_G, "CONCEAL_DARKNESS_LEVEL", 180)
+rawset(_G, "CONCEAL_ACCELERATION_BOOST", 5*FRACUNIT)
+rawset(_G, "CONCEAL_NORMALSPEED_BOOST",  25*FRACUNIT)
+rawset(_G, "CONCEAL_JUMPFACTOR_BOOST",  FRACUNIT/2)
+--Maximum tics for a player's passive to be active after the player exited the dark area
+rawset(_G, "UNCONCEAL_MAX_TICS", TICRATE)
 
 
 --Checks whether the mobject is valid and (optionally) has the correct skin 
@@ -101,6 +118,66 @@ rawset(_G, "RemoveStingers", function(mo, amount)
 		end
 	end
 end)
+
+rawset(_G, "GetDarkArea", function(sector, dark_level, relative_z)
+	local dark_enough = nil
+	--Check for overall lightlevel to conceal if dark enough
+	-- print("S: "..sector.lightlevel)
+	if(sector.lightlevel <= dark_level) then
+		dark_enough = sector
+	--Finds all floor-over-floor to check for lightlevel of shadows under blocks 
+	else
+		for fof in sector.ffloors() do
+			
+			--Check for lightlevel under blocks to conceal if dark enough
+			--Ignore certain fof's since they trigger conceal when it is not dark enough
+			--(standing above water would have triggered this affect)
+			if(relative_z < fof.bottomheight and fof.toplightlevel < dark_level and fof.flags&FF_SWIMMABLE == 0) then
+				dark_enough = fof
+				break
+			end
+			-- print("F	: "..fof.toplightlevel)
+		end
+	end
+
+	return dark_enough
+end)
+
+
+--Conceals the player in the darkness (called once)
+rawset(_G, "Conceal", function(mo)
+	S_StartSound(mo, sfx_hide1)
+
+	mo.unconceal_timer = UNCONCEAL_MAX_TICS
+
+	--Immediate extra stinger upon concealing
+	if(mo.stingers < MAX_STINGERS) then
+		AddStingers(mo, 1)
+	end
+
+	--Attribute increase
+	mo.player.acceleration = $+CONCEAL_ACCELERATION_BOOST
+	mo.player.normalspeed = $+CONCEAL_NORMALSPEED_BOOST
+	mo.player.jumpfactor = $+CONCEAL_JUMPFACTOR_BOOST
+end)
+
+--Conceal effects to be put every tic 
+rawset(_G, "ConcealEffects", function(mo)
+	mo.frame = $|FF_TRANS50--|FF_FULLBRIGHT
+end)
+
+--Stops concealing the player in the darkness (called once)
+rawset(_G, "Unconceal", function(mo)
+	
+	local skin = skins[mo.player.skin]
+
+	-- print("UnConceal!")
+    mo.player.acceleration = skin.acceleration
+    mo.player.normalspeed =  skin.normalspeed
+	mo.player.jumpfactor = skin.jumpfactor
+end)
+
+
 
 rawset(_G, "SpawnAfterImage", function(mo)
 	if(not Valid(mo)) then
@@ -211,6 +288,7 @@ rawset(_G, "CorrectRotationHoriz", function(rotatemo, pivotx, pivoty, desiredx, 
 	P_MoveOrigin(rotatemo, x, y, z)
 	
 end)
+
 
 --Rotates the mobject around the pivot, think of a circle with pivot as a center and
 --torotate being on the edge of the circle (distance between pivot and torotate is the radius of a circle)
@@ -385,14 +463,16 @@ local function SetUp(player)
 	--Cooldown for a ground stinger cooldown
 	player.mo.ground_tic_cd = 0 
 	player.mo.stung = 0
+	--Amount of extra stingers Helcurt has currently (not counting the current one)
 	player.mo.stingers = 0
 	player.mo.stinger_charge_countdown = -1
 	player.mo.hudstingers = {} --keeping track of HUD elements that represent the string
 
 	player.killcount = 0
 	player.lockon = nil
-	--Amount of extra stingers Helcurt has currently (not counting the current one)
-	player.mo.isconcealed = 0
+	
+	--Time for the conceal to last after leaving the darkness (decreases 'till hits zero to unconceal)
+	player.mo.unconceal_timer = -1
 	
 	-- if(player.night_timer ~= nil) then
 	-- 	EndHelcurtNightBuff(originplayer)
@@ -417,6 +497,8 @@ local function SetUp(player)
 		player.mo.hudstingers[i].frame = $|FF_FULLDARK
 	end
 	
+	Unconceal(player.mo)
+
 	-- P_SpawnMobj(player.mo.x, player.mo.y, player.mo.z, MT_FOLLOW)
 	-- player.mo.tail.flags2 = MF2_LINKDRAW
 	
@@ -451,12 +533,13 @@ local function CleanUp(player)
 
 	player.killcount = nil
 	player.lockon = nil
-	player.mo.isconcealed = nil
 	
 	player.night_timer = nil
 	
 	player.particlecolor = nil
 	
+	Unconceal(player.mo)
+
 	return true
 end
 --------------------------
@@ -886,7 +969,7 @@ mobjinfo[MT_TRNS] = {
 	height = FRACUNIT,
 	radius = FRACUNIT,
 	deathstate = S_NULL,
-	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY
+	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY--|MF_SCENERY
 }
 
 --A stinger Projectile
@@ -907,6 +990,14 @@ mobjinfo[MT_FOLLOW] = {
 	radius = FRACUNIT,
 	dispoffset = 1,
 	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY
+}
+
+
+mobjinfo[MT_SHDW] = {
+	spawnstate = S_SHDW_PRT,
+	height = 16*FRACUNIT,
+	radius = 8*FRACUNIT,
+	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY|MF_SCENERY
 }
 
 --[[
@@ -1014,6 +1105,36 @@ sfxinfo[sfx_stg05] = {
 }
 
 
+sfxinfo[sfx_stg01] = {
+	singular = false,
+	priority = 60
+}
+
+sfxinfo[sfx_stg02] = {
+	singular = false,
+	priority = 60
+}
+
+sfxinfo[sfx_stg03] = {
+	singular = false,
+	priority = 60
+}
+
+sfxinfo[sfx_stg04] = {
+	singular = false,
+	priority = 60
+}
+
+sfxinfo[sfx_stg05] = {
+	singular = false,
+	priority = 60
+}
+
+
+sfxinfo[sfx_hide1] = {
+	singular = true,
+	priority = 60
+}
 
 --/--------------------------
 --/ STATES
@@ -1030,6 +1151,18 @@ states[S_STACK] = {
 states[S_TRNS] = {
 	sprite = SPR_TRNS,
 	tics = TICRATE
+}
+
+
+states[S_SHDW_PRT] = {
+	sprite = SPR_SHDW,
+	tics = 4
+}
+
+states[S_SHDW_HINT] = {
+	sprite = SPR_TRNS,
+	frame = FF_TRANS40,
+	tics = TICRATE*2
 }
 
 states[S_FOLLOW_STAND] = {

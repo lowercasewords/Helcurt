@@ -12,9 +12,17 @@ local function StartHelcurtNightBuff(originplayer)
     if(not Valid(originplayer.mo, "helcurt") or not PAlive(originplayer)) then
         return nil
     end
-        --Increase in speed
-        originplayer.acceleration = $+$/4
-        originplayer.normalspeed = $+$/2
+        --[[
+        local skin = skins[originplayer.skin] 
+
+        --Reset attributes to be boosted
+        originplayer.acceleration = skin.acceleration
+        originplayer.normalspeed = skin.normalspeed
+
+        --Boost in attributes
+        originplayer.acceleration = $+CONCEAL_ACCELERATION_BOOST*2
+        originplayer.normalspeed = $+CONCEAL_NORMALSPEED_BOOST*2
+        ]]--
 end
 
 local function EndHelcurtNightBuff(originplayer)
@@ -22,11 +30,13 @@ local function EndHelcurtNightBuff(originplayer)
         return nil
     end
 
+    --[[
     local skin = skins[originplayer.skin]
     
     --Changes the speed back
     originplayer.acceleration = skin.acceleration
     originplayer.normalspeed = skin.normalspeed
+    ]]--
 end
 
 local function StartTheNight(originplayer)
