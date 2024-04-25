@@ -30,16 +30,16 @@ addHook("PlayerThink", function(player)
         and not (P_IsObjectOnGround(player.mo)) and
         player.mo.state ~= S_NIGHT_CHARGE 
         and player.night_timer == 0) then
-    
-        print("change to charge")
+            
         player.mo.prevstate = player.mo.state
         player.mo.state = S_NIGHT_CHARGE 
     end
+
     --While charging the night
     if(player.mo.state == S_NIGHT_CHARGE) then
-        print("charging")
         P_SetObjectMomZ(player.mo, 0, false)
     end
+
     --Proceeding with the countdown
     if(player.night_timer > 1) then
             player.night_timer = $-1
@@ -47,6 +47,7 @@ addHook("PlayerThink", function(player)
             if(S_SoundPlaying(player.mo, sfx_ult01) == nil and S_SoundPlaying(player.mo, sfx_ult02) == nil) then
                 S_StartSound(player.mo, sfx_ult02)
             end
+            
     --Clearing up after the night ends
     elseif(player.night_timer == 1) then
         player.night_timer = $-1

@@ -872,7 +872,7 @@ end
 
 
 local function A_NightCharge(actor, par1, par2)
-	print("Start charging!")
+	
 end
 
 local function A_NightActivate(actor, par1, par2)
@@ -880,7 +880,7 @@ local function A_NightActivate(actor, par1, par2)
 	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
 		return nil
 	end
-	print("Activate!")
+	
 	actor.player.night_timer = NIGHT_MAX_TIC
 	StartTheNight(actor.player)
 end
