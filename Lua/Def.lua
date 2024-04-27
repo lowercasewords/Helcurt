@@ -454,7 +454,7 @@ local function CleanUp(player)
 	player.mo.isconcealed = nil
 	
 	player.night_timer = nil
-	
+
 	player.particlecolor = nil
 	
 	return true
@@ -571,7 +571,8 @@ addHook("PostThinkFrame", function()
 									player.mo.x-player.mo.radius, 
 									-- player.mo.y+player.mo.radius-player.mo.radius*i, 
 									player.mo.y - (player.mo.radius*i) + (player.mo.radius/3) * MAX_STINGERS, 
-									player.mo.z+player.mo.height, player.mo.angle)
+									player.mo.z+player.mo.height, R_PointToAngle(player.mo.x, player.mo.y))
+				
 			end
 
 			--Rotate the folllow object around the player just a tiny bit to make it appear behind the player
