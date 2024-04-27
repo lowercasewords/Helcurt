@@ -27,9 +27,9 @@ addHook("PlayerThink", function(player)
     
     --Start charging the night
     if(player.cmd.buttons & BT_SPIN and player.cmd.buttons & BT_JUMP 
-        and not (P_IsObjectOnGround(player.mo)) and
-        player.mo.state ~= S_NIGHT_CHARGE 
-        and player.night_timer == 0) then
+            and not (P_IsObjectOnGround(player.mo)) and
+            player.mo.state ~= S_NIGHT_CHARGE 
+            and player.night_timer == 0) then
             
         player.mo.prevstate = player.mo.state
         player.mo.state = S_NIGHT_CHARGE 
@@ -37,7 +37,7 @@ addHook("PlayerThink", function(player)
 
     --While charging the night
     if(player.mo.state == S_NIGHT_CHARGE) then
-        P_SetObjectMomZ(player.mo, 0, false)
+        P_SetObjectMomZ(player.mo, 10*FRACUNIT, false)
     end
 
     --Proceeding with the countdown
