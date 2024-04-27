@@ -40,7 +40,7 @@ addHook("PlayerThink", function(player)
 	end
 
 	--If holding or pressing spin when able to attack (in the air)
-	if(P_IsObjectOnGround(player.mo) == false and player.spinheld ~= 0) then
+	if(P_IsObjectOnGround(player.mo) == false and player.spinheld ~= 0 and player.jumpheld == 0) then
 		
 		if(player.mo.state == S_BLADE_THURST) then
 			--Continuous behavior 

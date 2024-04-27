@@ -873,6 +873,10 @@ end
 
 local function A_NightCharge(actor, par1, par2)
 
+	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
+		return nil
+	end
+
 	--Prevents activation of other abilities during and after
 	actor.can_teleport = 0
 	actor.can_blade = 0
@@ -886,6 +890,7 @@ local function A_NightActivate(actor, par1, par2)
 	end
 	
 	actor.player.night_timer = NIGHT_MAX_TIC
+	P_Thrust(actor, actor.angle, 50*FRACUNIT)
 	StartTheNight(actor.player)
 end
 
