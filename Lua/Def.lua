@@ -13,12 +13,15 @@ freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRAN
 "S_AIR_1", "S_GRND_1", "S_AIR_2", "S_GRND_2", "S_AIR_3",
 "S_STINGER_AIR_1", "S_STINGER_AIR_2", 
 "S_STINGER_GRND_1", "S_STINGER_GRND_2",
-"S_NIGHT_CHARGE", "S_NIGHT_ACTIVATE")
-freeslot("MT_STGP", "MT_STGS", "MT_LOCK", "MT_TRNS", "MT_FOLLOW")
-freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK", "SPR_TRNS", "SPR_FLWS", "SPR_FLWR")
+"S_NIGHT_CHARGE", "S_NIGHT_ACTIVATE",
+"S_NGHT_1", "S_NGHT_2")
+freeslot("MT_STGP", "MT_STGS", "MT_LOCK", "MT_TRNS", "MT_FOLLOW", "MT_NGHT")
+freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK", "SPR_TRNS", "SPR_FLWS", "SPR_FLWR",
+"SPR_NGHT")
 freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", "sfx_hide1",
 "sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1",
 "sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05")
+
 --Particle slots
 freeslot("MT_SHDW", "SPR_SHDW", "S_SHDW_PRT", "S_SHDW_HINT")
 
@@ -575,7 +578,8 @@ local function SetUp(player)
 		SPEED_BUG_PREVENTION(player)
 	end
 	player.night_timer = 0
-	-- end
+	--Visual object that is shown while charging and activating the night
+	player.mo.night_obj = nil
 	
 	--DEPRECATED - Prevent changing to default particle color each time player respawns
 	if(player.particlecolor == nil) then
@@ -628,6 +632,7 @@ local function CleanUp(player)
 	player.lockon = nil
 	
 	player.night_timer = nil
+	player.mo.night_obj = nil
 	
 	player.particlecolor = nil
 	
@@ -864,9 +869,17 @@ local function A_Air3(actor, var1, var2)
 	
 end
 
+local function A_Nght_1(actor, var1, var2)
+	print(1)
+	actor.spritexscale = 10
+	actor.spriteyscale = 10
+end
 
-
-
+local function A_Nght_2(actor, var1, var2)
+	print(2)
+	-- actor.spritexscale = FRACUNIT*2
+	-- actor.spriteyscale = FRACUNIT*2
+end
 
 ---------------- PLAYER ACTIONS ---------------- 
 
@@ -881,6 +894,8 @@ local function A_NightCharge(actor, par1, par2)
 	actor.can_teleport = 0
 	actor.can_blade = 0
 	
+	actor.night_obj = P_SpawnMobj(actor.x, actor.y, actor.z, MT_NGHT)
+	actor.night_obj.state = S_NGHT_1
 end
 
 local function A_NightActivate(actor, par1, par2)
@@ -890,7 +905,16 @@ local function A_NightActivate(actor, par1, par2)
 	end
 	
 	actor.player.night_timer = NIGHT_MAX_TIC
+
+	if(actor.night_obj.state ~= S_NGHT_2) then
+		actor.night_obj.state = S_NGHT_2
+	end
+
+	actor.night_obj.spritexscale = FRACUNIT*2
+	actor.night_obj.spriteyscale = FRACUNIT*2
+
 	P_Thrust(actor, actor.angle, 50*FRACUNIT)
+	
 	StartTheNight(actor.player)
 end
 
@@ -1093,6 +1117,14 @@ end
 --/ MOBJECT INFOS
 --/--------------------------
 
+mobjinfo[MT_NGHT] = { 
+	spawnstate = S_NGHT_1,
+	deathstate = S_NULL,
+	height = FRACUNIT,
+	radius = FRACUNIT,
+	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY|MF_SCENERY
+}
+
 mobjinfo[MT_LOCK] = {
 	spawnstate = S_LOCK,
 	deathstate = S_NULL,
@@ -1276,101 +1308,6 @@ sfxinfo[sfx_hide1] = {
 --/--------------------------
 
 
----------------- CUSTOM OBJECT STATES ---------------- 
-
-states[S_STACK] = {
-	sprite = SPR_STGS,
-	tics = -1
-}
-
-states[S_TRNS] = {
-	sprite = SPR_TRNS,
-	tics = TICRATE
-}
-
-
-states[S_SHDW_PRT] = {
-	sprite = SPR_SHDW,
-	tics = 4
-}
-
-states[S_SHDW_HINT] = {
-	sprite = SPR_TRNS,
-	frame = FF_TRANS40,
-	tics = TICRATE*2
-}
-
-states[S_FOLLOW_STAND] = {
-	sprite = SPR_FLWS,
-	frame = FF_ANIMATE,
-	var1 = 2, --Number of frames
-	var2 = 7, --Tics before cycle to a new frame
-	tics = -1
-}
-
-states[S_FOLLOW_RUN] = {
-	sprite = SPR_FLWR,
-	frame = FF_ANIMATE,
-	var1 = 2, --Number of frames - 1
-	var2 = 3, --Tics before cycle to a new frame
-	tics = -1
-}
-
---[[
-states[S_LOCK] = {
-	sprite = SPR_LOCK,
-	tics = -1,
-	nextstate = S_NULL
-}
-]]--
-
---[[
-states[S_GHOST] = {
-	sprite = SPR_STGA,
-	frame = FF_FULLBRIGHT,
-	tics = -1,
-	nextstate = S_NULL
-}
-]]--
-
-states[S_AIR_1] = {
-	sprite = SPR_STGP,
-	frame = FF_FULLBRIGHT|B,
-	tics = 6,
-	nextstate = S_AIR_2
-}
-
-states[S_AIR_2] = {
-	sprite = SPR_STGP,
-	frame = FF_FULLBRIGHT|B,
-	tics = TICRATE,
-	action = A_Air2,
-	nextstate = S_AIR_3
-}
-
-states[S_GRND_1] = {
-	sprite = SPR_STGP,
-	frame = FF_FULLBRIGHT|A,
-	tics = 10,
-	nextstate = S_GRND_2
-}
-
-states[S_GRND_2] = {
-	sprite = SPR_STGP,
-	frame = FF_FULLBRIGHT|A,
-	tics = TICRATE,
-	action = A_Grnd2,
-	nextstate = S_NULL
-}
-
-states[S_AIR_3] = {
-	sprite = SPR_STGP,
-	frame = FF_FULLBRIGHT,
-	tics = TICRATE,
-	action = A_Air3,
-	nextstate = S_NULL
-}
-
 ---------------- PLAYER STATES ----------------
 
 
@@ -1492,4 +1429,115 @@ states[S_END_TRANSITION] = {
 	tics = -1,
 	action = A_End_Transition,
 	nextstate = S_PLAY_FALL
+}
+
+
+---------------- CUSTOM OBJECT STATES ---------------- 
+
+states[S_STACK] = {
+	sprite = SPR_STGS,
+	tics = -1
+}
+
+states[S_NGHT_1] = {
+	sprite = SPR_NGHT,
+	frame = FF_ANIMATE|FF_TRANS50,
+	tics = states[S_NIGHT_CHARGE].tics,
+	action = A_Nght_1,
+	nextstate = S_NGHT_2
+}
+
+states[S_NGHT_2] = {
+	sprite = SPR_NGHT,
+	frame = FF_ANIMATE|FF_TRANS20,
+	tics = TICRATE,
+	action = A_Nght_2,
+	nexstate = S_NULL
+}
+
+states[S_TRNS] = {
+	sprite = SPR_TRNS,
+	tics = TICRATE
+}
+
+states[S_SHDW_PRT] = {
+	sprite = SPR_SHDW,
+	tics = 4
+}
+
+states[S_SHDW_HINT] = {
+	sprite = SPR_TRNS,
+	frame = FF_TRANS40,
+	tics = TICRATE*2
+}
+
+states[S_FOLLOW_STAND] = {
+	sprite = SPR_FLWS,
+	frame = FF_ANIMATE,
+	var1 = 2, --Number of frames
+	var2 = 7, --Tics before cycle to a new frame
+	tics = -1
+}
+
+states[S_FOLLOW_RUN] = {
+	sprite = SPR_FLWR,
+	frame = FF_ANIMATE,
+	var1 = 2, --Number of frames - 1
+	var2 = 3, --Tics before cycle to a new frame
+	tics = -1
+}
+
+--[[
+states[S_LOCK] = {
+	sprite = SPR_LOCK,
+	tics = -1,
+	nextstate = S_NULL
+}
+]]--
+
+--[[
+states[S_GHOST] = {
+	sprite = SPR_STGA,
+	frame = FF_FULLBRIGHT,
+	tics = -1,
+	nextstate = S_NULL
+}
+]]--
+
+states[S_AIR_1] = {
+	sprite = SPR_STGP,
+	frame = FF_FULLBRIGHT|B,
+	tics = 6,
+	nextstate = S_AIR_2
+}
+
+states[S_AIR_2] = {
+	sprite = SPR_STGP,
+	frame = FF_FULLBRIGHT|B,
+	tics = TICRATE,
+	action = A_Air2,
+	nextstate = S_AIR_3
+}
+
+states[S_GRND_1] = {
+	sprite = SPR_STGP,
+	frame = FF_FULLBRIGHT|A,
+	tics = 10,
+	nextstate = S_GRND_2
+}
+
+states[S_GRND_2] = {
+	sprite = SPR_STGP,
+	frame = FF_FULLBRIGHT|A,
+	tics = TICRATE,
+	action = A_Grnd2,
+	nextstate = S_NULL
+}
+
+states[S_AIR_3] = {
+	sprite = SPR_STGP,
+	frame = FF_FULLBRIGHT,
+	tics = TICRATE,
+	action = A_Air3,
+	nextstate = S_NULL
 }
