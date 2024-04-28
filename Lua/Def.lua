@@ -804,7 +804,10 @@ addHook("PostThinkFrame", function()
 						obj.spriteyscale = $+(FRACUNIT / states[S_NGHT_1].tics)
 
 					elseif(obj.state == S_NGHT_2) then
+						--Move behind the player only half of the states tics
+						if(states[S_NGHT_2].tics*2/3 < obj.tics) then
 							P_MoveOrigin(player.mo.night_obj, player.mo.x, player.mo.y, player.mo.z)
+						end
 					end
 
 					SpawnAfterImage(obj, FF_TRANS50)
@@ -1477,7 +1480,7 @@ states[S_STACK] = {
 
 states[S_NGHT_1] = {
 	sprite = SPR_NGHT,
-	frame = FF_ANIMATE|FF_TRANS10,
+	frame = FF_ANIMATE|FF_TRANS90,
 	tics = states[S_NIGHT_CHARGE].tics,
 	nextstate = S_NGHT_2
 }
