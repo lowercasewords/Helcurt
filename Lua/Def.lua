@@ -803,6 +803,31 @@ addHook("PostThinkFrame", function()
 						obj.spritexscale = $+(FRACUNIT / states[S_NGHT_1].tics)
 						obj.spriteyscale = $+(FRACUNIT / states[S_NGHT_1].tics)
 
+						local distance = 80*FRACUNIT
+
+						--Spawn shadow particles around 
+						local shadow = P_SpawnMobjFromMobj(player.mo, 
+											P_RandomRange(-distance/FRACUNIT, distance/FRACUNIT)*FRACUNIT,
+											P_RandomRange(-distance/FRACUNIT, distance/FRACUNIT)*FRACUNIT,
+											P_RandomRange(-distance/FRACUNIT, distance/FRACUNIT)*FRACUNIT,
+											MT_SHDW)
+						
+						--Setting the visual properties
+						shadow.state = S_SHDW_PRT
+						shadow.frame = FF_TRANS10
+
+						--Setting the speed to match player's speed
+						shadow.momx = player.mo.momx
+						shadow.momy = player.mo.momy
+						shadow.momz = player.mo.momz
+
+						--Move "into" the direction of the player
+						P_Thrust(shadow, 
+								R_PointToAngle2(shadow.x, shadow.y, player.mo.x, player.mo.y),
+								R_PointToDist2(shadow.x, shadow.y, player.mo.x, player.mo.y)/TICRATE)
+
+						P_SetObjectMomZ(shadow, (player.mo.z - shadow.z)/TICRATE, true)
+
 					elseif(obj.state == S_NGHT_2) then
 						--Move behind the player only half of the states tics
 						if(states[S_NGHT_2].tics*2/3 < obj.tics) then
@@ -911,6 +936,16 @@ local function A_ShdwHint(actor, var1, var2)
 	actor.spriteyscale = FRACUNIT*4
 
 	P_SetObjectMomZ(actor, P_RandomRange(-2, 2)*FRACUNIT, false)
+end
+
+local function A_Nght_1(actor, var1, var2) 
+	if(not Valid(actor)) then
+		return nil
+	end
+
+	-- print("night!")
+	actor.spritexscale = FRACUNIT/2
+	actor.spriteyscale = FRACUNIT/2
 end
 
 local function A_Nght_2(actor, var1, var2) 
@@ -1481,6 +1516,7 @@ states[S_STACK] = {
 states[S_NGHT_1] = {
 	sprite = SPR_NGHT,
 	frame = FF_ANIMATE|FF_TRANS90,
+	action = A_Nght_1,
 	tics = states[S_NIGHT_CHARGE].tics,
 	nextstate = S_NGHT_2
 }
