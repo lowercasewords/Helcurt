@@ -871,16 +871,16 @@ local function A_Air3(actor, var1, var2)
 	
 end
 
-local function A_Nght_1(actor, var1, var2)
-	print(1)
-	actor.spritexscale = 10
-	actor.spriteyscale = 10
-end
 
-local function A_Nght_2(actor, var1, var2)
-	print(2)
-	-- actor.spritexscale = FRACUNIT*2
-	-- actor.spriteyscale = FRACUNIT*2
+local function A_ShdwHint(actor, var1, var2) 
+	if(not Valid(actor)) then
+		return nil
+	end
+
+	actor.spritexscale = FRACUNIT*4
+	actor.spriteyscale = FRACUNIT*4
+
+	P_SetObjectMomZ(actor, P_RandomRange(-2, 2)*FRACUNIT, false)
 end
 
 ---------------- PLAYER ACTIONS ---------------- 
@@ -1310,8 +1310,65 @@ sfxinfo[sfx_hide1] = {
 --/--------------------------
 
 
----------------- PLAYER STATES ----------------
 
+---------------- CUSTOM OBJECT STATES ---------------- 
+
+states[S_STACK] = {
+	sprite = SPR_STGS,
+	tics = -1
+}
+
+states[S_TRNS] = {
+	sprite = SPR_TRNS,
+	tics = TICRATE
+}
+
+
+states[S_SHDW_PRT] = {
+	sprite = SPR_SHDW,
+	frame = FF_TRANS50,
+	tics = TICRATE/2
+}
+
+states[S_SHDW_HINT] = {
+	sprite = SPR_SHDW,
+	frame = FF_TRANS10,
+	action = A_ShdwHint,
+	tics = TICRATE*2
+}
+
+states[S_FOLLOW_STAND] = {
+	sprite = SPR_FLWS,
+	frame = FF_ANIMATE|FF_FULLBRIGHT,
+	var1 = 2, --Number of frames
+	var2 = 7, --Tics before cycle to a new frame
+	tics = -1
+}
+
+states[S_FOLLOW_RUN] = {
+	sprite = SPR_FLWR,
+	frame = FF_ANIMATE,
+	var1 = 2, --Number of frames - 1
+	var2 = 3, --Tics before cycle to a new frame
+	tics = -1
+}
+
+--[[
+states[S_LOCK] = {
+	sprite = SPR_LOCK,
+	tics = -1,
+	nextstate = S_NULL
+}
+]]--
+
+--[[
+states[S_GHOST] = {
+	sprite = SPR_STGA,
+	frame = FF_FULLBRIGHT,
+	tics = -1,
+	nextstate = S_NULL
+}
+]]--
 
 
 --Charges in order to activate the night manually

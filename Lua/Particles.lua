@@ -13,6 +13,7 @@ end, COM_LOCAL)
 local MAX_TICS = TICRATE
 local counter = 0
 
+
 addHook("PlayerThink", function(player)
 -- 	if(player.valid and player.mo and player.mo.valid and player.mo.skin and player.mo.skin.valid
 -- 	and player.mo.skin == "helcurt")
@@ -50,10 +51,12 @@ addHook("PlayerThink", function(player)
 	if(player.mo.unconceal_timer > 0) then
 		local particle = P_SpawnMobj(player.mo.x+P_RandomRange(SPAWN_RADIUS_MAX, -SPAWN_RADIUS_MAX)*FRACUNIT, 
 									player.mo.y+P_RandomRange(SPAWN_RADIUS_MAX, -SPAWN_RADIUS_MAX)*FRACUNIT,  
-									player.mo.z+P_RandomRange(0, player.mo.height/FRACUNIT/2)*FRACUNIT,
+									player.mo.z+P_RandomRange(0, player.mo.height/(2*FRACUNIT))*FRACUNIT,
 									MT_SHDW)
 		particle.color = player.mo.color--particlecolor
-		P_SetObjectMomZ(particle, 2*FRACUNIT, false)
+		particle.momx = player.mo.momx/2
+		particle.momy = player.mo.momy/2
+		P_SetObjectMomZ(particle, FRACUNIT/2, false)
 	end
 
 	if(counter <= 0) then
@@ -125,13 +128,14 @@ addHook("PlayerThink", function(player)
 end)
 
 
+--[[
+
 addHook("MobjThinker", function(mo)
+	-- if(not Valid(mo)) then
+	-- 	return nil 
+	-- end
 
-	if(not Valid(mo)) then
-		return nil 	
-	end
+end, MT_SHDW)
 
-	--Ponit the night object sprite towards the camera
-	mo.angle = R_PointToAngle(mo.x, mo.y)
+]]--
 
-end, MT_NGHT)

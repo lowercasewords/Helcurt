@@ -24,10 +24,13 @@ build:
 	#Less fancy but it works. Use this until I can figure out the issue.
 	#Note: the project won't get big and I don't want to waste time fixing
 	#this minor issue, so this will be enough :3
+	
+	zip $(OUTPK3) $(PRIORITY_FILES)
+
+	zip $(OUTPK3) -r Lua
 	zip $(OUTPK3) Skins/S_SKIN
 	zip $(OUTPK3) -r Soc
 	zip $(OUTPK3) -r Skins
-	zip $(OUTPK3) -r Lua
 	zip $(OUTPK3) -r Sprites
 	zip $(OUTPK3) -r Sounds
 clean:
