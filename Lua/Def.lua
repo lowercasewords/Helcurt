@@ -760,6 +760,16 @@ local function A_Air3(actor, var1, var2)
 	
 end
 
+local function A_ShdwHint(actor, var1, var2) 
+	if(not Valid(actor)) then
+		return nil
+	end
+
+	actor.spritexscale = FRACUNIT*4
+	actor.spriteyscale = FRACUNIT*4
+
+	P_SetObjectMomZ(actor, P_RandomRange(-2, 2)*FRACUNIT, false)
+end
 ---------------- PLAYER ACTIONS ---------------- 
 
 
@@ -1161,14 +1171,15 @@ states[S_SHDW_PRT] = {
 }
 
 states[S_SHDW_HINT] = {
-	sprite = SPR_TRNS,
-	frame = FF_TRANS40,
+	sprite = SPR_SHDW,
+	frame = FF_TRANS10,
+	action = A_ShdwHint,
 	tics = TICRATE*2
 }
 
 states[S_FOLLOW_STAND] = {
 	sprite = SPR_FLWS,
-	frame = FF_ANIMATE,
+	frame = FF_ANIMATE|FF_FULLBRIGHT,
 	var1 = 2, --Number of frames
 	var2 = 7, --Tics before cycle to a new frame
 	tics = -1
