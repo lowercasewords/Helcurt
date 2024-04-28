@@ -1156,7 +1156,8 @@ states[S_TRNS] = {
 
 states[S_SHDW_PRT] = {
 	sprite = SPR_SHDW,
-	tics = 4
+	frame = FF_TRANS50,
+	tics = TICRATE/2
 }
 
 states[S_SHDW_HINT] = {
