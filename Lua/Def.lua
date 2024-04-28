@@ -12,12 +12,16 @@ freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRAN
 "S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK", "S_FOLLOW_STAND", "S_FOLLOW_RUN",
 "S_AIR_1", "S_GRND_1", "S_AIR_2", "S_GRND_2", "S_AIR_3",
 "S_STINGER_AIR_1", "S_STINGER_AIR_2", 
-"S_STINGER_GRND_1", "S_STINGER_GRND_2")
-freeslot("MT_STGP", "MT_STGS", "MT_LOCK", "MT_TRNS", "MT_FOLLOW")
-freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK", "SPR_TRNS", "SPR_FLWS", "SPR_FLWR")
+"S_STINGER_GRND_1", "S_STINGER_GRND_2",
+"S_NIGHT_CHARGE", "S_NIGHT_ACTIVATE",
+"S_NGHT_1", "S_NGHT_2")
+freeslot("MT_STGP", "MT_STGS", "MT_LOCK", "MT_TRNS", "MT_FOLLOW", "MT_NGHT")
+freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK", "SPR_TRNS", "SPR_FLWS", "SPR_FLWR",
+"SPR_NGHT")
 freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", "sfx_hide1",
 "sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1",
 "sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05")
+
 --Particle slots
 freeslot("MT_SHDW", "SPR_SHDW", "S_SHDW_PRT", "S_SHDW_HINT")
 
@@ -70,9 +74,14 @@ rawset(_G, "CONCEAL_JUMPFACTOR_BOOST",  FRACUNIT/2)
 --Maximum tics for a player's passive to be active after the player exited the dark area
 rawset(_G, "UNCONCEAL_MAX_TICS", TICRATE)
 
+--Duration of the night
+rawset(_G, "NIGHT_MAX_TIC", 5*TICRATE)
+rawset(_G, "NIGHT_SKYBOX", 6)
+rawset(_G, "NIGHT_LIGHT_MULTIPLYER", 3/4)
+
+
 
 --Checks whether the mobject is valid and (optionally) has the correct skin 
-
 rawset(_G, "Valid", function(mo, skin)
 	return mo ~= nil and mo.valid == true and mo.skin == skin and mo.state ~= S_NULL --and mo.state ~= states[mo.state].deathstate
 end)
@@ -177,6 +186,93 @@ rawset(_G, "Unconceal", function(mo)
 	mo.player.jumpfactor = skin.jumpfactor
 end)
 
+rawset(_G, "StartHelcurtNightBuff", function(originplayer)
+    if(not Valid(originplayer.mo, "helcurt") or not PAlive(originplayer)) then
+        return nil
+    end
+        --[[
+        local skin = skins[originplayer.skin] 
+
+        --Reset attributes to be boosted
+        originplayer.acceleration = skin.acceleration
+        originplayer.normalspeed = skin.normalspeed
+
+        --Boost in attributes
+        originplayer.acceleration = $+CONCEAL_ACCELERATION_BOOST*2
+        originplayer.normalspeed = $+CONCEAL_NORMALSPEED_BOOST*2
+        ]]--
+end)
+
+rawset(_G, "EndHelcurtNightBuff", function(originplayer)
+    if(not Valid(originplayer.mo, "helcurt") or not PAlive(originplayer)) then
+        return nil
+    end
+
+    --[[
+    local skin = skins[originplayer.skin]
+    
+    --Changes the speed back
+    originplayer.acceleration = skin.acceleration
+    originplayer.normalspeed = skin.normalspeed
+    ]]--
+end)
+
+rawset(_G, "StartTheNight", function(originplayer) 
+    if(not Valid(originplayer.mo, "helcurt")) then
+        return nil
+    end
+
+    StartHelcurtNightBuff(originplayer)
+    
+    --Changes the background for the Night Fall
+    P_SetupLevelSky(NIGHT_SKYBOX)
+    P_SetSkyboxMobj(nil)  
+    -- P_SwitchWeather(PRECIP_STORM)
+
+    --Starting the monologue and night sound
+    S_StartSound(originplayer.mo, sfx_mnlg1)
+    S_StartSound(originplayer.mo, sfx_ult01)
+
+    --Fading the background music
+    S_FadeMusic(50, 20)
+    -- S_SpeedMusic(FRACUNIT/2)
+    
+    --Make each sector of the map darker
+    for sector in sectors.iterate do
+        -- sector.oglightlevel = 0
+        -- sector.oglightlevel = sector.lightlevel
+        -- P_FadeLight(sector.tag, sector.lightlevel - sector.lightlevel/NIGHT_LIGHT_MULTIPLYER, 3)
+       sector.lightlevel = $*3/4
+    end
+end)
+
+--Call this function ONLY IF THE NIGHT ABILITY IS ON, 
+rawset(_G, "EndTheNight", function(originplayer, skybox, skynum)
+    if(not Valid(originplayer.mo, "helcurt")) then
+        return nil
+    end
+
+    EndHelcurtNightBuff(originplayer)
+
+   --Changes the background back to the OG (OriGinal)
+   P_SetupLevelSky(skynum)
+   -- P_SwitchWeather(current_mapinfo.weather)
+   if(originplayer.og_skybox.valid and originplayer.og_skybox ~= nil) then
+       P_SetSkyboxMobj(skybox)
+   end
+
+   --Wrapping-up the night sound and bringing back original level sounds
+   S_FadeMusic(100, 20)
+   S_StopSoundByID(originplayer.mo, sfx_ult02)
+   S_StartSound(originplayer.mo, sfx_ult03)
+   S_SpeedMusic(FRACUNIT)
+   
+   for sector in sectors.iterate do
+       -- P_FadeLight(sector.tag, -sector.lightlevel/2, 20)
+       -- sector.lightlevel = sector.oglightlevel
+       sector.lightlevel = $*4/3
+   end
+end)
 
 
 rawset(_G, "SpawnAfterImage", function(mo)
@@ -482,7 +578,8 @@ local function SetUp(player)
 		SPEED_BUG_PREVENTION(player)
 	end
 	player.night_timer = 0
-	-- end
+	--Visual object that is shown while charging and activating the night
+	player.mo.night_obj = nil
 	
 	--DEPRECATED - Prevent changing to default particle color each time player respawns
 	if(player.particlecolor == nil) then
@@ -535,6 +632,8 @@ local function CleanUp(player)
 	player.lockon = nil
 	
 	player.night_timer = nil
+
+	player.mo.night_obj = nil
 	
 	player.particlecolor = nil
 	
@@ -549,10 +648,20 @@ end
 --Handle needed variables on spawn
 addHook("PlayerSpawn", function(player)
 	-- if((not player.mo) or not (player.mo.skin == "helcurt"))  then
-	if(not Valid(player.mo, "helcurt")) then
-		return
+
+	--Set up if the player is helcurt, but doesn't work if the host player starts the server as helcurt
+	--because skin is set to helcurt AFTER player spawns
+	if(Valid(player.mo, "helcurt")) then
+		SetUp(player)
 	end
-	SetUp(player)
+	
+	--Sets up special server attributes
+	if(player == server) then
+		--information about the map so that the night won't last forever
+		server.current_mapinfo = 0
+		--original skybox, it is stored separately because skybox is not stored in mapheaderinfo
+		server.og_skybox = 0
+	end
 end)
 
 --The Base Thinker that plays before others,
@@ -586,7 +695,8 @@ addHook("PreThinkFrame", function()
 		--Not allow to move during these states
 		if(player.mo.state == S_IN_TRANSITION or 
 		player.mo.state == S_STINGER_GRND_1 or 
-		player.mo.state == S_STINGER_GRND_2) then
+		player.mo.state == S_STINGER_GRND_2 or 
+		player.mo.state == S_NIGHT_CHARGE) then
 			player.cmd.forwardmove = 0
 			player.cmd.sidemove = 0
 		end
@@ -654,7 +764,8 @@ addHook("PostThinkFrame", function()
 									player.mo.x-player.mo.radius, 
 									-- player.mo.y+player.mo.radius-player.mo.radius*i, 
 									player.mo.y - (player.mo.radius*i) + (player.mo.radius/3) * MAX_STINGERS, 
-									player.mo.z+player.mo.height, player.mo.angle)
+									player.mo.z+player.mo.height, R_PointToAngle(player.mo.x, player.mo.y))
+				
 			end
 
 			--Rotate the folllow object around the player just a tiny bit to make it appear behind the player
@@ -760,6 +871,7 @@ local function A_Air3(actor, var1, var2)
 	
 end
 
+
 local function A_ShdwHint(actor, var1, var2) 
 	if(not Valid(actor)) then
 		return nil
@@ -770,8 +882,43 @@ local function A_ShdwHint(actor, var1, var2)
 
 	P_SetObjectMomZ(actor, P_RandomRange(-2, 2)*FRACUNIT, false)
 end
+
 ---------------- PLAYER ACTIONS ---------------- 
 
+
+local function A_NightCharge(actor, par1, par2)
+
+	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
+		return nil
+	end
+
+	--Prevents activation of other abilities during and after
+	actor.can_teleport = 0
+	actor.can_blade = 0
+	
+	actor.night_obj = P_SpawnMobj(actor.x, actor.y, actor.z, MT_NGHT)
+	actor.night_obj.state = S_NGHT_1
+end
+
+local function A_NightActivate(actor, par1, par2)
+
+	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
+		return nil
+	end
+	
+	actor.player.night_timer = NIGHT_MAX_TIC
+
+	if(actor.night_obj.state ~= S_NGHT_2) then
+		actor.night_obj.state = S_NGHT_2
+	end
+
+	actor.night_obj.spritexscale = FRACUNIT*2
+	actor.night_obj.spriteyscale = FRACUNIT*2
+
+	P_Thrust(actor, actor.angle, 50*FRACUNIT)
+	
+	StartTheNight(actor.player)
+end
 
 --Thursts in the direction of the movement input while canceling all vertical momentum
 local function A_BladeThrust(actor, par1, par2)
@@ -780,7 +927,7 @@ local function A_BladeThrust(actor, par1, par2)
 	end
 	
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
-	P_SetObjectMomZ(actor, 0, false)
+	P_SetObjectMomZ(actor, -2*FRACUNIT, false)
 	P_InstaThrust(actor, actor.player.inputangle, ownerspeed/2+BLADE_THURST_SPEED)
 	
 	-- actor.player.pflags = $|PF_SPINNING
@@ -788,6 +935,7 @@ local function A_BladeThrust(actor, par1, par2)
 	actor.player.powers[pw_strong] = $|STR_SPRING
 	actor.can_blade = 0
 end
+
 
 local function A_BladeThrustHit(actor, par1, par2)
 	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
@@ -811,6 +959,7 @@ local function A_BladeThrustHit(actor, par1, par2)
 	actor.enhanced_teleport = 1
 end
 
+
 local function A_Pre_Transition(actor, par1, par2)
 	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
 		return nil
@@ -825,6 +974,7 @@ local function A_Pre_Transition(actor, par1, par2)
 	actor.momy = $/2
 	actor.momx = $/2
 end
+
 
 --Start the teleportation transition
 local function A_Start_Transition(actor, par1, par2)
@@ -844,8 +994,8 @@ local function A_Start_Transition(actor, par1, par2)
 	P_InstaThrust(actor, actor.angle, (actor.player.night_timer == 0 and TELEPORT_SPEED or TELEPORT_SPEED + TELEPORT_SPEED/3))
 	P_SetObjectMomZ(actor, 0, false)
 
-	
 end
+
 
 --[[
 --Perform single time once in transition
@@ -858,6 +1008,7 @@ local function A_In_Transition(actor, par1, par2)
 	
 end
 ]]--
+
 
 --End the transition
 local function A_End_Transition(actor, par1, par2)
@@ -967,6 +1118,14 @@ end
 --/--------------------------
 --/ MOBJECT INFOS
 --/--------------------------
+
+mobjinfo[MT_NGHT] = { 
+	spawnstate = S_NGHT_1,
+	deathstate = S_NULL,
+	height = FRACUNIT,
+	radius = FRACUNIT,
+	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY|MF_SCENERY
+}
 
 mobjinfo[MT_LOCK] = {
 	spawnstate = S_LOCK,
@@ -1151,6 +1310,7 @@ sfxinfo[sfx_hide1] = {
 --/--------------------------
 
 
+
 ---------------- CUSTOM OBJECT STATES ---------------- 
 
 states[S_STACK] = {
@@ -1210,45 +1370,24 @@ states[S_GHOST] = {
 }
 ]]--
 
-states[S_AIR_1] = {
-	sprite = SPR_STGP,
-	frame = FF_FULLBRIGHT|B,
-	tics = 6,
-	nextstate = S_AIR_2
+
+--Charges in order to activate the night manually
+states[S_NIGHT_CHARGE] = {
+	sprite = SPR_PLAY,
+	frame = SPR2_FALL,
+	tics = TICRATE/2,
+	action = A_NightCharge,
+	nextstate = S_NIGHT_ACTIVATE
 }
 
-states[S_AIR_2] = {
-	sprite = SPR_STGP,
-	frame = FF_FULLBRIGHT|B,
-	tics = TICRATE,
-	action = A_Air2,
-	nextstate = S_AIR_3
+--Activates the night 
+states[S_NIGHT_ACTIVATE] = {
+	sprite = SPR_PLAY,
+	frame = SPR2_BLDE,
+	tics = 5,
+	action = A_NightActivate,
+	nextstate = S_PLAY_FALL
 }
-
-states[S_GRND_1] = {
-	sprite = SPR_STGP,
-	frame = FF_FULLBRIGHT|A,
-	tics = 10,
-	nextstate = S_GRND_2
-}
-
-states[S_GRND_2] = {
-	sprite = SPR_STGP,
-	frame = FF_FULLBRIGHT|A,
-	tics = TICRATE,
-	action = A_Grnd2,
-	nextstate = S_NULL
-}
-
-states[S_AIR_3] = {
-	sprite = SPR_STGP,
-	frame = FF_FULLBRIGHT,
-	tics = TICRATE,
-	action = A_Air3,
-	nextstate = S_NULL
-}
-
----------------- PLAYER STATES ----------------
 
 states[S_STINGER_AIR_1] = {
 	sprite = SPR_PLAY,
@@ -1349,4 +1488,115 @@ states[S_END_TRANSITION] = {
 	tics = -1,
 	action = A_End_Transition,
 	nextstate = S_PLAY_FALL
+}
+
+
+---------------- CUSTOM OBJECT STATES ---------------- 
+
+states[S_STACK] = {
+	sprite = SPR_STGS,
+	tics = -1
+}
+
+states[S_NGHT_1] = {
+	sprite = SPR_NGHT,
+	frame = FF_ANIMATE|FF_TRANS50,
+	tics = states[S_NIGHT_CHARGE].tics,
+	action = A_Nght_1,
+	nextstate = S_NGHT_2
+}
+
+states[S_NGHT_2] = {
+	sprite = SPR_NGHT,
+	frame = FF_ANIMATE|FF_TRANS20,
+	tics = TICRATE,
+	action = A_Nght_2,
+	nexstate = S_NULL
+}
+
+states[S_TRNS] = {
+	sprite = SPR_TRNS,
+	tics = TICRATE
+}
+
+states[S_SHDW_PRT] = {
+	sprite = SPR_SHDW,
+	tics = 4
+}
+
+states[S_SHDW_HINT] = {
+	sprite = SPR_TRNS,
+	frame = FF_TRANS40,
+	tics = TICRATE*2
+}
+
+states[S_FOLLOW_STAND] = {
+	sprite = SPR_FLWS,
+	frame = FF_ANIMATE,
+	var1 = 2, --Number of frames
+	var2 = 7, --Tics before cycle to a new frame
+	tics = -1
+}
+
+states[S_FOLLOW_RUN] = {
+	sprite = SPR_FLWR,
+	frame = FF_ANIMATE,
+	var1 = 2, --Number of frames - 1
+	var2 = 3, --Tics before cycle to a new frame
+	tics = -1
+}
+
+--[[
+states[S_LOCK] = {
+	sprite = SPR_LOCK,
+	tics = -1,
+	nextstate = S_NULL
+}
+]]--
+
+--[[
+states[S_GHOST] = {
+	sprite = SPR_STGA,
+	frame = FF_FULLBRIGHT,
+	tics = -1,
+	nextstate = S_NULL
+}
+]]--
+
+states[S_AIR_1] = {
+	sprite = SPR_STGP,
+	frame = FF_FULLBRIGHT|B,
+	tics = 6,
+	nextstate = S_AIR_2
+}
+
+states[S_AIR_2] = {
+	sprite = SPR_STGP,
+	frame = FF_FULLBRIGHT|B,
+	tics = TICRATE,
+	action = A_Air2,
+	nextstate = S_AIR_3
+}
+
+states[S_GRND_1] = {
+	sprite = SPR_STGP,
+	frame = FF_FULLBRIGHT|A,
+	tics = 10,
+	nextstate = S_GRND_2
+}
+
+states[S_GRND_2] = {
+	sprite = SPR_STGP,
+	frame = FF_FULLBRIGHT|A,
+	tics = TICRATE,
+	action = A_Grnd2,
+	nextstate = S_NULL
+}
+
+states[S_AIR_3] = {
+	sprite = SPR_STGP,
+	frame = FF_FULLBRIGHT,
+	tics = TICRATE,
+	action = A_Air3,
+	nextstate = S_NULL
 }

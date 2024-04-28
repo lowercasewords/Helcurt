@@ -21,6 +21,32 @@ addHook("PlayerThink", function(player)
 		return nil
 	end 
 	
+	--Night Particle
+	if(player.mo.night_obj ~= nil and Valid(player.mo.night_obj)) then
+
+		local obj = player.mo.night_obj
+	
+		if(obj.state == S_NGHT_1) then
+
+			
+			P_MoveOrigin(player.mo.night_obj, player.mo.x, player.mo.y, player.mo.z)
+
+			--Change the sprites scale with a speed of a default scale per charging state tic
+			obj.spritexscale = $+(FRACUNIT / states[S_NGHT_1].tics)
+			obj.spriteyscale = $+(FRACUNIT / states[S_NGHT_1].tics)
+
+		elseif(obj.state == S_NGHT_2) then
+
+			--Move behind the player only half of the states tics
+			if(states[S_NGHT_2].tics/2 < obj.tics) then
+				P_MoveOrigin(player.mo.night_obj, player.mo.x, player.mo.y, player.mo.z)
+			end
+		end
+
+		P_SpawnGhostMobj(obj)
+	end
+
+
 	--Concealment particles
 	if(player.mo.unconceal_timer > 0) then
 		local particle = P_SpawnMobj(player.mo.x+P_RandomRange(SPAWN_RADIUS_MAX, -SPAWN_RADIUS_MAX)*FRACUNIT, 
@@ -101,6 +127,7 @@ addHook("PlayerThink", function(player)
 	end
 end)
 
+
 --[[
 
 addHook("MobjThinker", function(mo)
@@ -111,3 +138,4 @@ addHook("MobjThinker", function(mo)
 end, MT_SHDW)
 
 ]]--
+

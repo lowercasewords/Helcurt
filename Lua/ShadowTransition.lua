@@ -9,10 +9,9 @@ addHook("PlayerThink",
 			if(not Valid(player.mo, "helcurt") or not PAlive(player)) then
 				return nil
 			end
-
-
+			
 			--Perform a teleport when one is available by HOLDING the jump button
-			if(player.mo.can_teleport == 1 and player.jumpheld > TICS_PRESS_RANGE) then
+			if(player.mo.can_teleport == 1 and player.jumpheld > TICS_PRESS_RANGE and player.spinheld == 0) then
 				player.mo.prevstate = player.mo.state
 				player.mo.state = S_PRE_TRANSITION
 			end

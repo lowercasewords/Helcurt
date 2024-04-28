@@ -1,12 +1,11 @@
 Character
 SkinName = helcurt
 DisplayName = Helcurt
-PlayerText = ^5Helcurt^0 has seen better days
+PlayerText = ^5Helcurt^0 uses darkness and hunting to gain incredible speeds!
 
-^5Ability:^0 Shadow Transition. Press and hold jump to Teleport forward!
+^5Ability:^0 Collect stingers with various actions, release all either on the ground or in the air!
 
-^5Ability:^0 Press spin in the air to perform a homing attack,
- giving you a stack of Deadly Stinger (up to five), hold on land to unleash them!
+^5Ability:^0 Hold jump to teleport. Press spin to in the air for a blade attack.
  
-^5Tip:^0 Yell at the mod author to make it come out faster, it is very effective!
+^5Tip:^0 Dark areas conceal you and boost your attributes. Unleash Darkness upon the world by holding both jump and spin!
 #
