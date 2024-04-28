@@ -1310,65 +1310,7 @@ sfxinfo[sfx_hide1] = {
 --/--------------------------
 
 
-
----------------- CUSTOM OBJECT STATES ---------------- 
-
-states[S_STACK] = {
-	sprite = SPR_STGS,
-	tics = -1
-}
-
-states[S_TRNS] = {
-	sprite = SPR_TRNS,
-	tics = TICRATE
-}
-
-
-states[S_SHDW_PRT] = {
-	sprite = SPR_SHDW,
-	frame = FF_TRANS50,
-	tics = TICRATE/2
-}
-
-states[S_SHDW_HINT] = {
-	sprite = SPR_SHDW,
-	frame = FF_TRANS10,
-	action = A_ShdwHint,
-	tics = TICRATE*2
-}
-
-states[S_FOLLOW_STAND] = {
-	sprite = SPR_FLWS,
-	frame = FF_ANIMATE|FF_FULLBRIGHT,
-	var1 = 2, --Number of frames
-	var2 = 7, --Tics before cycle to a new frame
-	tics = -1
-}
-
-states[S_FOLLOW_RUN] = {
-	sprite = SPR_FLWR,
-	frame = FF_ANIMATE,
-	var1 = 2, --Number of frames - 1
-	var2 = 3, --Tics before cycle to a new frame
-	tics = -1
-}
-
---[[
-states[S_LOCK] = {
-	sprite = SPR_LOCK,
-	tics = -1,
-	nextstate = S_NULL
-}
-]]--
-
---[[
-states[S_GHOST] = {
-	sprite = SPR_STGA,
-	frame = FF_FULLBRIGHT,
-	tics = -1,
-	nextstate = S_NULL
-}
-]]--
+---------------- PLAYER STATES ---------------- 
 
 
 --Charges in order to activate the night manually
@@ -1521,12 +1463,14 @@ states[S_TRNS] = {
 
 states[S_SHDW_PRT] = {
 	sprite = SPR_SHDW,
-	tics = 4
+	frame = FF_TRANS50,
+	tics = TICRATE/2
 }
 
 states[S_SHDW_HINT] = {
-	sprite = SPR_TRNS,
-	frame = FF_TRANS40,
+	sprite = SPR_SHDW,
+	frame = FF_TRANS10,
+	action = A_ShdwHint,
 	tics = TICRATE*2
 }
 
@@ -1600,3 +1544,4 @@ states[S_AIR_3] = {
 	action = A_Air3,
 	nextstate = S_NULL
 }
+
