@@ -770,18 +770,45 @@ addHook("PostThinkFrame", function()
 
 			--Rotate the folllow object around the player just a tiny bit to make it appear behind the player
 			if(PAlive(player)) then
+				
 				CorrectRotationHoriz(player.followmobj, player.mo.x, player.mo.y,
 										player.mo.x-FRACUNIT, 
 										player.mo.y, 
 										player.mo.z, player.followmobj.angle)
-			end
 
-			if(PAlive(player)) then
+
+
 				player.prevjumpheld = player.jumpheld
 				player.prevspinheld = player.spinheld
 				player.mo.prevstate = player.mo.state
 				-- print("prev: "..player.mo.prevcarried.." vs "..player.powers[pw_carry])
 				player.mo.prevcarried = player.powers[pw_carry]
+
+
+
+				--Night Particle
+				if(player.mo.night_obj ~= nil and Valid(player.mo.night_obj)) then
+
+					local obj = player.mo.night_obj
+				
+					if(obj.state == S_NGHT_1) then
+
+						P_MoveOrigin(player.mo.night_obj, player.mo.x, player.mo.y, player.mo.z)
+
+						--Change the sprites scale with a speed of a default scale per charging state tic
+						obj.spritexscale = $+(FRACUNIT / states[S_NGHT_1].tics)
+						obj.spriteyscale = $+(FRACUNIT / states[S_NGHT_1].tics)
+
+					elseif(obj.state == S_NGHT_2) then
+
+						--Move behind the player only half of the states tics
+						-- if(states[S_NGHT_2].tics*2/3 < obj.tics) then
+							P_MoveOrigin(player.mo.night_obj, player.mo.x, player.mo.y, player.mo.z)
+						-- end
+					end
+
+					P_SpawnGhostMobj(obj)
+				end
 			end
 		end
 	end
@@ -883,6 +910,17 @@ local function A_ShdwHint(actor, var1, var2)
 	P_SetObjectMomZ(actor, P_RandomRange(-2, 2)*FRACUNIT, false)
 end
 
+local function A_Nght_2(actor, var1, var2) 
+	if(not Valid(actor)) then
+		return nil
+	end
+
+	-- print("night!")
+	actor.spritexscale = FRACUNIT*6
+	actor.spriteyscale = FRACUNIT*6
+end
+
+
 ---------------- PLAYER ACTIONS ---------------- 
 
 
@@ -908,12 +946,9 @@ local function A_NightActivate(actor, par1, par2)
 	
 	actor.player.night_timer = NIGHT_MAX_TIC
 
-	if(actor.night_obj.state ~= S_NGHT_2) then
-		actor.night_obj.state = S_NGHT_2
-	end
-
-	actor.night_obj.spritexscale = FRACUNIT*2
-	actor.night_obj.spriteyscale = FRACUNIT*2
+	-- if(actor.night_obj.state ~= S_NGHT_2) then
+		-- actor.night_obj.state = S_NGHT_2
+	-- end
 
 	P_Thrust(actor, actor.angle, 50*FRACUNIT)
 	
@@ -1444,14 +1479,13 @@ states[S_NGHT_1] = {
 	sprite = SPR_NGHT,
 	frame = FF_ANIMATE|FF_TRANS50,
 	tics = states[S_NIGHT_CHARGE].tics,
-	action = A_Nght_1,
 	nextstate = S_NGHT_2
 }
 
 states[S_NGHT_2] = {
 	sprite = SPR_NGHT,
 	frame = FF_ANIMATE|FF_TRANS20,
-	tics = TICRATE,
+	tics = TICRATE/2,
 	action = A_Nght_2,
 	nexstate = S_NULL
 }
