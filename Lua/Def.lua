@@ -274,14 +274,18 @@ rawset(_G, "EndTheNight", function(originplayer, skybox, skynum)
    end
 end)
 
-
-rawset(_G, "SpawnAfterImage", function(mo)
+--mo is an object to make an after image of 
+--trans is the translucency frame flag
+rawset(_G, "SpawnAfterImage", function(mo, trans)
 	if(not Valid(mo)) then
 		return false
 	end
 -- 	print("Spawning image")
 	local image = P_SpawnGhostMobj(mo) -- P_SpawnMobj(mo.x, mo.y, mo.z, mo.type)
 	image.state = mo.state
+	if(trans ~= nil) then
+		image.frame = trans
+	end
 	image.momx = 0
 	image.momy = 0
 	image.momz = 0
@@ -800,14 +804,10 @@ addHook("PostThinkFrame", function()
 						obj.spriteyscale = $+(FRACUNIT / states[S_NGHT_1].tics)
 
 					elseif(obj.state == S_NGHT_2) then
-
-						--Move behind the player only half of the states tics
-						-- if(states[S_NGHT_2].tics*2/3 < obj.tics) then
 							P_MoveOrigin(player.mo.night_obj, player.mo.x, player.mo.y, player.mo.z)
-						-- end
 					end
 
-					P_SpawnGhostMobj(obj)
+					SpawnAfterImage(obj, FF_TRANS50)
 				end
 			end
 		end
@@ -1477,15 +1477,15 @@ states[S_STACK] = {
 
 states[S_NGHT_1] = {
 	sprite = SPR_NGHT,
-	frame = FF_ANIMATE|FF_TRANS50,
+	frame = FF_ANIMATE|FF_TRANS10,
 	tics = states[S_NIGHT_CHARGE].tics,
 	nextstate = S_NGHT_2
 }
 
 states[S_NGHT_2] = {
 	sprite = SPR_NGHT,
-	frame = FF_ANIMATE|FF_TRANS20,
-	tics = TICRATE/2,
+	frame = FF_ANIMATE0,
+	tics = TICRATE/3,
 	action = A_Nght_2,
 	nexstate = S_NULL
 }
