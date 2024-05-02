@@ -102,7 +102,6 @@ rawset(_G, "NIGHT_SKYBOX", 6)
 rawset(_G, "NIGHT_LIGHT_MULTIPLYER", 3/4)
 
 
-
 --Checks whether the mobject is valid and (optionally) has the correct skin 
 rawset(_G, "Valid", function(mo, skin)
 	return mo ~= nil and mo.valid == true and mo.skin == skin and mo.state ~= S_NULL --and mo.state ~= states[mo.state].deathstate
@@ -111,6 +110,22 @@ end)
 --Checks if the player is alive (not dead nor just respawned)
 rawset(_G, "PAlive", function(p)
 	return p ~= nil and p.playerstate == PST_LIVE
+end)
+
+--Randomly starts a random sound in range
+--mo is the origin object
+--a random sound is played between start_sound and end_sound (inclusive)
+--chance number is between 0 and FRACUNIT, being a chance to play the sound
+--Returns true if any sound was played at all
+rawset(_G, "TrySoundInRange", function(mo, start_sound, end_sound, chance)
+	--If the origin object is valid and sound is determined to play by chance
+	if(not Valid(mo) and chance ~= nil and not P_RandomChance(chance))then
+		return false
+	end
+
+	local sound = P_RandomRange(start_sound, end_sound) 
+	S_StartSound(mo, sound)
+	return true
 end)
 
 
