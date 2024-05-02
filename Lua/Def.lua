@@ -18,7 +18,7 @@ freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRAN
 freeslot("MT_STGP", "MT_STGS", "MT_LOCK", "MT_TRNS", "MT_FOLLOW", "MT_NGHT")
 freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK", "SPR_TRNS", "SPR_FLWS", "SPR_FLWR",
 "SPR_NGHT")
-freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", "sfx_hide1",
+freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", "sfx_hide1", "sfx_hide2", "sfx_hide3",
 "sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1",
 "sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05")
 
@@ -155,14 +155,14 @@ end)
 
 --Conceals the player in the darkness (called once)
 rawset(_G, "Conceal", function(mo)
-	S_StartSound(mo, sfx_hide1)
-
 	mo.unconceal_timer = UNCONCEAL_MAX_TICS
 
 	--Immediate extra stinger upon concealing
 	if(mo.stingers < MAX_STINGERS) then
 		AddStingers(mo, 1)
 	end
+
+	S_StartSound(mo, sfx_hide1)
 
 	--Attribute increase
 	mo.player.acceleration = $+CONCEAL_ACCELERATION_BOOST
@@ -172,6 +172,10 @@ end)
 
 --Conceal effects to be put every tic 
 rawset(_G, "ConcealEffects", function(mo)
+	if(not S_SoundPlaying(mo, sfx_hide1) and not S_SoundPlaying(mo, sfx_hide2) and not S_SoundPlaying(mo, sfx_hide3)) then
+		S_StartSound(mo, sfx_hide2)
+	end
+
 	mo.frame = $|FF_TRANS50--|FF_FULLBRIGHT
 end)
 
@@ -179,6 +183,10 @@ end)
 rawset(_G, "Unconceal", function(mo)
 	
 	local skin = skins[mo.player.skin]
+
+	S_StopSound(mo, sfx_hide1)
+	S_StopSound(mo, sfx_hide2)
+	S_StartSound(mo, sfx_hide3)
 
 	-- print("UnConceal!")
     mo.player.acceleration = skin.acceleration
@@ -1301,6 +1309,16 @@ sfxinfo[sfx_stg05] = {
 
 
 sfxinfo[sfx_hide1] = {
+	singular = true,
+	priority = 60
+}
+
+sfxinfo[sfx_hide2] = {
+	singular = true,
+	priority = 60
+}
+
+sfxinfo[sfx_hide3] = {
 	singular = true,
 	priority = 60
 }
