@@ -8,6 +8,7 @@
 --/
 --/--------------------------
 
+--Most player and object sprites
 freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRANSITION", "S_TRNS",
 "S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK", "S_FOLLOW_STAND", "S_FOLLOW_RUN",
 "S_AIR_1", "S_GRND_1", "S_AIR_2", "S_GRND_2", "S_AIR_3",
@@ -15,12 +16,33 @@ freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRAN
 "S_STINGER_GRND_1", "S_STINGER_GRND_2",
 "S_NIGHT_CHARGE", "S_NIGHT_ACTIVATE",
 "S_NGHT_1", "S_NGHT_2")
+
+--Most objects
 freeslot("MT_STGP", "MT_STGS", "MT_LOCK", "MT_TRNS", "MT_FOLLOW", "MT_NGHT")
+
+--most player and object sprites
 freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK", "SPR_TRNS", "SPR_FLWS", "SPR_FLWR",
 "SPR_NGHT")
-freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", "sfx_hide1", "sfx_hide2", "sfx_hide3",
-"sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1",
+
+--Sound effects
+freeslot(
+	"sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", 
+	"sfx_hide1", "sfx_hide2", "sfx_hide3",
+	"sfx_ult01", "sfx_ult02", "sfx_ult03", 
+	"sfx_trns1", "sfx_trns2", 
+	"sfx_blde1",
 "sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05")
+
+--Monologues
+freeslot(
+	"sfx_mbos1",
+	"sfx_mgrn1", "sfx_mgrn2", "sfx_mgrn3", "sfx_mgrn4", "sfx_mgrn5", 
+	"sfx_mkil1", "sfx_mkil2", "sfx_mkil3", "sfx_mkil4", "sfx_mkil5",
+	"sfx_mkil1", "sfx_mkil2", "sfx_mkil3",
+	"sfx_mnl01", "sfx_mnl02", "sfx_mnl03", "sfx_mnl04", "sfx_mnl05", 
+	"sfx_mrwn1", "sfx_mrwn2", 
+	"sfx_mstg1",
+	"sfx_mtlp2")
 
 --Particle slots
 freeslot("MT_SHDW", "SPR_SHDW", "S_SHDW_PRT", "S_SHDW_HINT")
@@ -1213,10 +1235,6 @@ sfxinfo[sfx_trns2] = {
 }
 
 sfxinfo[sfx_blde1] = {
-	singular = false,
-	priority = 60
-}
-sfxinfo[sfx_mnlg1] = {
 	singular = false,
 	priority = 60
 }
