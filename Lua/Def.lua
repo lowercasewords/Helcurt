@@ -26,19 +26,19 @@ freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STG
 
 --Sound effects
 freeslot(
-	"sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", 
-	"sfx_hide1", "sfx_hide2", "sfx_hide3",
-	"sfx_ult01", "sfx_ult02", "sfx_ult03", 
-	"sfx_trns1", "sfx_trns2", 
 	"sfx_blde1",
-"sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05")
+	"sfx_trns1", "sfx_trns2", 
+	"sfx_ult01", "sfx_ult02", "sfx_ult03", 
+	"sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", 
+	"sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05",
+	"sfx_hide1", "sfx_hide2", "sfx_hide3")
 
 --Monologues
 freeslot(
 	"sfx_mbos1",
 	"sfx_mgrn1", "sfx_mgrn2", "sfx_mgrn3", "sfx_mgrn4", "sfx_mgrn5", 
 	"sfx_mkil1", "sfx_mkil2", "sfx_mkil3", "sfx_mkil4", "sfx_mkil5",
-	"sfx_mkil1", "sfx_mkil2", "sfx_mkil3",
+	"sfx_mnht1", "sfx_mnht2", "sfx_mnht3",
 	"sfx_mnl01", "sfx_mnl02", "sfx_mnl03", "sfx_mnl04", "sfx_mnl05", 
 	"sfx_mrwn1", "sfx_mrwn2", 
 	"sfx_mstg1",
@@ -1239,102 +1239,74 @@ mobjinfo[MT_STGS] = {
 --/ SOUNDS
 --/--------------------------
 
-sfxinfo[sfx_trns1] = {
-	singular = false,
-	priority = 64
-}
 
-sfxinfo[sfx_trns2] = {
-	singular = false,
-	priority = 65
-}
+------------ Sound effects ------------
+
 
 sfxinfo[sfx_blde1] = {
 	singular = false,
 	priority = 60
 }
 
+
+sfxinfo[sfx_trns1] = {
+	singular = false,
+	priority = 64
+}
+sfxinfo[sfx_trns2] = {
+	singular = false,
+	priority = 65
+}
+
+
 sfxinfo[sfx_ult01] = {
 	singular = false,
 	priority = 60
 }
-
 sfxinfo[sfx_ult02] = {
 	singular = false,
 	priority = 60
 }
-
 sfxinfo[sfx_ult03] = {
 	singular = false,
 	priority = 60
 }
 
+
 sfxinfo[sfx_upg01] = {
 	singular = false,
 	priority = 60
 }
-
 sfxinfo[sfx_upg02] = {
 	singular = false,
 	priority = 60
 }
-
 sfxinfo[sfx_upg03] = {
 	singular = false,
 	priority = 60
 }
-
 sfxinfo[sfx_upg04] = {
 	singular = false,
 	priority = 60
 }
 
-sfxinfo[sfx_stg01] = {
-	singular = false,
-	priority = 60
-}
-
-sfxinfo[sfx_stg02] = {
-	singular = false,
-	priority = 60
-}
-
-sfxinfo[sfx_stg03] = {
-	singular = false,
-	priority = 60
-}
-
-sfxinfo[sfx_stg04] = {
-	singular = false,
-	priority = 60
-}
-
-sfxinfo[sfx_stg05] = {
-	singular = false,
-	priority = 60
-}
-
 
 sfxinfo[sfx_stg01] = {
 	singular = false,
 	priority = 60
 }
-
 sfxinfo[sfx_stg02] = {
 	singular = false,
 	priority = 60
 }
-
 sfxinfo[sfx_stg03] = {
 	singular = false,
 	priority = 60
 }
-
 sfxinfo[sfx_stg04] = {
 	singular = false,
 	priority = 60
 }
-
 sfxinfo[sfx_stg05] = {
 	singular = false,
 	priority = 60
@@ -1345,17 +1317,123 @@ sfxinfo[sfx_hide1] = {
 	singular = true,
 	priority = 60
 }
-
 sfxinfo[sfx_hide2] = {
 	singular = true,
 	priority = 60
 }
-
 sfxinfo[sfx_hide3] = {
 	singular = true,
 	priority = 60
 }
 
+------------ MONOLOGUES ------------
+
+
+sfxinfo[sfx_mbos1] = {
+	singular = true,
+	priority = 60
+}
+
+
+sfxinfo[sfx_mgrn1] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mgrn2] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mgrn3] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mgrn4] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mgrn5] = {
+	singular = true,
+	priority = 60
+}
+
+
+sfxinfo[sfx_mkil1] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mkil2] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mkil3] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mkil4] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mkil5] = {
+	singular = true,
+	priority = 60
+}
+
+
+sfxinfo[sfx_mnht1] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mnht2] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mnht3] = {
+	singular = true,
+	priority = 60
+}
+
+
+sfxinfo[sfx_mnl01] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mnl02] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mnl03] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mnl04] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mnl05] = {
+	singular = true,
+	priority = 60
+}
+
+sfxinfo[sfx_mrwn1] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mrwn2] = {
+	singular = true,
+	priority = 60
+}
+
+
+sfxinfo[sfx_mstg1] = {
+	singular = true,
+	priority = 60
+}
+
+
+sfxinfo[sfx_mtlp2] = {
+	singular = true,
+	priority = 60
+}
 --/--------------------------
 --/ STATES
 --/--------------------------
