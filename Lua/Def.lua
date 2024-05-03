@@ -42,6 +42,7 @@ freeslot(
 	"sfx_mnl01", "sfx_mnl02", "sfx_mnl03", "sfx_mnl04", "sfx_mnl05", "sfx_mnl06", 
 	"sfx_mrwn1", "sfx_mrwn2", 
 	"sfx_mstg1",
+	"sfx_mdth1", "sfx_mdth2", 
 	"sfx_mtlp1")
 
 --Particle slots
@@ -888,6 +889,22 @@ addHook("MobjDeath", function(target, inflictor, source, dmgtype)
 end)
 
 
+--Determines how to handle Helcurt's death
+addHook("MobjDeath", function(target, inflictor, source, dmgtype)
+	if(not Valid(target, "helcurt")) then
+		return nil
+	end
+	
+	TrySoundInRange(target, sfx_mdth1, sfx_mdth2, FRACUNIT)
+	  
+
+end, MT_PLAYER)
+
+	  
+
+end, MT_PLAYER)
+
+
 
 --/--------------------------
 --/ ACTIONS
@@ -1460,6 +1477,16 @@ sfxinfo[sfx_mrwn1] = {
 	priority = 60
 }
 sfxinfo[sfx_mrwn2] = {
+	singular = true,
+	priority = 60
+}
+
+
+sfxinfo[sfx_mdth1] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mdth2] = {
 	singular = true,
 	priority = 60
 }
