@@ -35,10 +35,10 @@ freeslot(
 
 --Monologues
 freeslot(
-"sfx_mrwn1", "sfx_mrwn2", 
+	"sfx_mrwn1", "sfx_mrwn2", 
 	"sfx_mdth1", "sfx_mdth2",
 	"sfx_mbos1", "sfx_mbos2",
-"sfx_mstg1",
+	"sfx_mstg1",
 	"sfx_mtlp1",
 	"sfx_mnht1", "sfx_mnht2", "sfx_mnht3",
 	"sfx_mgrn1", "sfx_mgrn2", "sfx_mgrn3", "sfx_mgrn4", "sfx_mgrn5", 
@@ -198,7 +198,7 @@ rawset(_G, "IsSoundPlayingRange", function(mo, start_sound, end_sound, ignore_st
 	for i = start_sound, end_sound, 1 do
 		if(S_SoundPlaying(mo, i) and (i < ignore_start or i > ignore_end)) then
 			print("return true!")
-	return true
+			return true
 		end
 	end
 
@@ -382,7 +382,7 @@ rawset(_G, "StartTheNight", function(originplayer)
     -- P_SwitchWeather(PRECIP_STORM)
 
     --Starting the monologue and night sound
-    HelcurtSpeakOverride(originplayer.mo, sfx_mnht1, sfx_mnht3)
+	HelcurtSpeakOverride(originplayer.mo, sfx_mnht1, sfx_mnht3)
 	S_StartSound(originplayer.mo, sfx_nght1)
 
     --Fading the background music
@@ -812,7 +812,7 @@ addHook("PlayerSpawn", function(player)
 		SetUp(player)
 	end
 	
-	TrySoundInRange(player.mo, sfx_mrwn1, sfx_mrwn2)
+	HelcurtSpeakOverride(player.mo, sfx_mrwn1, sfx_mrwn2)
 
 	--Sets up special server attributes
 	if(player == server) then
@@ -904,8 +904,9 @@ addHook("PlayerThink", function(p)
 	if(p.monologue_timer > 0*TICRATE) then
 		p.monologue_timer = $-1
 	else 
-		TrySoundInRange(p.mo, sfx_mnl01, sfx_mnl05)
-		p.monologue_timer = P_RandomRange(MONOLOGUE_TIC_MAX/2, 3*MONOLOGUE_TIC_MAX/2)
+		if(HelcurtSpeak(p.mo, sfx_mnl01, sfx_mnl05) ~= nil) then
+			p.monologue_timer = P_RandomRange(MONOLOGUE_TIC_MAX/2, 3*MONOLOGUE_TIC_MAX/2)
+		end
 	end
 end)
 
@@ -969,7 +970,7 @@ addHook("MobjDeath", function(target, inflictor, source, dmgtype)
 	-- print(source.skin)
 	if(target.flags & TARGET_DMG_RANGE ~= 0) then
 		source.player.killcount = $+1
-		TrySoundInRange(inflictor, sfx_mkil1, sfx_mkil4, FRACUNIT/2)
+		HelcurtSpeak(inflictor, sfx_mkil1, sfx_mkil4, FRACUNIT/2)
 	end
 
 end)
@@ -981,7 +982,7 @@ addHook("MobjDeath", function(target, inflictor, source, dmgtype)
 		return nil
 	end
 	
-	TrySoundInRange(target, sfx_mdth1, sfx_mdth2, FRACUNIT)
+	HelcurtSpeakOverride(target, sfx_mdth1, sfx_mdth2, FRACUNIT)
 	  
 
 end, MT_PLAYER)
@@ -993,7 +994,7 @@ addHook("MobjDamage", function(target, inflictor, source, dmgtype)
 		return nil
 	end
 	
-	TrySoundInRange(target, sfx_mgrn3, sfx_mgrn4, FRACUNIT)
+	HelcurtSpeakOverride(target, sfx_mgrn3, sfx_mgrn4, FRACUNIT)
 	  
 
 end, MT_PLAYER)
@@ -1210,7 +1211,7 @@ local function A_End_Transition(actor, par1, par2)
 	end
 
 	S_StartSound(actor, sfx_trns2)
-	S_StartSound(actor, sfx_mtlp1)
+	HelcurtSpeak(actor, sfx_mtlp1)
 	P_SpawnMobj(actor.x, actor.y, actor.z, MT_TRNS)
 
 
@@ -1254,7 +1255,7 @@ local function Stinger(playmo, startrollangle, stingerstate)
 	playmo.momy = $/CHARGE_SLOWDOWN_FACTOR
 	playmo.momz = $/CHARGE_SLOWDOWN_FACTOR
 
-	TrySoundInRange(playmo, sfx_mstg1, sfx_mstg1, FRACUNIT/4)
+	HelcurtSpeak(playmo, sfx_mstg1, sfx_mstg1, FRACUNIT/4)
 	S_StartSound(playmo, sfx_stg01+playmo.stingers)
 
 	--Spawning each of Helcurt available stingers and one Helcurt always has
