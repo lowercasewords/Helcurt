@@ -37,7 +37,7 @@ freeslot(
 freeslot(
 	"sfx_mbos1",
 	"sfx_mgrn1", "sfx_mgrn2", "sfx_mgrn3", "sfx_mgrn4", "sfx_mgrn5", 
-	"sfx_mkil1", "sfx_mkil2", "sfx_mkil3", "sfx_mkil4", "sfx_mkil5",
+	"sfx_mkil1", "sfx_mkil2", "sfx_mkil3", "sfx_mkil4",
 	"sfx_mnht1", "sfx_mnht2", "sfx_mnht3",
 	"sfx_mnl01", "sfx_mnl02", "sfx_mnl03", "sfx_mnl04", "sfx_mnl05", 
 	"sfx_mrwn1", "sfx_mrwn2", 
@@ -844,10 +844,13 @@ addHook("MobjDeath", function(target, inflictor, source, dmgtype)
 	if(not Valid(source, "helcurt")) then
 		return nil
 	end
+
+	
 	
 	-- print(source.skin)
 	if(target.flags & TARGET_DMG_RANGE ~= 0) then
 		source.player.killcount = $+1
+		TrySoundInRange(inflictor, sfx_mkil1, sfx_mkil4, FRACUNIT/2)
 	end
 
 end)
@@ -1372,10 +1375,6 @@ sfxinfo[sfx_mkil3] = {
 	priority = 60
 }
 sfxinfo[sfx_mkil4] = {
-	singular = true,
-	priority = 60
-}
-sfxinfo[sfx_mkil5] = {
 	singular = true,
 	priority = 60
 }
