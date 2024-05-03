@@ -109,7 +109,12 @@ rawset(_G, "NIGHT_LIGHT_MULTIPLYER", 3/4)
 
 --Checks whether the mobject is valid and (optionally) has the correct skin 
 rawset(_G, "Valid", function(mo, skin)
-	return mo ~= nil and mo.valid == true and mo.skin == skin and mo.state ~= S_NULL --and mo.state ~= states[mo.state].deathstate
+	
+	local isvalid =  mo ~= nil and mo.valid == true and mo.state ~= S_NULL --and mo.state ~= states[mo.state].deathstate
+	if(isvalid and skin == nil) then -- In case the skin value was not supplied
+		skin = mo.skin
+	end
+	return isvalid and mo.skin == skin
 end)
 
 --Checks if the player is alive (not dead nor just respawned)
@@ -121,12 +126,12 @@ end)
 --mo is the origin object
 --a random sound is played between start_sound and end_sound (inclusive)
 --chance number is between 0 and FRACUNIT, being a chance to play the sound
---Returns true if any sound was played at all
+--Returns the sound that was chosen to play, doesn't mean it 100% was played. Returns nil if nothing was chosen
 rawset(_G, "TrySoundInRange", function(mo, start_sound, end_sound, chance)
 	
 	--If the origin object is valid and sound is determined to play by chance
 	if(not Valid(mo) and chance ~= nil and not P_RandomChance(chance))then
-		return false
+		return nil
 	end
 
 	--In case that end_sound is not supplied
@@ -134,17 +139,98 @@ rawset(_G, "TrySoundInRange", function(mo, start_sound, end_sound, chance)
 		end_sound = start_sound
 	end
 	
+	--[[
 	--If the sound in range is already playing
 	for i = start_sound, end_sound, 1 do
 		if(S_SoundPlaying(mo, i)) then
 			S_StopSoundByID(mo, i)
 		end
 	end
+	]]--
 
 	local sound = P_RandomRange(start_sound, end_sound) 
 	S_StartSound(mo, sound)
 
+	return sound
+end)
+
+
+rawset(_G, "StopSoundsRange", function(mo, start_sound, end_sound, ignore_start, ignore_end) 
+	if(not Valid(mo))then
+		return false
+	end
+
+	local wasStopped = false
+
+	--In case one or two of ignore sounds are not supplied
+	if(ignore_start == nil or ignore_end == nil) then
+		ignore_start = -1
+		ignore_end = -1
+	end
+
+	--If the sound in range is already playing
+	for i = start_sound, end_sound, 1 do
+		if(S_SoundPlaying(mo, i) and 
+		(i < ignore_start or i > ignore_end)) then
+			S_StopSoundByID(mo, i)
+			wasStopped = true
+		end
+	end
+
+	return wasStopped
+end)
+
+rawset(_G, "IsSoundPlayingRange", function(mo, start_sound, end_sound, ignore_start, ignore_end) 
+	if(not Valid(mo))then
+		
+		return false
+	end
+
+	--In case one or two of ignore sounds are not supplied
+	if(ignore_start == nil or ignore_end == nil) then
+		ignore_start = -1
+		ignore_end = -1
+	end
+
+	--If the sound in range is already playing
+	for i = start_sound, end_sound, 1 do
+		if(S_SoundPlaying(mo, i) and (i < ignore_start or i > ignore_end)) then
+			print("return true!")
 	return true
+		end
+	end
+
+	return false
+end)
+
+
+--Immediately interrupts all monologue sounds in favor of desired monologue
+rawset(_G, "HelcurtSpeakOverride", function(mo, start_sound, end_sound, chance) 
+	if(not Valid(mo))then
+		return nil
+	end
+
+	StopSoundsRange(mo, MONOLOGUE_START_SOUND, MONOLOGUE_END_SOUND)
+
+	--Reset the random monologue timer
+	if(mo.player ~= nil) then
+		mo.player.monologue_timer = MONOLOGUE_TIC_MAX
+	end
+
+	local monologue = TrySoundInRange(mo, start_sound, end_sound, chance)
+
+	return monologue
+end)
+
+--Says something without interruption
+rawset(_G, "HelcurtSpeak", function(mo, start_sound, end_sound, chance) 
+	if(not Valid(mo) or IsSoundPlayingRange(mo, MONOLOGUE_START_SOUND, MONOLOGUE_END_SOUND, start_sound, end_sound))then
+		return nil
+	end
+
+	local monologue = TrySoundInRange(mo, start_sound, end_sound, chance)
+
+	return monologue
 end)
 
 
