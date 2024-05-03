@@ -1142,6 +1142,8 @@ local function Stinger(playmo, startrollangle, stingerstate)
 	playmo.momx = $/CHARGE_SLOWDOWN_FACTOR
 	playmo.momy = $/CHARGE_SLOWDOWN_FACTOR
 	playmo.momz = $/CHARGE_SLOWDOWN_FACTOR
+
+	TrySoundInRange(playmo, sfx_mstg1, sfx_mstg1, FRACUNIT/4)
 	S_StartSound(playmo, sfx_stg01+playmo.stingers)
 
 	--Spawning each of Helcurt available stingers and one Helcurt always has
