@@ -39,7 +39,7 @@ freeslot(
 	"sfx_mgrn1", "sfx_mgrn2", "sfx_mgrn3", "sfx_mgrn4", "sfx_mgrn5", 
 	"sfx_mkil1", "sfx_mkil2", "sfx_mkil3", "sfx_mkil4",
 	"sfx_mnht1", "sfx_mnht2", "sfx_mnht3",
-	"sfx_mnl01", "sfx_mnl02", "sfx_mnl03", "sfx_mnl04", "sfx_mnl05", 
+	"sfx_mnl01", "sfx_mnl02", "sfx_mnl03", "sfx_mnl04", "sfx_mnl05", "sfx_mnl06", 
 	"sfx_mrwn1", "sfx_mrwn2", 
 	"sfx_mstg1",
 	"sfx_mtlp2")
@@ -53,6 +53,10 @@ rawset(_G, "SPAWN_RADIUS_MAX", 10)
 --Anything below or equal to this tics counts as pressing a button once instead of holding it
 rawset(_G, "TICS_PRESS_RANGE", 5)
 rawset(_G, "SPAWN_TIC_MAX", 1)
+
+--A maximum tic value for a monologue timer, actualr timer 
+--could possible be set to lover value based on this maximum constant
+rawset(_G, "MONOLOGUE_TIC_MAX", TICRATE*10)
 
 
 rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MONITOR|MF_SPRING)
@@ -118,7 +122,7 @@ end)
 --chance number is between 0 and FRACUNIT, being a chance to play the sound
 --Returns true if any sound was played at all
 rawset(_G, "TrySoundInRange", function(mo, start_sound, end_sound, chance)
-
+	
 	--If the origin object is valid and sound is determined to play by chance
 	if(not Valid(mo) and chance ~= nil and not P_RandomChance(chance))then
 		return false
@@ -610,6 +614,9 @@ local function SetUp(player)
 	--Carried by anything last tic
 	player.mo.prevcarried = 0
 
+	--Timer on which Helcurt says a random monologue phrase
+	player.monologue_timer = MONOLOGUE_TIC_MAX
+
 	player.mo.can_teleport = 0
 	player.mo.teleported = 0
 	player.mo.enhanced_teleport = 0
@@ -673,6 +680,8 @@ local function CleanUp(player)
 	player.prevspinheld = nil
 	player.mo.hasjumped = nil
 
+	player.monologue_timer = -1
+
 	player.mo.can_teleport = nil
 	player.mo.teleported = nil
 	player.mo.enhanced_teleport = nil
@@ -716,7 +725,7 @@ addHook("PlayerSpawn", function(player)
 		SetUp(player)
 	end
 	
-TrySoundInRange(player.mo, sfx_mrwn1, sfx_mrwn2)
+	TrySoundInRange(player.mo, sfx_mrwn1, sfx_mrwn2)
 
 	--Sets up special server attributes
 	if(player == server) then
@@ -804,6 +813,13 @@ addHook("PlayerThink", function(p)
 	if((p.mo.prevcarried ~= 0 and p.powers[pw_carry] == 0)) then
 		p.mo.hasjumped = 1
 	end
+
+	if(p.monologue_timer > 0*TICRATE) then
+		p.monologue_timer = $-1
+	else 
+		TrySoundInRange(p.mo, sfx_mnl01, sfx_mnl05)
+		p.monologue_timer = P_RandomRange(MONOLOGUE_TIC_MAX/2, 3*MONOLOGUE_TIC_MAX/2)
+	end
 end)
 
 
@@ -860,9 +876,9 @@ addHook("MobjDeath", function(target, inflictor, source, dmgtype)
 	if(not Valid(source, "helcurt")) then
 		return nil
 	end
+	
+	
 
-	
-	
 	-- print(source.skin)
 	if(target.flags & TARGET_DMG_RANGE ~= 0) then
 		source.player.killcount = $+1
@@ -1430,6 +1446,11 @@ sfxinfo[sfx_mnl05] = {
 	singular = true,
 	priority = 60
 }
+sfxinfo[sfx_mnl06] = {
+	singular = true,
+	priority = 60
+}
+
 
 sfxinfo[sfx_mrwn1] = {
 	singular = true,
