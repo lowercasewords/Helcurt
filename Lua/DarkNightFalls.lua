@@ -25,6 +25,7 @@ addHook("PlayerThink", function(player)
 		return
 	end
     
+    
     --Start charging the night
     if(player.cmd.buttons & BT_SPIN and player.cmd.buttons & BT_JUMP 
             and not (P_IsObjectOnGround(player.mo)) and
@@ -35,10 +36,14 @@ addHook("PlayerThink", function(player)
         player.mo.state = S_NIGHT_CHARGE 
     end
 
+
     --While charging the night
     if(player.mo.state == S_NIGHT_CHARGE) then
-        P_SetObjectMomZ(player.mo, 10*FRACUNIT, false)
+        P_SetObjectMomZ(player.mo, 2*FRACUNIT, false)
+    -- elseif(player.mo.prevstate == S_NIGHT_CHARGE and player.mo.state ~= states[S_NIGHT_CHARGE].nextstate) then
+    --     print("Prevent!")
     end
+
 
     --Proceeding with the countdown
     if(player.night_timer > 1) then
@@ -54,6 +59,36 @@ addHook("PlayerThink", function(player)
         EndTheNight(player, server.og_skybox, server.current_mapinfo.skynum)
     end
 end)
+
+
+addHook("MobjThinker", function(eyesmo)
+    if(not Valid(eyesmo) or not Valid(eyesmo.target, "helcurt")) then
+        return nil
+    end
+
+    if(eyesmo.state == S_EYES_1) then
+        P_MoveOrigin(eyesmo, eyesmo.target.x, eyesmo.target.y, eyesmo.target.z)
+
+        --Change the sprites scale with a speed of a default scale per charging state tic
+        -- eyesmo.spritexscale = $+(FRACUNIT / states[S_EYES_1].tics)
+        -- eyesmo.spriteyscale = $+(FRACUNIT / states[S_EYES_1].tics)
+        eyesmo.spritexscale = $+((STYX_EYES_SCALE/2) / states[S_EYES_1].tics)
+        eyesmo.spriteyscale = $+((STYX_EYES_SCALE/2) / states[S_EYES_1].tics)
+
+        SpawnAfterImage(eyesmo, FF_TRANS90)
+    elseif(eyesmo.state == S_EYES_2) then
+        --Move behind the player only half of the states tics
+        if(states[S_EYES_2].tics*2/3 < eyesmo.tics) then
+            P_MoveOrigin(eyesmo, eyesmo.target.x, eyesmo.target.y, eyesmo.target.z)
+        end
+        
+        SpawnAfterImage(eyesmo, FF_TRANS30)
+    end
+
+    
+    
+end, MT_EYES)
+
 
 --Temporary solution to the bug in which Helcurt keeps his speed buffs after a respawn if 
 --he spawns during the night. It is caused due to the end of the night behavior not triggering.

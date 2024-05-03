@@ -14,11 +14,10 @@ freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRAN
 "S_AIR_1", "S_GRND_1", "S_AIR_2", "S_GRND_2", "S_AIR_3",
 "S_STINGER_AIR_1", "S_STINGER_AIR_2", 
 "S_STINGER_GRND_1", "S_STINGER_GRND_2",
-"S_NIGHT_CHARGE", "S_NIGHT_ACTIVATE",
-"S_NGHT_1", "S_NGHT_2")
+"S_NIGHT_CHARGE", "S_NIGHT_ACTIVATE", "S_EYES_1", "S_EYES_2", "S_NGHT_1", "S_NGHT_2")
 
 --Most objects
-freeslot("MT_STGP", "MT_STGS", "MT_LOCK", "MT_TRNS", "MT_FOLLOW", "MT_NGHT")
+freeslot("MT_STGP", "MT_STGS", "MT_LOCK", "MT_TRNS", "MT_FOLLOW", "MT_EYES")
 
 --most player and object sprites
 freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK", "SPR_TRNS", "SPR_FLWS", "SPR_FLWR",
@@ -56,6 +55,8 @@ rawset(_G, "SPAWN_RADIUS_MAX", 10)
 --Anything below or equal to this tics counts as pressing a button once instead of holding it
 rawset(_G, "TICS_PRESS_RANGE", 5)
 rawset(_G, "SPAWN_TIC_MAX", 1)
+--Custom objects
+rawset(_G, "STYX_EYES_SCALE", FRACUNIT*6)
 
 --A maximum tic value for a monologue timer, actualr timer 
 --could possible be set to lover value based on this maximum constant
@@ -104,6 +105,7 @@ rawset(_G, "CONCEAL_NORMALSPEED_BOOST",  25*FRACUNIT)
 rawset(_G, "CONCEAL_JUMPFACTOR_BOOST",  FRACUNIT/2)
 --Maximum tics for a player's passive to be active after the player exited the dark area
 rawset(_G, "UNCONCEAL_MAX_TICS", TICRATE)
+
 
 --Duration of the night
 rawset(_G, "NIGHT_MAX_TIC", 5*TICRATE)
@@ -429,14 +431,18 @@ rawset(_G, "EndTheNight", function(originplayer, skybox, skynum)
    end
 end)
 
-
-rawset(_G, "SpawnAfterImage", function(mo)
+--mo is an object to make an after image of 
+--trans is the translucency frame flag
+rawset(_G, "SpawnAfterImage", function(mo, trans)
 	if(not Valid(mo)) then
 		return false
 	end
 -- 	print("Spawning image")
 	local image = P_SpawnGhostMobj(mo) -- P_SpawnMobj(mo.x, mo.y, mo.z, mo.type)
 	image.state = mo.state
+	if(trans ~= nil) then
+		image.frame = trans
+	end
 	image.momx = 0
 	image.momy = 0
 	image.momz = 0
@@ -736,8 +742,6 @@ local function SetUp(player)
 		SPEED_BUG_PREVENTION(player)
 	end
 	player.night_timer = 0
-	--Visual object that is shown while charging and activating the night
-	player.mo.night_obj = nil
 	
 	--DEPRECATED - Prevent changing to default particle color each time player respawns
 	if(player.particlecolor == nil) then
@@ -793,8 +797,6 @@ local function CleanUp(player)
 	
 	player.night_timer = nil
 
-	player.mo.night_obj = nil
-	
 	player.particlecolor = nil
 	
 	Unconceal(player.mo)
@@ -939,18 +941,51 @@ addHook("PostThinkFrame", function()
 
 			--Rotate the folllow object around the player just a tiny bit to make it appear behind the player
 			if(PAlive(player)) then
+				
 				CorrectRotationHoriz(player.followmobj, player.mo.x, player.mo.y,
 										player.mo.x-FRACUNIT, 
 										player.mo.y, 
 										player.mo.z, player.followmobj.angle)
-			end
 
-			if(PAlive(player)) then
+
+
 				player.prevjumpheld = player.jumpheld
 				player.prevspinheld = player.spinheld
 				player.mo.prevstate = player.mo.state
 				-- print("prev: "..player.mo.prevcarried.." vs "..player.powers[pw_carry])
 				player.mo.prevcarried = player.powers[pw_carry]
+
+				--Charging shadow particles during the ultimate
+				if(player.mo.state == S_NIGHT_CHARGE) then
+
+					--Max distance for charging shadow particles around the player
+					local distance = 80*FRACUNIT
+
+					--Spawn shadow particles around 
+					local shadow = P_SpawnMobjFromMobj(player.mo, 
+										P_RandomRange(-distance/FRACUNIT, distance/FRACUNIT)*FRACUNIT,
+										P_RandomRange(-distance/FRACUNIT, distance/FRACUNIT)*FRACUNIT,
+										P_RandomRange(-distance/FRACUNIT, distance/FRACUNIT)*FRACUNIT,
+										MT_SHDW)
+					
+					--Setting the visual properties
+					shadow.state = S_SHDW_PRT
+					shadow.frame = FF_TRANS10
+
+					--Setting the speed to match player's speed
+					shadow.momx = player.mo.momx
+					shadow.momy = player.mo.momy
+					shadow.momz = player.mo.momz
+
+					--Move "into" the direction of the player
+					P_Thrust(shadow, 
+							R_PointToAngle2(shadow.x, shadow.y, player.mo.x, player.mo.y),
+							R_PointToDist2(shadow.x, shadow.y, player.mo.x, player.mo.y)/TICRATE)
+
+					P_SetObjectMomZ(shadow, (player.mo.z - shadow.z)/(TICRATE/3), true)
+				end
+
+				
 			end
 		end
 	end
@@ -1081,6 +1116,24 @@ local function A_ShdwHint(actor, var1, var2)
 	P_SetObjectMomZ(actor, P_RandomRange(-2, 2)*FRACUNIT, false)
 end
 
+local function A_Eyes_1(actor, var1, var2) 
+	if(not Valid(actor)) then
+		return nil
+	end
+
+end
+
+local function A_Eyes_2(actor, var1, var2) 
+	if(not Valid(actor)) then
+		return nil
+	end
+
+	-- print("night!")
+	actor.spritexscale = STYX_EYES_SCALE
+	actor.spriteyscale = STYX_EYES_SCALE
+end
+
+
 ---------------- PLAYER ACTIONS ---------------- 
 
 
@@ -1094,8 +1147,11 @@ local function A_NightCharge(actor, par1, par2)
 	actor.can_teleport = 0
 	actor.can_blade = 0
 	
-	actor.night_obj = P_SpawnMobj(actor.x, actor.y, actor.z, MT_NGHT)
-	actor.night_obj.state = S_NGHT_1
+	--Visual effect that look like "eyes" while summoning the night
+	local styx_eyes = P_SpawnMobj(actor.x, actor.y, actor.z, MT_EYES)
+	--Who'm to follow
+	styx_eyes.target = actor
+	styx_eyes.state = S_EYES_1
 end
 
 local function A_NightActivate(actor, par1, par2)
@@ -1105,13 +1161,6 @@ local function A_NightActivate(actor, par1, par2)
 	end
 	
 	actor.player.night_timer = NIGHT_MAX_TIC
-
-	if(actor.night_obj.state ~= S_NGHT_2) then
-		actor.night_obj.state = S_NGHT_2
-	end
-
-	actor.night_obj.spritexscale = FRACUNIT*2
-	actor.night_obj.spriteyscale = FRACUNIT*2
 
 	P_Thrust(actor, actor.angle, 50*FRACUNIT)
 	
@@ -1320,8 +1369,8 @@ end
 --/ MOBJECT INFOS
 --/--------------------------
 
-mobjinfo[MT_NGHT] = { 
-	spawnstate = S_NGHT_1,
+mobjinfo[MT_EYES] = { 
+	spawnstate = S_EYES_1,
 	deathstate = S_NULL,
 	height = FRACUNIT,
 	radius = FRACUNIT,
@@ -1739,19 +1788,19 @@ states[S_STACK] = {
 	tics = -1
 }
 
-states[S_NGHT_1] = {
+states[S_EYES_1] = {
 	sprite = SPR_NGHT,
-	frame = FF_ANIMATE|FF_TRANS50,
+	frame = FF_ANIMATE|FF_TRANS90,
+	action = A_Eyes_1,
 	tics = states[S_NIGHT_CHARGE].tics,
-	action = A_Nght_1,
-	nextstate = S_NGHT_2
+	nextstate = S_EYES_2
 }
 
-states[S_NGHT_2] = {
+states[S_EYES_2] = {
 	sprite = SPR_NGHT,
-	frame = FF_ANIMATE|FF_TRANS20,
-	tics = TICRATE,
-	action = A_Nght_2,
+	frame = FF_ANIMATE|FF_TRANS50,
+	tics = TICRATE/3,
+	action = A_Eyes_2,
 	nexstate = S_NULL
 }
 
