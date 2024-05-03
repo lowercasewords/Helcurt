@@ -37,13 +37,13 @@ freeslot(
 freeslot(
 "sfx_mrwn1", "sfx_mrwn2", 
 	"sfx_mdth1", "sfx_mdth2",
-	"sfx_mbos1",
+	"sfx_mbos1", "sfx_mbos2",
 "sfx_mstg1",
 	"sfx_mtlp1",
 	"sfx_mnht1", "sfx_mnht2", "sfx_mnht3",
 	"sfx_mgrn1", "sfx_mgrn2", "sfx_mgrn3", "sfx_mgrn4", "sfx_mgrn5", 
 	"sfx_mkil1", "sfx_mkil2", "sfx_mkil3", "sfx_mkil4",
-	"sfx_mnl01", "sfx_mnl02", "sfx_mnl03", "sfx_mnl04", "sfx_mnl05", "sfx_mnl06")
+	"sfx_mnl01", "sfx_mnl02", "sfx_mnl03", "sfx_mnl04", "sfx_mnl05")
 
 --Particle slots
 freeslot("MT_SHDW", "SPR_SHDW", "S_SHDW_PRT", "S_SHDW_HINT")
@@ -59,7 +59,7 @@ rawset(_G, "SPAWN_TIC_MAX", 1)
 --could possible be set to lover value based on this maximum constant
 rawset(_G, "MONOLOGUE_TIC_MAX", TICRATE*10)
 rawset(_G, "MONOLOGUE_START_SOUND", sfx_mrwn1)
-rawset(_G, "MONOLOGUE_END_SOUND", sfx_mnl06)
+rawset(_G, "MONOLOGUE_END_SOUND", sfx_mnl05)
 
 
 rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MONITOR|MF_SPRING)
@@ -1484,6 +1484,10 @@ sfxinfo[sfx_mbos1] = {
 	singular = true,
 	priority = 60
 }
+sfxinfo[sfx_mbos2] = {
+	singular = true,
+	priority = 60
+}
 
 
 sfxinfo[sfx_mgrn1] = {
@@ -1557,10 +1561,6 @@ sfxinfo[sfx_mnl04] = {
 	priority = 60
 }
 sfxinfo[sfx_mnl05] = {
-	singular = true,
-	priority = 60
-}
-sfxinfo[sfx_mnl06] = {
 	singular = true,
 	priority = 60
 }
