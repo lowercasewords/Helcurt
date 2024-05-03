@@ -8,19 +8,43 @@
 --/
 --/--------------------------
 
+--Most player and object sprites
 freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRANSITION", "S_TRNS",
 "S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK", "S_FOLLOW_STAND", "S_FOLLOW_RUN",
 "S_AIR_1", "S_GRND_1", "S_AIR_2", "S_GRND_2", "S_AIR_3",
 "S_STINGER_AIR_1", "S_STINGER_AIR_2", 
 "S_STINGER_GRND_1", "S_STINGER_GRND_2",
-"S_NIGHT_CHARGE", "S_NIGHT_ACTIVATE",
-"S_EYES_1", "S_EYES_2")
+"S_NIGHT_CHARGE", "S_NIGHT_ACTIVATE", "S_EYES_1", "S_EYES_2", "S_NGHT_1", "S_NGHT_2")
+
+--Most objects
 freeslot("MT_STGP", "MT_STGS", "MT_LOCK", "MT_TRNS", "MT_FOLLOW", "MT_EYES")
+
+--most player and object sprites
 freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STGA", "SPR_LOCK", "SPR_TRNS", "SPR_FLWS", "SPR_FLWR",
 "SPR_NGHT")
-freeslot("sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", "sfx_hide1",
-"sfx_ult01", "sfx_ult02", "sfx_ult03", "sfx_trns1", "sfx_trns2", "sfx_blde1", "sfx_mnlg1",
-"sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05")
+
+--Sound effects
+freeslot(
+	"sfx_blde1",
+	"sfx_trns1", "sfx_trns2", 
+	"sfx_nght1", "sfx_nght2", "sfx_nght3", 
+	"sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", 
+	"sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05",
+	"sfx_hide1", "sfx_hide2", "sfx_hide3")
+
+--Monologues
+freeslot(
+	"sfx_mrwn1", "sfx_mrwn2", 
+	"sfx_mdth1", "sfx_mdth2",
+	"sfx_mbos1", "sfx_mbos2",
+		"sfx_mcon1", 
+		"sfx_munc1",
+	"sfx_mstg1",
+	"sfx_mtlp1",
+	"sfx_mnht1", "sfx_mnht2", "sfx_mnht3",
+	"sfx_mgrn1", "sfx_mgrn2", "sfx_mgrn3", "sfx_mgrn4", "sfx_mgrn5", 
+	"sfx_mkil1", "sfx_mkil2", "sfx_mkil3", "sfx_mkil4",
+	"sfx_mnl01", "sfx_mnl02", "sfx_mnl03")
 
 --Particle slots
 freeslot("MT_SHDW", "SPR_SHDW", "S_SHDW_PRT", "S_SHDW_HINT")
@@ -33,6 +57,12 @@ rawset(_G, "TICS_PRESS_RANGE", 5)
 rawset(_G, "SPAWN_TIC_MAX", 1)
 --Custom objects
 rawset(_G, "STYX_EYES_SCALE", FRACUNIT*6)
+
+--A maximum tic value for a monologue timer, actualr timer 
+--could possible be set to lover value based on this maximum constant
+rawset(_G, "MONOLOGUE_TIC_MAX", TICRATE*10)
+rawset(_G, "MONOLOGUE_START_SOUND", sfx_mrwn1)
+rawset(_G, "MONOLOGUE_END_SOUND", sfx_mnl03)
 
 
 rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MONITOR|MF_SPRING)
@@ -85,12 +115,127 @@ rawset(_G, "NIGHT_LIGHT_MULTIPLYER", 3/4)
 
 --Checks whether the mobject is valid and (optionally) has the correct skin 
 rawset(_G, "Valid", function(mo, skin)
-	return mo ~= nil and mo.valid == true and mo.skin == skin and mo.state ~= S_NULL --and mo.state ~= states[mo.state].deathstate
+	
+	local isvalid =  mo ~= nil and mo.valid == true and mo.state ~= S_NULL --and mo.state ~= states[mo.state].deathstate
+	if(isvalid and skin == nil) then -- In case the skin value was not supplied
+		skin = mo.skin
+	end
+	return isvalid and mo.skin == skin
 end)
 
 --Checks if the player is alive (not dead nor just respawned)
 rawset(_G, "PAlive", function(p)
 	return p ~= nil and p.playerstate == PST_LIVE
+end)
+
+--Randomly starts a random sound in range
+--mo is the origin object
+--a random sound is played between start_sound and end_sound (inclusive)
+--chance number is between 0 and FRACUNIT, being a chance to play the sound
+--Returns the sound that was chosen to play, doesn't mean it 100% was played. Returns nil if nothing was chosen
+rawset(_G, "TrySoundInRange", function(mo, start_sound, end_sound, chance)
+	
+	--If the origin object is valid and sound is determined to play by chance
+	if(not Valid(mo) and chance ~= nil and not P_RandomChance(chance))then
+		return nil
+	end
+
+	--In case that end_sound is not supplied
+	if(end_sound == nil) then
+		end_sound = start_sound
+	end
+	
+	--[[
+	--If the sound in range is already playing
+	for i = start_sound, end_sound, 1 do
+		if(S_SoundPlaying(mo, i)) then
+			S_StopSoundByID(mo, i)
+		end
+	end
+	]]--
+
+	local sound = P_RandomRange(start_sound, end_sound) 
+	S_StartSound(mo, sound)
+
+	return sound
+end)
+
+
+rawset(_G, "StopSoundsRange", function(mo, start_sound, end_sound, ignore_start, ignore_end) 
+	if(not Valid(mo))then
+		return false
+	end
+
+	local wasStopped = false
+
+	--In case one or two of ignore sounds are not supplied
+	if(ignore_start == nil or ignore_end == nil) then
+		ignore_start = -1
+		ignore_end = -1
+	end
+
+	--If the sound in range is already playing
+	for i = start_sound, end_sound, 1 do
+		if(S_SoundPlaying(mo, i) and 
+		(i < ignore_start or i > ignore_end)) then
+			S_StopSoundByID(mo, i)
+			wasStopped = true
+		end
+	end
+
+	return wasStopped
+end)
+
+rawset(_G, "IsSoundPlayingRange", function(mo, start_sound, end_sound, ignore_start, ignore_end) 
+	if(not Valid(mo))then
+		
+		return false
+	end
+
+	--In case one or two of ignore sounds are not supplied
+	if(ignore_start == nil or ignore_end == nil) then
+		ignore_start = -1
+		ignore_end = -1
+	end
+
+	--If the sound in range is already playing
+	for i = start_sound, end_sound, 1 do
+		if(S_SoundPlaying(mo, i) and (i < ignore_start or i > ignore_end)) then
+			return true
+		end
+	end
+
+	return false
+end)
+
+
+--Immediately interrupts all monologue sounds in favor of desired monologue
+rawset(_G, "HelcurtSpeakOverride", function(mo, start_sound, end_sound, chance) 
+	if(not Valid(mo))then
+		return nil
+	end
+
+	StopSoundsRange(mo, MONOLOGUE_START_SOUND, MONOLOGUE_END_SOUND)
+
+	--Reset the random monologue timer
+	if(mo.player ~= nil) then
+		mo.player.monologue_timer = MONOLOGUE_TIC_MAX
+	end
+
+	local monologue = TrySoundInRange(mo, start_sound, end_sound, chance)
+
+	return monologue
+end)
+
+--Says something without interruption
+rawset(_G, "HelcurtSpeak", function(mo, start_sound, end_sound, chance) 
+	if(not Valid(mo) or IsSoundPlayingRange(mo, MONOLOGUE_START_SOUND, MONOLOGUE_END_SOUND))then
+		return nil
+	end
+		
+	local monologue = TrySoundInRange(mo, start_sound, end_sound, chance)
+
+	return monologue
 end)
 
 
@@ -157,14 +302,15 @@ end)
 
 --Conceals the player in the darkness (called once)
 rawset(_G, "Conceal", function(mo)
-	S_StartSound(mo, sfx_hide1)
-
 	mo.unconceal_timer = UNCONCEAL_MAX_TICS
 
 	--Immediate extra stinger upon concealing
 	if(mo.stingers < MAX_STINGERS) then
 		AddStingers(mo, 1)
 	end
+
+	S_StartSound(mo, sfx_hide1)
+	HelcurtSpeak(mo, sfx_mcon1, sfx_mcon1, FRACUNIT/10)
 
 	--Attribute increase
 	mo.player.acceleration = $+CONCEAL_ACCELERATION_BOOST
@@ -174,6 +320,10 @@ end)
 
 --Conceal effects to be put every tic 
 rawset(_G, "ConcealEffects", function(mo)
+	if(not S_SoundPlaying(mo, sfx_hide1) and not S_SoundPlaying(mo, sfx_hide2) and not S_SoundPlaying(mo, sfx_hide3)) then
+		S_StartSound(mo, sfx_hide2)
+	end
+
 	mo.frame = $|FF_TRANS50--|FF_FULLBRIGHT
 end)
 
@@ -181,6 +331,11 @@ end)
 rawset(_G, "Unconceal", function(mo)
 	
 	local skin = skins[mo.player.skin]
+
+	HelcurtSpeak(mo, sfx_munc1, sfx_munc1, FRACUNIT/10)
+	S_StopSound(mo, sfx_hide1)
+	S_StopSound(mo, sfx_hide2)
+	S_StartSound(mo, sfx_hide3)
 
 	-- print("UnConceal!")
     mo.player.acceleration = skin.acceleration
@@ -232,8 +387,8 @@ rawset(_G, "StartTheNight", function(originplayer)
     -- P_SwitchWeather(PRECIP_STORM)
 
     --Starting the monologue and night sound
-    S_StartSound(originplayer.mo, sfx_mnlg1)
-    S_StartSound(originplayer.mo, sfx_ult01)
+	HelcurtSpeakOverride(originplayer.mo, sfx_mnht1, sfx_mnht3)
+	S_StartSound(originplayer.mo, sfx_nght1)
 
     --Fading the background music
     S_FadeMusic(50, 20)
@@ -265,8 +420,8 @@ rawset(_G, "EndTheNight", function(originplayer, skybox, skynum)
 
    --Wrapping-up the night sound and bringing back original level sounds
    S_FadeMusic(100, 20)
-   S_StopSoundByID(originplayer.mo, sfx_ult02)
-   S_StartSound(originplayer.mo, sfx_ult03)
+   S_StopSoundByID(originplayer.mo, sfx_nght2)
+   S_StartSound(originplayer.mo, sfx_nght3)
    S_SpeedMusic(FRACUNIT)
    
    for sector in sectors.iterate do
@@ -555,6 +710,9 @@ local function SetUp(player)
 	--Carried by anything last tic
 	player.mo.prevcarried = 0
 
+	--Timer on which Helcurt says a random monologue phrase
+	player.monologue_timer = MONOLOGUE_TIC_MAX
+
 	player.mo.can_teleport = 0
 	player.mo.teleported = 0
 	player.mo.enhanced_teleport = 0
@@ -616,6 +774,8 @@ local function CleanUp(player)
 	player.prevspinheld = nil
 	player.mo.hasjumped = nil
 
+	player.monologue_timer = -1
+
 	player.mo.can_teleport = nil
 	player.mo.teleported = nil
 	player.mo.enhanced_teleport = nil
@@ -657,6 +817,8 @@ addHook("PlayerSpawn", function(player)
 		SetUp(player)
 	end
 	
+	HelcurtSpeakOverride(player.mo, sfx_mrwn1, sfx_mrwn2)
+
 	--Sets up special server attributes
 	if(player == server) then
 		--information about the map so that the night won't last forever
@@ -742,6 +904,13 @@ addHook("PlayerThink", function(p)
 	--Detect when the player has left the carry in order to allow to perform the abilities
 	if((p.mo.prevcarried ~= 0 and p.powers[pw_carry] == 0)) then
 		p.mo.hasjumped = 1
+	end
+
+	if(p.monologue_timer > 0*TICRATE) then
+		p.monologue_timer = $-1
+	else 
+		HelcurtSpeak(p.mo, sfx_mnl01, sfx_mnl03, FRACUNIT/3) 
+		p.monologue_timer = P_RandomRange(MONOLOGUE_TIC_MAX/2, 3*MONOLOGUE_TIC_MAX/2)
 	end
 end)
 
@@ -833,12 +1002,41 @@ addHook("MobjDeath", function(target, inflictor, source, dmgtype)
 		return nil
 	end
 	
+	
+
 	-- print(source.skin)
 	if(target.flags & TARGET_DMG_RANGE ~= 0) then
 		source.player.killcount = $+1
+		HelcurtSpeak(inflictor, sfx_mkil1, sfx_mkil4, FRACUNIT)
+	-- elseif(target.flags & TARGET_DMG_RANGE|MF_BOSS and target.) then
+	-- 	HelcurtSpeakOverride(target, sfx_mbos1, sfx_mbos2, FRACUNIT)
 	end
 
 end)
+
+
+--Determines how to handle Helcurt's death
+addHook("MobjDeath", function(target, inflictor, source, dmgtype)
+	if(not Valid(target, "helcurt")) then
+		return nil
+	end
+	
+	HelcurtSpeakOverride(target, sfx_mdth1, sfx_mdth2, FRACUNIT)
+	  
+
+end, MT_PLAYER)
+
+
+--Determines how to handle when Helcurt is damaged
+addHook("MobjDamage", function(target, inflictor, source, dmgtype)
+	if(not Valid(target, "helcurt")) then
+		return nil
+	end
+	
+	HelcurtSpeakOverride(target, sfx_mgrn3, sfx_mgrn4, FRACUNIT/5)
+	  
+
+end, MT_PLAYER)
 
 
 
@@ -1066,6 +1264,7 @@ local function A_End_Transition(actor, par1, par2)
 	end
 
 	S_StartSound(actor, sfx_trns2)
+	HelcurtSpeak(actor, sfx_mtlp1, sfx_mtlp1, FRACUNIT/3)
 	P_SpawnMobj(actor.x, actor.y, actor.z, MT_TRNS)
 
 
@@ -1108,6 +1307,8 @@ local function Stinger(playmo, startrollangle, stingerstate)
 	playmo.momx = $/CHARGE_SLOWDOWN_FACTOR
 	playmo.momy = $/CHARGE_SLOWDOWN_FACTOR
 	playmo.momz = $/CHARGE_SLOWDOWN_FACTOR
+
+	HelcurtSpeak(playmo, sfx_mstg1, sfx_mstg1, FRACUNIT/5)
 	S_StartSound(playmo, sfx_stg01+playmo.stingers)
 
 	--Spawning each of Helcurt available stingers and one Helcurt always has
@@ -1243,106 +1444,74 @@ mobjinfo[MT_STGS] = {
 --/ SOUNDS
 --/--------------------------
 
-sfxinfo[sfx_trns1] = {
-	singular = false,
-	priority = 64
-}
 
-sfxinfo[sfx_trns2] = {
-	singular = false,
-	priority = 65
-}
+------------ Sound effects ------------
+
 
 sfxinfo[sfx_blde1] = {
 	singular = false,
 	priority = 60
 }
-sfxinfo[sfx_mnlg1] = {
+
+
+sfxinfo[sfx_trns1] = {
+	singular = false,
+	priority = 64
+}
+sfxinfo[sfx_trns2] = {
+	singular = false,
+	priority = 65
+}
+
+
+sfxinfo[sfx_nght1] = {
+	singular = false,
+	priority = 60
+}
+sfxinfo[sfx_nght2] = {
+	singular = false,
+	priority = 60
+}
+sfxinfo[sfx_nght3] = {
 	singular = false,
 	priority = 60
 }
 
-sfxinfo[sfx_ult01] = {
-	singular = false,
-	priority = 60
-}
-
-sfxinfo[sfx_ult02] = {
-	singular = false,
-	priority = 60
-}
-
-sfxinfo[sfx_ult03] = {
-	singular = false,
-	priority = 60
-}
 
 sfxinfo[sfx_upg01] = {
 	singular = false,
 	priority = 60
 }
-
 sfxinfo[sfx_upg02] = {
 	singular = false,
 	priority = 60
 }
-
 sfxinfo[sfx_upg03] = {
 	singular = false,
 	priority = 60
 }
-
 sfxinfo[sfx_upg04] = {
 	singular = false,
 	priority = 60
 }
 
-sfxinfo[sfx_stg01] = {
-	singular = false,
-	priority = 60
-}
-
-sfxinfo[sfx_stg02] = {
-	singular = false,
-	priority = 60
-}
-
-sfxinfo[sfx_stg03] = {
-	singular = false,
-	priority = 60
-}
-
-sfxinfo[sfx_stg04] = {
-	singular = false,
-	priority = 60
-}
-
-sfxinfo[sfx_stg05] = {
-	singular = false,
-	priority = 60
-}
-
 
 sfxinfo[sfx_stg01] = {
 	singular = false,
 	priority = 60
 }
-
 sfxinfo[sfx_stg02] = {
 	singular = false,
 	priority = 60
 }
-
 sfxinfo[sfx_stg03] = {
 	singular = false,
 	priority = 60
 }
-
 sfxinfo[sfx_stg04] = {
 	singular = false,
 	priority = 60
 }
-
 sfxinfo[sfx_stg05] = {
 	singular = false,
 	priority = 60
@@ -1353,7 +1522,137 @@ sfxinfo[sfx_hide1] = {
 	singular = true,
 	priority = 60
 }
+sfxinfo[sfx_hide2] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_hide3] = {
+	singular = true,
+	priority = 60
+}
 
+------------ MONOLOGUES ------------
+
+
+sfxinfo[sfx_mbos1] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mbos2] = {
+	singular = true,
+	priority = 60
+}
+
+
+sfxinfo[sfx_mcon1] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_munc1] = {
+	singular = true,
+	priority = 60
+}
+
+
+
+sfxinfo[sfx_mgrn1] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mgrn2] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mgrn3] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mgrn4] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mgrn5] = {
+	singular = true,
+	priority = 60
+}
+
+
+sfxinfo[sfx_mkil1] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mkil2] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mkil3] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mkil4] = {
+	singular = true,
+	priority = 60
+}
+
+
+sfxinfo[sfx_mnht1] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mnht2] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mnht3] = {
+	singular = true,
+	priority = 60
+}
+
+
+sfxinfo[sfx_mnl01] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mnl02] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mnl03] = {
+	singular = true,
+	priority = 60
+}
+
+
+sfxinfo[sfx_mrwn1] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mrwn2] = {
+	singular = true,
+	priority = 60
+}
+
+
+sfxinfo[sfx_mdth1] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_mdth2] = {
+	singular = true,
+	priority = 60
+}
+
+
+sfxinfo[sfx_mstg1] = {
+	singular = true,
+	priority = 60
+}
+
+
+sfxinfo[sfx_mtlp1] = {
+	singular = true,
+	priority = 60
+}
 --/--------------------------
 --/ STATES
 --/--------------------------
