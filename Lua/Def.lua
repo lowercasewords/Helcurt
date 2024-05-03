@@ -1066,7 +1066,7 @@ local function A_Air2(actor, var1, var2)
 	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST)
 
 	--Contribute to the vertical boost of the player
-	P_SetObjectMomZ(actor.target, STINGER_VERT_BOOST, true)	
+	-- P_SetObjectMomZ(actor.target, STINGER_VERT_BOOST, true)	
 
 end
 
@@ -1322,19 +1322,31 @@ local function Stinger(playmo, startrollangle, stingerstate)
 		stinger.released = playmo.stingers + 1 --How many stingers were released (not the best way to do it I know but it works just fine)
 		stinger.state = stingerstate
 	end
-
-
-	--Reset stingers after usage
-	RemoveStingers(playmo, MAX_STINGERS)
+	
 end
 
 local function A_StingerAir1(actor, var1, var2)
 	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
 		return nil
 	end
+
 	--Helcurt's when he started charging his stinger attack (that circly thing process around Helcurt)
 	P_SetObjectMomZ(actor, EXTRA_CHARGE_BOOST, false)
 	Stinger(actor, var1, var2)
+end
+
+
+local function A_StingerAir2(actor, var1, var2)
+	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
+		return nil
+	end
+	
+	P_SetObjectMomZ(actor, STINGER_VERT_BOOST * actor.stingers, true)	
+	P_Thrust(actor, actor.player.inputangle, STINGER_HORIZ_BOOST)
+
+	-- P_SetObjectMomZ(actor.target, STINGER_VERT_BOOST, true)	
+	--Reset stingers after usage
+	RemoveStingers(actor, MAX_STINGERS)
 end
 
 local function A_StingerGrnd1(actor, var1, var2)
@@ -1349,15 +1361,8 @@ local function A_StingerGrnd1(actor, var1, var2)
 	actor.ground_tic_cd = STINGER_GRND_COOLDOWN
 	P_SetObjectMomZ(actor, 2*FRACUNIT, false)
 	P_Thrust(actor, actor.player.inputangle, ownerspeed + STINGER_HORIZ_BOOST)
-end
 
-local function A_StingerAir2(actor, var1, var2)
-	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
-		return nil
-	end
-
-	P_SetObjectMomZ(actor, 0, false)
-	P_Thrust(actor, actor.player.inputangle, STINGER_HORIZ_BOOST)
+	RemoveStingers(actor, MAX_STINGERS)
 end
 
 local function A_StingerGrnd2(actor, var1, var2)
