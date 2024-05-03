@@ -44,8 +44,8 @@ addHook("PlayerThink", function(player)
     if(player.night_timer > 1) then
             player.night_timer = $-1
             --Keep playing the repeating night sound 
-            if(S_SoundPlaying(player.mo, sfx_ult01) == nil and S_SoundPlaying(player.mo, sfx_ult02) == nil) then
-                S_StartSound(player.mo, sfx_ult02)
+            if(not S_SoundPlaying(player.mo, sfx_nght1) and not S_SoundPlaying(player.mo, sfx_nght2)) then
+                S_StartSound(player.mo, sfx_nght2)
             end
             
     --Clearing up after the night ends

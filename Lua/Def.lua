@@ -28,7 +28,7 @@ freeslot("SPR2_STNG", "SPR2_BLDE", "SPR2_LNCH", "SPR_STGP", "SPR_STGS", "SPR_STG
 freeslot(
 	"sfx_blde1",
 	"sfx_trns1", "sfx_trns2", 
-	"sfx_ult01", "sfx_ult02", "sfx_ult03", 
+	"sfx_nght1", "sfx_nght2", "sfx_nght3", 
 	"sfx_upg01", "sfx_upg02", "sfx_upg03", "sfx_upg04", 
 	"sfx_stg01", "sfx_stg02", "sfx_stg03", "sfx_stg04", "sfx_stg05",
 	"sfx_hide1", "sfx_hide2", "sfx_hide3")
@@ -297,7 +297,7 @@ rawset(_G, "StartTheNight", function(originplayer)
 
     --Starting the monologue and night sound
     TrySoundInRange(originplayer.mo, sfx_mnht1, sfx_mnht3)
-	S_StartSound(originplayer.mo, sfx_ult01)
+	S_StartSound(originplayer.mo, sfx_nght1)
 
     --Fading the background music
     S_FadeMusic(50, 20)
@@ -329,8 +329,8 @@ rawset(_G, "EndTheNight", function(originplayer, skybox, skynum)
 
    --Wrapping-up the night sound and bringing back original level sounds
    S_FadeMusic(100, 20)
-   S_StopSoundByID(originplayer.mo, sfx_ult02)
-   S_StartSound(originplayer.mo, sfx_ult03)
+   S_StopSoundByID(originplayer.mo, sfx_nght2)
+   S_StartSound(originplayer.mo, sfx_nght3)
    S_SpeedMusic(FRACUNIT)
    
    for sector in sectors.iterate do
@@ -1324,15 +1324,15 @@ sfxinfo[sfx_trns2] = {
 }
 
 
-sfxinfo[sfx_ult01] = {
+sfxinfo[sfx_nght1] = {
 	singular = false,
 	priority = 60
 }
-sfxinfo[sfx_ult02] = {
+sfxinfo[sfx_nght2] = {
 	singular = false,
 	priority = 60
 }
-sfxinfo[sfx_ult03] = {
+sfxinfo[sfx_nght3] = {
 	singular = false,
 	priority = 60
 }
