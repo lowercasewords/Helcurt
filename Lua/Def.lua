@@ -38,12 +38,14 @@ freeslot(
 	"sfx_mrwn1", "sfx_mrwn2", 
 	"sfx_mdth1", "sfx_mdth2",
 	"sfx_mbos1", "sfx_mbos2",
+		"sfx_mcon1", 
+		"sfx_munc1",
 	"sfx_mstg1",
 	"sfx_mtlp1",
 	"sfx_mnht1", "sfx_mnht2", "sfx_mnht3",
 	"sfx_mgrn1", "sfx_mgrn2", "sfx_mgrn3", "sfx_mgrn4", "sfx_mgrn5", 
 	"sfx_mkil1", "sfx_mkil2", "sfx_mkil3", "sfx_mkil4",
-	"sfx_mnl01", "sfx_mnl02", "sfx_mnl03", "sfx_mnl04", "sfx_mnl05")
+	"sfx_mnl01", "sfx_mnl02", "sfx_mnl03")
 
 --Particle slots
 freeslot("MT_SHDW", "SPR_SHDW", "S_SHDW_PRT", "S_SHDW_HINT")
@@ -59,7 +61,7 @@ rawset(_G, "SPAWN_TIC_MAX", 1)
 --could possible be set to lover value based on this maximum constant
 rawset(_G, "MONOLOGUE_TIC_MAX", TICRATE*10)
 rawset(_G, "MONOLOGUE_START_SOUND", sfx_mrwn1)
-rawset(_G, "MONOLOGUE_END_SOUND", sfx_mnl05)
+rawset(_G, "MONOLOGUE_END_SOUND", sfx_mnl03)
 
 
 rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MONITOR|MF_SPRING)
@@ -197,7 +199,6 @@ rawset(_G, "IsSoundPlayingRange", function(mo, start_sound, end_sound, ignore_st
 	--If the sound in range is already playing
 	for i = start_sound, end_sound, 1 do
 		if(S_SoundPlaying(mo, i) and (i < ignore_start or i > ignore_end)) then
-			print("return true!")
 			return true
 		end
 	end
@@ -307,6 +308,7 @@ rawset(_G, "Conceal", function(mo)
 	end
 
 	S_StartSound(mo, sfx_hide1)
+	HelcurtSpeak(mo, sfx_mcon1, sfx_mcon1, FRACUNIT)
 
 	--Attribute increase
 	mo.player.acceleration = $+CONCEAL_ACCELERATION_BOOST
@@ -328,6 +330,7 @@ rawset(_G, "Unconceal", function(mo)
 	
 	local skin = skins[mo.player.skin]
 
+	HelcurtSpeak(mo, sfx_mcon1, sfx_mcon1, FRACUNIT)
 	S_StopSound(mo, sfx_hide1)
 	S_StopSound(mo, sfx_hide2)
 	S_StartSound(mo, sfx_hide3)
@@ -971,6 +974,8 @@ addHook("MobjDeath", function(target, inflictor, source, dmgtype)
 	if(target.flags & TARGET_DMG_RANGE ~= 0) then
 		source.player.killcount = $+1
 		HelcurtSpeak(inflictor, sfx_mkil1, sfx_mkil4, FRACUNIT/2)
+	-- elseif(target.flags & TARGET_DMG_RANGE|MF_BOSS and target.) then
+	-- 	HelcurtSpeakOverride(target, sfx_mbos1, sfx_mbos2, FRACUNIT)
 	end
 
 end)
@@ -1491,6 +1496,17 @@ sfxinfo[sfx_mbos2] = {
 }
 
 
+sfxinfo[sfx_mcon1] = {
+	singular = true,
+	priority = 60
+}
+sfxinfo[sfx_munc1] = {
+	singular = true,
+	priority = 60
+}
+
+
+
 sfxinfo[sfx_mgrn1] = {
 	singular = true,
 	priority = 60
@@ -1554,14 +1570,6 @@ sfxinfo[sfx_mnl02] = {
 	priority = 60
 }
 sfxinfo[sfx_mnl03] = {
-	singular = true,
-	priority = 60
-}
-sfxinfo[sfx_mnl04] = {
-	singular = true,
-	priority = 60
-}
-sfxinfo[sfx_mnl05] = {
 	singular = true,
 	priority = 60
 }
