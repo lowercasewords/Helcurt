@@ -42,7 +42,7 @@ freeslot(
 	"sfx_mnl01", "sfx_mnl02", "sfx_mnl03", "sfx_mnl04", "sfx_mnl05", "sfx_mnl06", 
 	"sfx_mrwn1", "sfx_mrwn2", 
 	"sfx_mstg1",
-	"sfx_mtlp2")
+	"sfx_mtlp1")
 
 --Particle slots
 freeslot("MT_SHDW", "SPR_SHDW", "S_SHDW_PRT", "S_SHDW_HINT")
@@ -1099,6 +1099,7 @@ local function A_End_Transition(actor, par1, par2)
 	end
 
 	S_StartSound(actor, sfx_trns2)
+	S_StartSound(actor, sfx_mtlp1)
 	P_SpawnMobj(actor.x, actor.y, actor.z, MT_TRNS)
 
 
@@ -1468,7 +1469,7 @@ sfxinfo[sfx_mstg1] = {
 }
 
 
-sfxinfo[sfx_mtlp2] = {
+sfxinfo[sfx_mtlp1] = {
 	singular = true,
 	priority = 60
 }
