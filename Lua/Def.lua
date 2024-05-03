@@ -900,6 +900,14 @@ addHook("MobjDeath", function(target, inflictor, source, dmgtype)
 
 end, MT_PLAYER)
 
+
+--Determines how to handle when Helcurt is damaged
+addHook("MobjDamage", function(target, inflictor, source, dmgtype)
+	if(not Valid(target, "helcurt")) then
+		return nil
+	end
+	
+	TrySoundInRange(target, sfx_mgrn3, sfx_mgrn4, FRACUNIT)
 	  
 
 end, MT_PLAYER)
