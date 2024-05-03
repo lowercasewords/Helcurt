@@ -35,15 +35,15 @@ freeslot(
 
 --Monologues
 freeslot(
+"sfx_mrwn1", "sfx_mrwn2", 
+	"sfx_mdth1", "sfx_mdth2",
 	"sfx_mbos1",
+"sfx_mstg1",
+	"sfx_mtlp1",
+	"sfx_mnht1", "sfx_mnht2", "sfx_mnht3",
 	"sfx_mgrn1", "sfx_mgrn2", "sfx_mgrn3", "sfx_mgrn4", "sfx_mgrn5", 
 	"sfx_mkil1", "sfx_mkil2", "sfx_mkil3", "sfx_mkil4",
-	"sfx_mnht1", "sfx_mnht2", "sfx_mnht3",
-	"sfx_mnl01", "sfx_mnl02", "sfx_mnl03", "sfx_mnl04", "sfx_mnl05", "sfx_mnl06", 
-	"sfx_mrwn1", "sfx_mrwn2", 
-	"sfx_mstg1",
-	"sfx_mdth1", "sfx_mdth2", 
-	"sfx_mtlp1")
+	"sfx_mnl01", "sfx_mnl02", "sfx_mnl03", "sfx_mnl04", "sfx_mnl05", "sfx_mnl06")
 
 --Particle slots
 freeslot("MT_SHDW", "SPR_SHDW", "S_SHDW_PRT", "S_SHDW_HINT")
@@ -58,6 +58,8 @@ rawset(_G, "SPAWN_TIC_MAX", 1)
 --A maximum tic value for a monologue timer, actualr timer 
 --could possible be set to lover value based on this maximum constant
 rawset(_G, "MONOLOGUE_TIC_MAX", TICRATE*10)
+rawset(_G, "MONOLOGUE_START_SOUND", sfx_mrwn1)
+rawset(_G, "MONOLOGUE_END_SOUND", sfx_mnl06)
 
 
 rawset(_G, "TARGET_DMG_RANGE", MF_SHOOTABLE|MF_ENEMY|MF_BOSS|MF_MONITOR)--|MF_MONITOR|MF_SPRING)
@@ -372,8 +374,6 @@ rawset(_G, "StartTheNight", function(originplayer)
         return nil
     end
 
-	
-
     StartHelcurtNightBuff(originplayer)
     
     --Changes the background for the Night Fall
@@ -382,7 +382,7 @@ rawset(_G, "StartTheNight", function(originplayer)
     -- P_SwitchWeather(PRECIP_STORM)
 
     --Starting the monologue and night sound
-    TrySoundInRange(originplayer.mo, sfx_mnht1, sfx_mnht3)
+    HelcurtSpeakOverride(originplayer.mo, sfx_mnht1, sfx_mnht3)
 	S_StartSound(originplayer.mo, sfx_nght1)
 
     --Fading the background music
