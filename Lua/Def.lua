@@ -267,6 +267,8 @@ rawset(_G, "StartTheNight", function(originplayer)
         return nil
     end
 
+	
+
     StartHelcurtNightBuff(originplayer)
     
     --Changes the background for the Night Fall
@@ -275,8 +277,8 @@ rawset(_G, "StartTheNight", function(originplayer)
     -- P_SwitchWeather(PRECIP_STORM)
 
     --Starting the monologue and night sound
-    S_StartSound(originplayer.mo, sfx_mnlg1)
-    S_StartSound(originplayer.mo, sfx_ult01)
+    TrySoundInRange(originplayer.mo, sfx_mnht1, sfx_mnht3)
+	S_StartSound(originplayer.mo, sfx_ult01)
 
     --Fading the background music
     S_FadeMusic(50, 20)
