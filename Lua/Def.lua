@@ -716,6 +716,8 @@ addHook("PlayerSpawn", function(player)
 		SetUp(player)
 	end
 	
+TrySoundInRange(player.mo, sfx_mrwn1, sfx_mrwn2)
+
 	--Sets up special server attributes
 	if(player == server) then
 		--information about the map so that the night won't last forever
