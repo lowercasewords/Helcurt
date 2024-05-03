@@ -227,10 +227,10 @@ end)
 
 --Says something without interruption
 rawset(_G, "HelcurtSpeak", function(mo, start_sound, end_sound, chance) 
-	if(not Valid(mo) or IsSoundPlayingRange(mo, MONOLOGUE_START_SOUND, MONOLOGUE_END_SOUND, start_sound, end_sound))then
+	if(not Valid(mo) or IsSoundPlayingRange(mo, MONOLOGUE_START_SOUND, MONOLOGUE_END_SOUND))then
 		return nil
 	end
-
+		
 	local monologue = TrySoundInRange(mo, start_sound, end_sound, chance)
 
 	return monologue
@@ -308,7 +308,7 @@ rawset(_G, "Conceal", function(mo)
 	end
 
 	S_StartSound(mo, sfx_hide1)
-	HelcurtSpeak(mo, sfx_mcon1, sfx_mcon1, FRACUNIT)
+	HelcurtSpeak(mo, sfx_mcon1, sfx_mcon1, FRACUNIT/10)
 
 	--Attribute increase
 	mo.player.acceleration = $+CONCEAL_ACCELERATION_BOOST
@@ -330,7 +330,7 @@ rawset(_G, "Unconceal", function(mo)
 	
 	local skin = skins[mo.player.skin]
 
-	HelcurtSpeak(mo, sfx_mcon1, sfx_mcon1, FRACUNIT)
+	HelcurtSpeak(mo, sfx_munc1, sfx_munc1, FRACUNIT/10)
 	S_StopSound(mo, sfx_hide1)
 	S_StopSound(mo, sfx_hide2)
 	S_StartSound(mo, sfx_hide3)
@@ -907,9 +907,8 @@ addHook("PlayerThink", function(p)
 	if(p.monologue_timer > 0*TICRATE) then
 		p.monologue_timer = $-1
 	else 
-		if(HelcurtSpeak(p.mo, sfx_mnl01, sfx_mnl05) ~= nil) then
-			p.monologue_timer = P_RandomRange(MONOLOGUE_TIC_MAX/2, 3*MONOLOGUE_TIC_MAX/2)
-		end
+		HelcurtSpeak(p.mo, sfx_mnl01, sfx_mnl03, FRACUNIT/3) 
+		p.monologue_timer = P_RandomRange(MONOLOGUE_TIC_MAX/2, 3*MONOLOGUE_TIC_MAX/2)
 	end
 end)
 
@@ -973,7 +972,7 @@ addHook("MobjDeath", function(target, inflictor, source, dmgtype)
 	-- print(source.skin)
 	if(target.flags & TARGET_DMG_RANGE ~= 0) then
 		source.player.killcount = $+1
-		HelcurtSpeak(inflictor, sfx_mkil1, sfx_mkil4, FRACUNIT/2)
+		HelcurtSpeak(inflictor, sfx_mkil1, sfx_mkil4, FRACUNIT)
 	-- elseif(target.flags & TARGET_DMG_RANGE|MF_BOSS and target.) then
 	-- 	HelcurtSpeakOverride(target, sfx_mbos1, sfx_mbos2, FRACUNIT)
 	end
@@ -999,7 +998,7 @@ addHook("MobjDamage", function(target, inflictor, source, dmgtype)
 		return nil
 	end
 	
-	HelcurtSpeakOverride(target, sfx_mgrn3, sfx_mgrn4, FRACUNIT)
+	HelcurtSpeakOverride(target, sfx_mgrn3, sfx_mgrn4, FRACUNIT/5)
 	  
 
 end, MT_PLAYER)
@@ -1216,7 +1215,7 @@ local function A_End_Transition(actor, par1, par2)
 	end
 
 	S_StartSound(actor, sfx_trns2)
-	HelcurtSpeak(actor, sfx_mtlp1)
+	HelcurtSpeak(actor, sfx_mtlp1, sfx_mtlp1, FRACUNIT/3)
 	P_SpawnMobj(actor.x, actor.y, actor.z, MT_TRNS)
 
 
@@ -1260,7 +1259,7 @@ local function Stinger(playmo, startrollangle, stingerstate)
 	playmo.momy = $/CHARGE_SLOWDOWN_FACTOR
 	playmo.momz = $/CHARGE_SLOWDOWN_FACTOR
 
-	HelcurtSpeak(playmo, sfx_mstg1, sfx_mstg1, FRACUNIT/4)
+	HelcurtSpeak(playmo, sfx_mstg1, sfx_mstg1, FRACUNIT/5)
 	S_StartSound(playmo, sfx_stg01+playmo.stingers)
 
 	--Spawning each of Helcurt available stingers and one Helcurt always has
