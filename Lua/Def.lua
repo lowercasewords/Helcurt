@@ -118,13 +118,27 @@ end)
 --chance number is between 0 and FRACUNIT, being a chance to play the sound
 --Returns true if any sound was played at all
 rawset(_G, "TrySoundInRange", function(mo, start_sound, end_sound, chance)
+
 	--If the origin object is valid and sound is determined to play by chance
 	if(not Valid(mo) and chance ~= nil and not P_RandomChance(chance))then
 		return false
 	end
 
+	--In case that end_sound is not supplied
+	if(end_sound == nil) then
+		end_sound = start_sound
+	end
+	
+	--If the sound in range is already playing
+	for i = start_sound, end_sound, 1 do
+		if(S_SoundPlaying(mo, i)) then
+			S_StopSoundByID(mo, i)
+		end
+	end
+
 	local sound = P_RandomRange(start_sound, end_sound) 
 	S_StartSound(mo, sound)
+
 	return true
 end)
 
