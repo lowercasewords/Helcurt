@@ -15,8 +15,11 @@ local BLADE_VERT_BOOST = 6*FRACUNIT
 local LOCK_HEIGHT_MUL = 2
 --Range system used in searchblock function to find targets
 local BLADE_BLOCK_SEARCH = 500*FRACUNIT
+--[[
 --Maximum distance between enemy and Helcurt for latter to blade attack 
-local BLADE_HIT_DISTANCE = 50*FRACUNIT
+local BLADE_HIT_DISTANCE = 5*FRACUNIT
+]]--
+
 
 --/--------------------------
 --/ HOOKS
@@ -45,10 +48,7 @@ addHook("PlayerThink", function(player)
 		if(player.mo.state == S_BLADE_THURST) then
 			--Continuous behavior 
 			
-			if(player.spinheld == TICS_PRESS_RANGE) then
-
-				P_SetObjectMomZ(player.mo, BLADE_THRUST_FALL, false)
-			elseif(player.spinheld > TICS_PRESS_RANGE) then
+			if(player.spinheld >= TICS_PRESS_RANGE) then
 				-- print("down: "..player.mo.momz)
 				P_SetObjectMomZ(player.mo, BLADE_THRUST_FALL/3, true)
 			end
@@ -79,7 +79,7 @@ addHook("PlayerThink", function(player)
 			FixedMul(checkmo.z - playmo.z, checkmo.z - playmo.z)))
 		]]--
 		--Damage the enemy and enter a state of hitting an enemy only if the target is valid and in the hit distance in all 3 directions
-		if(distcheck < checkmo.radius+playmo.radius+BLADE_HIT_DISTANCE and L_ZCollide(playmo, checkmo, checkmo.height+BLADE_HIT_DISTANCE) 
+		if(distcheck < checkmo.radius*2+playmo.radius*2 and L_ZCollide(playmo, checkmo, checkmo.height) 
 		and checkmo.valid and checkmo.health > 0 
 		and checkmo.state ~= checkmo.info.painstate
 		and checkmo.flags2 & (MF2_BOSSFLEE|MF2_FRET|MF2_BOSSDEAD|MF2_INVERTAIMABLE) == 0

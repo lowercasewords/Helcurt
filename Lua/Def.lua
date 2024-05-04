@@ -75,10 +75,9 @@ rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
 rawset(_G, "TELEPORT_STOP_SPEED", 3)
 
 
-rawset(_G, "LENGTH_MELEE_RANGE", 100*FRACUNIT)
 rawset(_G, "BLADE_THURST_SPEED", 15*FRACUNIT)
 rawset(_G, "BLADE_THURST_JUMP", 8*FRACUNIT)
-rawset(_G, "BLADE_THRUST_FALL", -FRACUNIT*10)
+rawset(_G, "BLADE_THRUST_FALL", -FRACUNIT*5)
 
 
 --Maximum amount of extra stingers (not counting the one you always have)
@@ -1174,7 +1173,7 @@ local function A_BladeThrust(actor, par1, par2)
 	end
 	
 	local ownerspeed = FixedHypot(actor.momx, actor.momy)
-	P_SetObjectMomZ(actor, -2*FRACUNIT, false)
+	P_SetObjectMomZ(actor, BLADE_THRUST_FALL, false)
 	P_InstaThrust(actor, actor.player.inputangle, ownerspeed/2+BLADE_THURST_SPEED)
 	
 	-- actor.player.pflags = $|PF_SPINNING
