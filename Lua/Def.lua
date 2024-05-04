@@ -77,7 +77,7 @@ rawset(_G, "TELEPORT_STOP_SPEED", 3)
 
 rawset(_G, "BLADE_THURST_SPEED", 15*FRACUNIT)
 rawset(_G, "BLADE_THURST_JUMP", 8*FRACUNIT)
-rawset(_G, "BLADE_THRUST_FALL", -FRACUNIT*5)
+rawset(_G, "BLADE_THRUST_FALL", -FRACUNIT*10)
 
 
 --Maximum amount of extra stingers (not counting the one you always have)
@@ -301,6 +301,10 @@ end)
 
 --Conceals the player in the darkness (called once)
 rawset(_G, "Conceal", function(mo)
+	if(not Valid(mo)) then
+		return nil
+	end
+
 	mo.unconceal_timer = UNCONCEAL_MAX_TICS
 
 	--Immediate extra stinger upon concealing
@@ -328,10 +332,15 @@ end)
 
 --Stops concealing the player in the darkness (called once)
 rawset(_G, "Unconceal", function(mo)
-	
+	if(not Valid(mo)) then
+		return nil
+	end
 	local skin = skins[mo.player.skin]
 
-	HelcurtSpeak(mo, sfx_munc1, sfx_munc1, FRACUNIT/10)
+	if(Valid(mo, "helcurt")) then
+		HelcurtSpeak(mo, sfx_munc1, sfx_munc1, FRACUNIT/10)
+	end
+
 	S_StopSound(mo, sfx_hide1)
 	S_StopSound(mo, sfx_hide2)
 	S_StartSound(mo, sfx_hide3)
@@ -700,6 +709,8 @@ local function SetUp(player)
 		return false
 	end
 	
+	HelcurtSpeakOverride(player.mo, sfx_mrwn1, sfx_mrwn2)
+	
 	player.spinheld = 0 --Increments each tic it's held IN PRETHINK, use PF_SPINDOWN to get previous update
 	player.jumpheld = 0 --Increments each tic it's held IN PRETHINK, use PF_JUMPDOWN to get previous update
 	player.prevjumpheld = 0 --Value of jumpheld in previous tic
@@ -816,7 +827,6 @@ addHook("PlayerSpawn", function(player)
 		SetUp(player)
 	end
 	
-	HelcurtSpeakOverride(player.mo, sfx_mrwn1, sfx_mrwn2)
 
 	--Sets up special server attributes
 	if(player == server) then
@@ -900,12 +910,16 @@ addHook("PreThinkFrame", function()
 end)
 
 addHook("PlayerThink", function(p)
+	if(not Valid(p.mo, "helcurt") or PAlive(p)) then
+		return false
+	end
+
 	--Detect when the player has left the carry in order to allow to perform the abilities
 	if((p.mo.prevcarried ~= 0 and p.powers[pw_carry] == 0)) then
 		p.mo.hasjumped = 1
 	end
 
-	if(p.monologue_timer > 0*TICRATE) then
+	if(p.monologue_timer ~= nil and p.monologue_timer > 0*TICRATE) then
 		p.monologue_timer = $-1
 	else 
 		HelcurtSpeak(p.mo, sfx_mnl01, sfx_mnl03, FRACUNIT/3) 
