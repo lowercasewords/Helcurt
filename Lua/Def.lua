@@ -1422,7 +1422,6 @@ mobjinfo[MT_STGP] = {
 	deathstate = S_NULL,
 	height = 16*FRACUNIT,
 	radius = 32*FRACUNIT,
-	speed = 2*FRACUNIT,
 	flags = MF2_SUPERFIRE|MF_NOGRAVITY|MF_MISSILE
 
 }
