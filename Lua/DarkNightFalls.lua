@@ -1,3 +1,6 @@
+--Required number of kiils to summon the night
+local KILLS_FOR_NIGHT = 10
+
 addHook("MapLoad", function(mapnum)
     server.current_mapinfo = mapheaderinfo[mapnum]
     --Searces for the skybox type to retrieve it
@@ -25,13 +28,12 @@ addHook("PlayerThink", function(player)
 		return
 	end
     
-    
     --Start charging the night
-    if(player.cmd.buttons & BT_SPIN and player.cmd.buttons & BT_JUMP 
+    if(player.killnight > KILLS_FOR_NIGHT and player.cmd.buttons & BT_SPIN and player.cmd.buttons & BT_JUMP 
             and not (P_IsObjectOnGround(player.mo)) and
             player.mo.state ~= S_NIGHT_CHARGE 
             and player.night_timer == 0) then
-            
+        player.killnight = 0
         player.mo.prevstate = player.mo.state
         player.mo.state = S_NIGHT_CHARGE 
     end

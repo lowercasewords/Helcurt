@@ -739,6 +739,9 @@ local function SetUp(player)
 	player.mo.hudstingers = {} --keeping track of HUD elements that represent the string
 
 	player.killcount = 0
+	--Separate kill count to summon the night,
+	--resets to zero when the night is summoned by the player
+	player.killnight = 0
 	player.lockon = nil
 	
 	--Time for the conceal to last after leaving the darkness (decreases 'till hits zero to unconceal)
@@ -803,6 +806,7 @@ local function CleanUp(player)
 	player.mo.hudstingers = nil 
 
 	player.killcount = nil
+	player.killnight = nil
 	player.lockon = nil
 	
 	player.night_timer = nil
@@ -910,7 +914,7 @@ addHook("PreThinkFrame", function()
 end)
 
 addHook("PlayerThink", function(p)
-	if(not Valid(p.mo, "helcurt") or PAlive(p)) then
+	if(not Valid(p.mo, "helcurt") or not PAlive(p)) then
 		return false
 	end
 
@@ -925,6 +929,8 @@ addHook("PlayerThink", function(p)
 		HelcurtSpeak(p.mo, sfx_mnl01, sfx_mnl03, FRACUNIT/3) 
 		p.monologue_timer = P_RandomRange(MONOLOGUE_TIC_MAX/2, 3*MONOLOGUE_TIC_MAX/2)
 	end
+
+	
 end)
 
 
@@ -1020,6 +1026,7 @@ addHook("MobjDeath", function(target, inflictor, source, dmgtype)
 	-- print(source.skin)
 	if(target.flags & TARGET_DMG_RANGE ~= 0) then
 		source.player.killcount = $+1
+		source.player.killnight = $+1
 		HelcurtSpeak(inflictor, sfx_mkil1, sfx_mkil4, FRACUNIT)
 	-- elseif(target.flags & TARGET_DMG_RANGE|MF_BOSS and target.) then
 	-- 	HelcurtSpeakOverride(target, sfx_mbos1, sfx_mbos2, FRACUNIT)
