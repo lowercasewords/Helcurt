@@ -12,7 +12,7 @@ all: clean build launch
 	echo "done!"
 
 launch: 
-	$(EXECUTABLE) -file $(OUTPK3) -warp $(MAP) + $(SKIN)
+	$(EXECUTABLE) -file $(OUTPK3) -warp $(MAP) + $(SKIN) + devmode 1
 build:
 	#Zips correctly with correct indecies for S_SKIN and Def.lua, but
 	#the game doesn't load other lua and sprite files at all for some reason,
@@ -33,5 +33,10 @@ build:
 	zip $(OUTPK3) -r Skins
 	zip $(OUTPK3) -r Sprites
 	zip $(OUTPK3) -r Sounds
+
+host: build
+	$(EXECUTABLE) -file $(OUTPK3) -warp $(MAP) -server + $(SKIN) + devmode 1
+join: build
+	$(EXECUTABLE) -file $(OUTPK3)  + $(SKIN) + color aether +  connect localhost
 clean:
 	-rm $(OUTPK3)

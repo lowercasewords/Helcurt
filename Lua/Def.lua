@@ -99,8 +99,8 @@ rawset(_G, "CHARGE_SLOWDOWN_FACTOR", 3)
 
 --How dark the area has to be to activate his passive
 rawset(_G, "CONCEAL_DARKNESS_LEVEL", 180)
-rawset(_G, "CONCEAL_ACCELERATION_BOOST", 5*FRACUNIT)
-rawset(_G, "CONCEAL_NORMALSPEED_BOOST",  25*FRACUNIT)
+rawset(_G, "CONCEAL_ACCELERATION_BOOST", 20)
+rawset(_G, "CONCEAL_NORMALSPEED_BOOST",  10*FRACUNIT)
 rawset(_G, "CONCEAL_JUMPFACTOR_BOOST",  FRACUNIT/2)
 --Maximum tics for a player's passive to be active after the player exited the dark area
 rawset(_G, "UNCONCEAL_MAX_TICS", TICRATE)
