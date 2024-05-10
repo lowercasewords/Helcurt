@@ -81,15 +81,23 @@ addHook("PlayerThink", function(player)
 		--Damage the enemy and enter a state of hitting an enemy only if the target is valid and in the hit distance in all 3 directions
 		if(distcheck < checkmo.radius*2+playmo.radius*2 and L_ZCollide(playmo, checkmo, checkmo.height) 
 		and checkmo.valid and checkmo.health > 0 
-		and checkmo.state ~= checkmo.info.painstate
-		and checkmo.flags2 & (MF2_BOSSFLEE|MF2_FRET|MF2_BOSSDEAD|MF2_INVERTAIMABLE) == 0
-		and checkmo.flags & MF_SHOOTABLE ~= 0
-		and checkmo.flags & TARGET_DMG_RANGE ~= 0 and checkmo.flags & TARGET_IGNORE_RANGE == 0) then
-			P_DamageMobj(checkmo, player.mo, player.mo, 1)
-			-- P_KillMobj(checkmo, player.mo, player.mo)
-			playmo.prevstate = playmo.state 
-			playmo.state = S_BLADE_THURST_HIT
-			return true
+		and checkmo.state ~= checkmo.info.painstate) then
+			
+			if(checkmo.flags2 & (MF2_BOSSFLEE|MF2_FRET|MF2_BOSSDEAD) == 0
+			and checkmo.flags & TARGET_DMG_RANGE ~= 0 and checkmo.flags & TARGET_IGNORE_RANGE == 0) then
+				--Damage invertable enemies (like metal sonic)
+				if(checkmo.flags2&MF2_INVERTAIMABLE) then
+					checkmo.flags2 = $|MF2_CLASSICPUSH
+				else
+					--Regular damage
+					P_DamageMobj(checkmo, player.mo, player.mo, 1)
+				end
+				-- P_KillMobj(checkmo, player.mo, player.mo)
+				playmo.prevstate = playmo.state 
+				playmo.state = S_BLADE_THURST_HIT
+				return true
+			end
+
 		end
 		end, 
 		player.mo, 
