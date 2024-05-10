@@ -1420,9 +1420,9 @@ mobjinfo[MT_TRNS] = {
 mobjinfo[MT_STGP] = {
 	spawnstate = S_AIR_1,
 	deathstate = S_NULL,
-	height = 16*FRACUNIT,
+	height = 64*FRACUNIT,
 	radius = 32*FRACUNIT,
-	flags = MF2_SUPERFIRE|MF_NOGRAVITY|MF_MISSILE
+	flags = MF2_SUPERFIRE|MF_NOGRAVITY
 
 }
 

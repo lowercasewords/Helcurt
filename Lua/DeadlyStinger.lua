@@ -172,7 +172,26 @@ stinger.target.state ~= nil) then
 		end
 	end
 	]]--
+
+	--Scan the area for the enemies to be hit with invertable damage (mainly metal sonic)
+	searchBlockmap("objects", function(stinger_projectile, destmo)
+		if(destmo.flags2 & MF2_INVERTAIMABLE ~= 0
+		and L_ZCollide(stinger_projectile, destmo)
+		and stinger_projectile.x - stinger_projectile.radius < destmo.x + destmo.radius and stinger_projectile.x + stinger_projectile.radius > destmo.x - destmo.radius
+		and stinger_projectile.y - stinger_projectile.radius < destmo.y + destmo.radius and stinger_projectile.y + stinger_projectile.radius > destmo.y - destmo.radius) then
+			destmo.flags2 = $|MF2_CLASSICPUSH
+			return true
+		end
+	end, stinger, stinger.x-500*FRACUNIT, stinger.x+500*FRACUNIT, stinger.y-500*FRACUNIT, stinger.y+500*FRACUNIT)
+
+	--MF2_CLASSICPUSH
+	-- if(object.flags2&MF2_INVERTAIMABLE ~= 0) then
+	-- 	print("metal!")
+	-- end
+
+
 end, MT_STGP)
+
 
 
 --Handle the Stinger Projectile damage registration (damage itself is performed through MF_MISSILE flag)
@@ -184,13 +203,14 @@ addHook("MobjDamage", function(target, inflictor, source, damage, damagetype)
 	AddStingers(source, 1)
 end)
 
+
+
 --Defines behavior when a stinger collides with an object
 addHook("MobjMoveCollide", function(stinger, object)
 	if(not Valid(stinger) or not Valid(object) or not Valid(stinger.target, "helcurt")) then
 		return nil
 	end
-
-	-- elseif(object.type == TARGET_KILL_RANGE) then
+	
 	--Kill if collided with a spike or some of its variants
 	if(object.type == MT_SPIKE or object.type == MT_WALLSPIKE or object.type == MT_POINTYBALL) then
 		P_KillMobj(object, stinger, stinger.target)
@@ -201,6 +221,8 @@ addHook("MobjMoveCollide", function(stinger, object)
 	end
 end, MT_STGP)
 
+
+
 --Used in the Line Collide thinker both for front and back sector
 local function WallBust(stinger, fof)
 	if(fof.valid and fof.flags&FF_BUSTUP and fof.flags&FF_EXISTS) then
@@ -208,6 +230,8 @@ local function WallBust(stinger, fof)
 		return false
 	end
 end
+
+
 
 addHook("MobjLineCollide", function(stinger, line)
 	
