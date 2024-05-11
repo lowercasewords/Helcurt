@@ -11,7 +11,7 @@
 --Most player and object sprites
 freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRANSITION", "S_TRNS",
 "S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK", "S_FOLLOW_STAND", "S_FOLLOW_RUN",
-"S_AIR_1", "S_GRND_1", "S_AIR_2", "S_GRND_2", "S_AIR_3",
+"S_AIR_1", "S_GRND_1", "S_AIR_2", "S_GRND_2",
 "S_STINGER_AIR_1", "S_STINGER_AIR_2", 
 "S_STINGER_GRND_1", "S_STINGER_GRND_2",
 "S_NIGHT_CHARGE", "S_NIGHT_ACTIVATE", "S_EYES_1", "S_EYES_2", "S_NGHT_1", "S_NGHT_2")
@@ -82,8 +82,10 @@ rawset(_G, "BLADE_THRUST_FALL", -FRACUNIT*10)
 
 --Maximum amount of extra stingers (not counting the one you always have)
 rawset(_G, "MAX_STINGERS", 4)
-rawset(_G, "STINGER_VERT_BOOST", 5*FRACUNIT)
-rawset(_G, "STINGER_HORIZ_BOOST", 20*FRACUNIT)
+rawset(_G, "STINGER_VERT_BOOST", 20*FRACUNIT)
+rawset(_G, "STINGER_HORIZ_BOOST", 40*FRACUNIT)
+rawset(_G, "STGP_AIR_SPEED", 20*FRACUNIT)
+rawset(_G, "STGP_GRND_SPEED", 40*FRACUNIT)
 rawset(_G, "STINGER_GRND_COOLDOWN", TICRATE)
 --Half of the stinger's angular trajectory a it needs to travel
 rawset(_G, "HALF_AIR_ANGLE", ANGLE_135)
@@ -92,7 +94,7 @@ rawset(_G, "HALF_GRND_ANGLE", ANG105-ANG20)
 rawset(_G, "SEPARATION_AIR_ANGLE", ANGLE_45)
 rawset(_G, "SEPARATION_GRND_ANGLE", ANG30)
 --Extra vertical boost for helcurt when charging the stingers (before release)
-rawset(_G, "EXTRA_CHARGE_BOOST", 10*FRACUNIT)
+rawset(_G, "EXTRA_CHARGE_BOOST", 20*FRACUNIT)
 --Slow down Helcurt by this factor once when started charging stingers
 rawset(_G, "CHARGE_SLOWDOWN_FACTOR", 3)
 
@@ -1074,16 +1076,17 @@ local function A_Air2(actor, var1, var2)
 		return nil
 	end
 	
-	--Point away from the player
+	local ownerspeed = FixedHypot(actor.target.momx, actor.target.momy)
+
+	--Point towards the player
 	actor.angle = 
-		ANGLE_180 + 
 		R_PointToAngle2(actor.x, actor.y, actor.target.x, actor.target.y) -
 		actor.target.angle +
 		actor.target.player.inputangle
 
 	--Fixed momentum change for the stinger
-	P_SetObjectMomZ(actor, -STINGER_VERT_BOOST*5, false)
-	P_Thrust(actor, actor.angle, STINGER_HORIZ_BOOST)
+	P_SetObjectMomZ(actor, -STGP_AIR_SPEED, false)
+	P_Thrust(actor, actor.angle, -STGP_GRND_SPEED/2)
 
 	--Contribute to the vertical boost of the player
 	-- P_SetObjectMomZ(actor.target, STINGER_VERT_BOOST, true)	
@@ -1345,23 +1348,26 @@ local function Stinger(playmo, startrollangle, stingerstate)
 	
 end
 
+--Helcurt prepares to stinger jump
 local function A_StingerAir1(actor, var1, var2)
 	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
 		return nil
 	end
 
 	--Helcurt's when he started charging his stinger attack (that circly thing process around Helcurt)
-	P_SetObjectMomZ(actor, EXTRA_CHARGE_BOOST, false)
+	P_SetObjectMomZ(actor, STINGER_VERT_BOOST, true)
 	Stinger(actor, var1, var2)
 end
 
 
+--Helcurt stinger jumps
 local function A_StingerAir2(actor, var1, var2)
 	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
 		return nil
 	end
 	
-	P_SetObjectMomZ(actor, STINGER_VERT_BOOST * actor.stingers, true)	
+	local vertboost = STINGER_VERT_BOOST * actor.stingers
+	P_SetObjectMomZ(actor, vertboost/MAX_STINGERS, true)
 	P_Thrust(actor, actor.player.inputangle, STINGER_HORIZ_BOOST)
 
 	-- P_SetObjectMomZ(actor.target, STINGER_VERT_BOOST, true)	
@@ -1369,6 +1375,8 @@ local function A_StingerAir2(actor, var1, var2)
 	RemoveStingers(actor, MAX_STINGERS)
 end
 
+
+--Helcurt prepares ground stinger
 local function A_StingerGrnd1(actor, var1, var2)
 	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
 		return nil
@@ -1380,11 +1388,12 @@ local function A_StingerGrnd1(actor, var1, var2)
 
 	actor.ground_tic_cd = STINGER_GRND_COOLDOWN
 	P_SetObjectMomZ(actor, 2*FRACUNIT, false)
-	P_Thrust(actor, actor.player.inputangle, ownerspeed + STINGER_HORIZ_BOOST)
+	-- P_Thrust(actor, actor.player.inputangle, STINGER_HORIZ_BOOST/2)
 
 	RemoveStingers(actor, MAX_STINGERS)
 end
 
+--Helcurt uses ground stinger
 local function A_StingerGrnd2(actor, var1, var2)
 	
 end
@@ -1418,7 +1427,7 @@ mobjinfo[MT_TRNS] = {
 
 --A stinger Projectile
 mobjinfo[MT_STGP] = {
-	spawnstate = S_AIR_1,
+	spawnstate = S_NULL,
 	deathstate = S_NULL,
 	height = 64*FRACUNIT,
 	radius = 32*FRACUNIT,
@@ -1736,7 +1745,7 @@ states[S_STINGER_GRND_2] = {
 	frame = SPR2_RUN_,
 	action = A_StingerGrnd2,
 	-- tics = states[S_GRND_2].tics,
-	tics = 10,
+	tics = 5,
 	nextstate = S_PLAY_STND
 }
 
@@ -1891,8 +1900,18 @@ states[S_AIR_2] = {
 	frame = FF_FULLBRIGHT|B,
 	tics = TICRATE,
 	action = A_Air2,
-	nextstate = S_AIR_3
+	nextstate = S_GRND_2
 }
+
+--[[
+states[S_AIR_3] = {
+	sprite = SPR_STGP,
+	frame = FF_FULLBRIGHT,
+	tics = TICRATE,
+	action = A_Air3,
+	nextstate = S_NULL
+}
+]]--
 
 states[S_GRND_1] = {
 	sprite = SPR_STGP,
@@ -1904,16 +1923,7 @@ states[S_GRND_1] = {
 states[S_GRND_2] = {
 	sprite = SPR_STGP,
 	frame = FF_FULLBRIGHT|A,
-	tics = TICRATE,
+	tics = TICRATE/2,
 	action = A_Grnd2,
 	nextstate = S_NULL
 }
-
-states[S_AIR_3] = {
-	sprite = SPR_STGP,
-	frame = FF_FULLBRIGHT,
-	tics = TICRATE,
-	action = A_Air3,
-	nextstate = S_NULL
-}
-
