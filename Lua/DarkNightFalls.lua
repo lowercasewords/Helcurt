@@ -29,7 +29,8 @@ addHook("PlayerThink", function(player)
 	end
     
     --Start charging the night
-    if(player.killnight > KILLS_FOR_NIGHT and player.cmd.buttons & BT_SPIN and player.cmd.buttons & BT_JUMP 
+    --player.killnight > KILLS_FOR_NIGHT
+    if(player.cmd.buttons & BT_SPIN and player.cmd.buttons & BT_JUMP 
             and not (P_IsObjectOnGround(player.mo)) and
             player.mo.state ~= S_NIGHT_CHARGE 
             and player.night_timer == 0) then
