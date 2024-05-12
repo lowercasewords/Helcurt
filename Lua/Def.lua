@@ -880,7 +880,14 @@ addHook("PreThinkFrame", function()
 			player.cmd.sidemove = 0
 		end
 		
-			
+		
+		--Noclip while teleporting, thus not be damaged by anything
+		if(player.mo.state == S_START_TRANSITION or player.mo.state == S_IN_TRANSITION) then
+			player.mo.flags = $|MF_NOCLIPTHING
+		elseif(player.mo.flags&MF_NOCLIPTHING ~= 0) then
+			player.mo.flags = $&~MF_NOCLIPTHING
+		end
+
 		--Retrieves the current input
 		if(player.cmd.buttons & BT_SPIN) then
 			player.spinheld = $+1
@@ -1255,7 +1262,7 @@ local function A_Start_Transition(actor, par1, par2)
 	P_SpawnMobj(actor.x, actor.y, actor.z, MT_TRNS)
 
 
-	actor.flags = $|MF_NOCLIPTHING
+	
 	
 	--Thrusts forward, increased with the nightfall.
 	--NOTE: consider making teleport's speed relative to helcurt's, the faster he moves
@@ -1295,7 +1302,6 @@ local function A_End_Transition(actor, par1, par2)
 		-- actor.can_blade = true
 -- 	end
 	-- print("end!")
-	actor.flags = $&~MF_NOCLIPTHING
 	--Regular teleport (momentum is decreased)
 	if(actor.enhanced_teleport == 0) then
 		actor.momy = $/TELEPORT_STOP_SPEED
