@@ -1818,6 +1818,7 @@ states[S_END_TRANSITION] = {
 
 states[S_STACK] = {
 	sprite = SPR_STGS,
+	frame = FF_TRANS20,
 	tics = -1
 }
 
