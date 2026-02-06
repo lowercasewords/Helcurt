@@ -1,0 +1,6 @@
+{
+    "cmake.configureOnOpen": false,
+    "Lua.diagnostics.disable": [
+        "empty-block"
+    ]
+}

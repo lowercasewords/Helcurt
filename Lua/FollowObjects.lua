@@ -1,3 +1,4 @@
+--[[ma
 addHook("FollowMobj", function(player, mo)
 
     -- CorrectRotationHoriz(mo, player.mo.x, player.mo.y,
@@ -34,3 +35,4 @@ addHook("FollowMobj", function(player, mo)
     mo.scale = player.mo.scale
     
 end, MT_FOLLOW)
+]]--

@@ -1,10 +1,12 @@
-OUTPK3 = out.pk3
-EXECUTABLE = /Applications/Games/Sonic\ Robo\ Blast\ 2.app/Contents/MacOS/Sonic\ Robo\ Blast\ 2
+
+OUTPK3 = ../out_pk3/out.pk3
+EXECUTABLE = "/Applications/Sonic Robo Blast 2.app/Contents/MacOS/srb2"
 DIRS = Lua Sprites Skins Sounds Soc 
 PRIORITY_FILES = Skins/S_SKIN Lua/Def.lua
 
 SKIN = skin helcurt
 MAP = map01
+BOT_ADDON = "~/srb2/addons/micellaneous/L_SonicTailsKNE-v1.2.wad"
 CHEATS = "godmode 1" "devmode 1"
 
 # Sometimes LUA are not loaded so they need to be refreshed by going into slade and saving any file
@@ -12,7 +14,8 @@ all: clean build launch
 	echo "done!"
 
 launch: 
-	$(EXECUTABLE) -file $(OUTPK3) -warp $(MAP) + $(SKIN) + devmode 1
+	$(EXECUTABLE) -file $(OUTPK3) $(BOT_ADDON) -warp $(MAP) + $(SKIN) +devmode 1
+
 build:
 	#Zips correctly with correct indecies for S_SKIN and Def.lua, but
 	#the game doesn't load other lua and sprite files at all for some reason,
