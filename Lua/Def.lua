@@ -970,10 +970,12 @@ addHook("PostThinkFrame", function()
 			--Rotate the folllow object around the player just a tiny bit to make it appear behind the player
 			if(PAlive(player)) then
 				
-				CorrectRotationHoriz(player.followmobj, player.mo.x, player.mo.y,
-										player.mo.x-FRACUNIT, 
-										player.mo.y, 
-										player.mo.z, player.followmobj.angle)
+				if player.followmobj then
+					CorrectRotationHoriz(player.followmobj, player.mo.x, player.mo.y,
+											player.mo.x-FRACUNIT, 
+											player.mo.y, 
+											player.mo.z, player.followmobj.angle)
+				end
 
 
 

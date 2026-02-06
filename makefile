@@ -14,7 +14,7 @@ all: clean build launch
 	echo "done!"
 
 launch: 
-	$(EXECUTABLE) -file $(OUTPK3) $(BOT_ADDON) -warp $(MAP) + $(SKIN) +devmode 1
+	$(EXECUTABLE) -file $(OUTPK3) $(BOT_ADDON) -nomusic -warp $(MAP) + $(SKIN) +devmode 1 -nodata
 
 build:
 	#Zips correctly with correct indecies for S_SKIN and Def.lua, but
