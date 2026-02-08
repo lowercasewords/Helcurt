@@ -10,7 +10,7 @@
 
 --Most player and object sprites
 freeslot("S_PRE_TRANSITION", "S_START_TRANSITION", "S_IN_TRANSITION","S_END_TRANSITION", "S_TRNS",
-"S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK", "S_FOLLOW_STAND", "S_FOLLOW_RUN",
+"S_BLADE_THURST", "S_BLADE_THURST_HIT", "S_STACK", "S_LOCK", "S_FOLLOW",
 "S_AIR_1", "S_GRND_1", "S_AIR_2", "S_GRND_2",
 "S_STINGER_AIR_1", "S_STINGER_AIR_2", 
 "S_STINGER_GRND_1", "S_STINGER_GRND_2",
@@ -60,7 +60,7 @@ rawset(_G, "STYX_EYES_SCALE", FRACUNIT*6)
 
 --A maximum tic value for a monologue timer, actualr timer 
 --could possible be set to lover value based on this maximum constant
-rawset(_G, "MONOLOGUE_TIC_MAX", TICRATE*10)
+rawset(_G, "MONOLOGUE_TIC_MAX", TICRATE*40)
 rawset(_G, "MONOLOGUE_START_SOUND", sfx_mrwn1)
 rawset(_G, "MONOLOGUE_END_SOUND", sfx_mnl03)
 
@@ -1445,10 +1445,10 @@ mobjinfo[MT_STGP] = {
 
 -- The follow object (the cape and tail)
 mobjinfo[MT_FOLLOW] = {
-	spawnstate = S_FOLLOW_STAND,
+	spawnstate = S_FOLLOW,
 	height = FRACUNIT,
 	radius = FRACUNIT,
-	dispoffset = 1,
+	dispoffset = -1,
 	flags = MF_NOBLOCKMAP|MF_NOCLIP|MF_FLOAT|MF_NOGRAVITY
 }
 
@@ -1864,19 +1864,11 @@ states[S_SHDW_HINT] = {
 	tics = TICRATE*2
 }
 
-states[S_FOLLOW_STAND] = {
-	sprite = SPR_FLWS,
-	frame = FF_ANIMATE,
-	var1 = 2, --Number of frames
-	var2 = 7, --Tics before cycle to a new frame
-	tics = -1
-}
-
-states[S_FOLLOW_RUN] = {
+states[S_FOLLOW] = {
 	sprite = SPR_FLWR,
 	frame = FF_ANIMATE,
-	var1 = 2, --Number of frames - 1
-	var2 = 3, --Tics before cycle to a new frame
+	var1 = 3, --Number of frames minus 1
+	var2 = 10, --Tics before cycle to a new frame
 	tics = -1
 }
 
