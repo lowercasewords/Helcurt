@@ -3,6 +3,27 @@ local CONCEAL_SHADOW_DIFFERENCE = 20
 --Default time to wait for a single stinger to charge  
 local STINGER_CHARGE_TIMER = 5*TICRATE
 
+hud.add(function(v, player, camera)
+    -- Check if we are in-game and not in a title screen
+    if not (player and player.valid and Valid(player.mo, 'helcurt')) then return end
+
+	if player.mo.unconceal_timer <= 0 then return end
+
+	-- v.fadeScreen(0xFF00, 20)
+    local patch = v.cachePatch("VIGNETTE")
+
+	local ratio = FixedDiv(UNCONCEAL_MAX_TICS*FRACUNIT, player.mo.unconceal_timer*FRACUNIT)/FRACUNIT
+	
+	local trans = min(max(V_10TRANS*ratio, V_10TRANS), V_10TRANS)
+
+	local flags = V_NOSCALESTART|trans
+    
+	local scale_width = FixedDiv(v.width()*FRACUNIT, patch.width*FRACUNIT) / v.dupx()
+    local scale_height = FixedDiv(v.height()*FRACUNIT, (patch.height)*FRACUNIT) / v.dupy()
+
+    v.drawStretched(0, 0, scale_width, scale_height, patch, flags)
+end, "game")
+
 --[[
 COM_AddCommand("la", function(player, lightlevel)
 	for sector in sectors.iterate do
