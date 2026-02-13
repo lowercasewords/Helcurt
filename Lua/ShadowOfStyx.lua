@@ -43,33 +43,6 @@ COM_AddCommand("debug_dark", function(player, lightlevel)
 	CONCEAL_DARKNESS_LEVEL = tonumber(lightlevel)
 end)
 
-
-addHook("PlayerThink", function(player)
-	if(not Valid(player.mo, "helcurt") or not PAlive(player)) then
-		return
-	end
-
-	--Recharge stingers over time while concealed
-	if(player.mo.unconceal_timer > 0 and player.mo.stingers < MAX_STINGERS) then
-		--If less than maxinteger stingers: start the countdown
-		if(player.mo.stingers < MAX_STINGERS and player.mo.stinger_charge_countdown <= -1) then
-			player.mo.stinger_charge_countdown = STINGER_CHARGE_TIMER
-		--Keep counting if the countdown has not ended
-		elseif(player.mo.stinger_charge_countdown > 0) then
-			player.mo.stinger_charge_countdown = $-1
-		--If countdown ended: give a stinger
-		elseif(player.mo.stinger_charge_countdown == 0) then
-			AddStingers(player.mo, 1)
-			player.mo.stinger_charge_countdown = $-1
-		end
-		
-	end
-	
-end)
-
-
-
-
 addHook("PostThinkFrame", function()
 	for player in players.iterate() do
 		if(not Valid(player.mo, "helcurt") or not PAlive(player)) then
