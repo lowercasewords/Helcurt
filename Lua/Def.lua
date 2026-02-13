@@ -66,14 +66,6 @@ rawset(_G, "TARGET_IGNORE_RANGE", MF_MISSILE)
 rawset(_G, "TELEPORT_SPEED", 70*FRACUNIT)
 rawset(_G, "TELEPORT_STOP_SPEED", 3)
 
---How dark the area has to be to activate his passive
-rawset(_G, "CONCEAL_DARKNESS_LEVEL", 120)
-rawset(_G, "CONCEAL_ACCELERATION_BOOST", 20)
-rawset(_G, "CONCEAL_NORMALSPEED_BOOST",  10*FRACUNIT)
-rawset(_G, "CONCEAL_JUMPFACTOR_BOOST",  FRACUNIT/2)
---Maximum tics for a player's passive to be active after the player exited the dark area
-rawset(_G, "PROWLER_STATE_BAR_MAX", TICRATE)
-
 --Duration of the night
 rawset(_G, "NIGHT_MAX_TIC", 5*TICRATE)
 rawset(_G, "NIGHT_SKYBOX", 6)
@@ -227,54 +219,6 @@ rawset(_G, "GetDarkArea", function(sector, dark_level, relative_z)
 	end
 
 	return dark_enough
-end)
-
-
---Conceals the player in the darkness (called once)
-rawset(_G, "Conceal", function(mo)
-	if(not Valid(mo)) then
-		return nil
-	end
-
-	mo.prowler_state_bar = PROWLER_STATE_BAR_MAX
-
-	S_StartSound(mo, sfx_hide1)
-	HelcurtSpeak(mo, sfx_mcon1, sfx_mcon1, FRACUNIT/10)
-
-	--Attribute increase
-	mo.player.acceleration = $+CONCEAL_ACCELERATION_BOOST
-	mo.player.normalspeed = $+CONCEAL_NORMALSPEED_BOOST
-	mo.player.jumpfactor = $+CONCEAL_JUMPFACTOR_BOOST
-end)
-
---Conceal effects to be put every tic 
-rawset(_G, "ConcealEffects", function(mo)
-	if(not S_SoundPlaying(mo, sfx_hide1) and not S_SoundPlaying(mo, sfx_hide2) and not S_SoundPlaying(mo, sfx_hide3)) then
-		S_StartSound(mo, sfx_hide2)
-	end
-
-	mo.frame = $|FF_TRANS50--|FF_FULLBRIGHT
-end)
-
---Stops concealing the player in the darkness (called once)
-rawset(_G, "Unconceal", function(mo)
-	if(not Valid(mo)) then
-		return nil
-	end
-	local skin = skins[mo.player.skin]
-
-	if(Valid(mo, "helcurt")) then
-		HelcurtSpeak(mo, sfx_munc1, sfx_munc1, FRACUNIT/10)
-	end
-
-	S_StopSound(mo, sfx_hide1)
-	S_StopSound(mo, sfx_hide2)
-	S_StartSound(mo, sfx_hide3)
-
-	-- print("UnConceal!")
-    mo.player.acceleration = skin.acceleration
-    mo.player.normalspeed =  skin.normalspeed
-	mo.player.jumpfactor = skin.jumpfactor
 end)
 
 rawset(_G, "StartHelcurtNightBuff", function(originplayer)
@@ -503,7 +447,7 @@ local function SetUp(player)
 	player.lockon = nil
 	
 	--Time for the conceal to last after leaving the darkness (decreases 'till hits zero to unconceal)
-	player.mo.prowler_state_bar = -1
+	player.mo.prowler_state_bar = PROWLER_STATE_BAR_MAX
 	
 	-- if(player.night_timer ~= nil) then
 	-- 	EndHelcurtNightBuff(originplayer)
@@ -519,7 +463,7 @@ local function SetUp(player)
 		player.particlecolor = SKINCOLOR_DUSK
 	end
 
-	Unconceal(player.mo)
+	-- Unconceal(player.mo)
 
 	-- P_SpawnMobj(player.mo.x, player.mo.y, player.mo.z, MT_FOLLOW)
 	-- player.mo.tail.flags2 = MF2_LINKDRAW
@@ -563,7 +507,7 @@ local function CleanUp(player)
 
 	player.particlecolor = nil
 	
-	Unconceal(player.mo)
+	-- Unconceal(player.mo)
 
 	return true
 end

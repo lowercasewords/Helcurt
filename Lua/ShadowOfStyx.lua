@@ -1,3 +1,12 @@
+
+--How dark the area has to be to activate his passive
+rawset(_G, "CONCEAL_DARKNESS_LEVEL", 200)
+rawset(_G, "CONCEAL_ACCELERATION_BOOST", 20)
+rawset(_G, "CONCEAL_NORMALSPEED_BOOST",  10*FRACUNIT)
+rawset(_G, "CONCEAL_JUMPFACTOR_BOOST",  FRACUNIT/2)
+--Maximum tics for a player's passive to be active after the player exited the dark area
+rawset(_G, "PROWLER_STATE_BAR_MAX", 3*TICRATE)
+
 --How dark the area has to be to activate his passive
 local CONCEAL_SHADOW_DIFFERENCE = 20
 --Default time to wait for a single stinger to charge  
@@ -41,6 +50,77 @@ end)
 COM_AddCommand("debug_dark", function(player, lightlevel)
 	print("Changing Darkness lightlevel requirements from "..CONCEAL_DARKNESS_LEVEL.." to "..lightlevel)
 	CONCEAL_DARKNESS_LEVEL = tonumber(lightlevel)
+end
+
+end)
+
+--Conceals the player in the darkness (called once)
+rawset(_G, "Conceal", function(mo)
+	if(not Valid(mo)) then
+		return nil
+	end
+
+	mo.prowler_state_bar = PROWLER_STATE_BAR_MAX
+
+	S_StartSound(mo, sfx_hide1)
+	HelcurtSpeak(mo, sfx_mcon1, sfx_mcon1, FRACUNIT/10)
+
+	--Attribute increase
+	-- mo.player.acceleration = $+CONCEAL_ACCELERATION_BOOST
+	-- mo.player.normalspeed = $+CONCEAL_NORMALSPEED_BOOST
+	-- mo.player.jumpfactor = $+CONCEAL_JUMPFACTOR_BOOST
+	local skin = skins[mo.player.skin]
+    mo.player.normalspeed = skin.normalspeed
+
+end)
+
+--Conceal effects to be put every tic 
+rawset(_G, "ConcealEffects", function(mo)
+	if(not S_SoundPlaying(mo, sfx_hide1) and not S_SoundPlaying(mo, sfx_hide2) and not S_SoundPlaying(mo, sfx_hide3)) then
+		S_StartSound(mo, sfx_hide2)
+	end
+
+	mo.frame = $|FF_TRANS50--|FF_FULLBRIGHT
+end)
+
+--Stops concealing the player in the darkness (called once)
+rawset(_G, "Unconceal", function(mo)
+	if(not Valid(mo)) then
+		return nil
+	end
+	local skin = skins[mo.player.skin]
+
+	if(Valid(mo, "helcurt")) then
+		HelcurtSpeak(mo, sfx_munc1, sfx_munc1, FRACUNIT/10)
+	end
+
+	S_StopSound(mo, sfx_hide1)
+	S_StopSound(mo, sfx_hide2)
+	S_StartSound(mo, sfx_hide3)
+
+	-- print("UnConceal!")
+    mo.player.acceleration = skin.acceleration
+    mo.player.normalspeed =  skin.normalspeed
+	mo.player.jumpfactor = skin.jumpfactor
+end)
+
+
+local EXPOSED_RUN_FACTOR = 2*FRACUNIT/3
+
+local function WhileProwlerExposed(player)
+	local skin = skins[player.skin]
+	player.normalspeed = FixedMul(skin.normalspeed, EXPOSED_RUN_FACTOR)
+end
+
+addHook("PlayerThink", function(p)
+	if(not Valid(p.mo, "helcurt") or not PAlive(p)) then return false end
+
+	local pb = p.mo.prowler_state_bar
+	if pb == -1 then
+		WhileProwlerExposed(p)
+	end
+
+	-- print("prowler bar: "..pb)
 end)
 
 addHook("PostThinkFrame", function()
