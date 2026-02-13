@@ -87,6 +87,11 @@ rawset(_G, "PAlive", function(p)
 	return p ~= nil and p.playerstate == PST_LIVE
 end)
 
+-- Combines checking whether the player is alive, player is valid, and skin is correct
+rawset(_G, "HelcurtAlive", function(player)
+	return Valid(player.mo, 'helcurt') and PAlive(player)
+end)
+
 --Randomly starts a random sound in range
 --mo is the origin object
 --a random sound is played between start_sound and end_sound (inclusive)
