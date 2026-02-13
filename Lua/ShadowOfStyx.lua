@@ -7,12 +7,12 @@ hud.add(function(v, player, camera)
     -- Check if we are in-game and not in a title screen
     if not (player and player.valid and Valid(player.mo, 'helcurt')) then return end
 
-	if player.mo.unconceal_timer <= 0 then return end
+	if player.mo.prowler_state_bar <= 0 then return end
 
 	-- v.fadeScreen(0xFF00, 20)
     local patch = v.cachePatch("VIGNETTE")
 
-	local ratio = FixedDiv(UNCONCEAL_MAX_TICS*FRACUNIT, player.mo.unconceal_timer*FRACUNIT)/FRACUNIT
+	local ratio = FixedDiv(PROWLER_STATE_BAR_MAX*FRACUNIT, player.mo.prowler_state_bar*FRACUNIT)/FRACUNIT
 	
 	local trans = min(max(V_10TRANS*ratio, V_10TRANS), V_10TRANS)
 
@@ -57,20 +57,20 @@ addHook("PostThinkFrame", function()
 			dark_enough = GetDarkArea(sector, CONCEAL_DARKNESS_LEVEL, player.mo.z)
 
 			--Conceal if possible and not concealed already
-			if(dark_enough ~= nil and player.mo.unconceal_timer <= 0) then
+			if(dark_enough ~= nil and player.mo.prowler_state_bar <= 0) then
 				Conceal(player.mo)
 			--If time is up on concealment -> Unconceal
-			elseif(player.mo.unconceal_timer == 0) then
+			elseif(player.mo.prowler_state_bar == 0) then
 				Unconceal(player.mo)
 			end
 		end
 		
 		--While concealed
-		if(player.mo.unconceal_timer >= 0) then
+		if(player.mo.prowler_state_bar >= 0) then
 		 	ConcealEffects(player.mo)
 			--Counting down the timer to be concealed when not dark enough
 			if(dark_enough == nil) then
-				player.mo.unconceal_timer = $-1
+				player.mo.prowler_state_bar = $-1
 			end
 		end
 

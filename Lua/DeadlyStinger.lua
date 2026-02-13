@@ -1,0 +1,6 @@
+-- DeadlyStinger.lua
+-- 
+-- Implementes the main logic of Deadly Stinger ability.
+--
+-- Deadly Stinger ability is the primary way for Helcurt to deal damage,
+-- which is being done automatically if certain conditions are met.

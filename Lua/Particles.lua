@@ -22,7 +22,7 @@ addHook("PlayerThink", function(player)
 	end 
 	
 	--Concealment particles
-	if(player.mo.unconceal_timer > 0) then
+	if(player.mo.prowler_state_bar > 0) then
 		local particle = P_SpawnMobj(player.mo.x+P_RandomRange(SPAWN_RADIUS_MAX, -SPAWN_RADIUS_MAX)*FRACUNIT, 
 									player.mo.y+P_RandomRange(SPAWN_RADIUS_MAX, -SPAWN_RADIUS_MAX)*FRACUNIT,  
 									player.mo.z+P_RandomRange(0, player.mo.height/(2*FRACUNIT))*FRACUNIT,

@@ -44,7 +44,6 @@ freeslot(
 --Particle slots
 freeslot("MT_SHDW", "SPR_SHDW", "S_SHDW_PRT", "S_SHDW_HINT")
 
-
 --constants and functions used throghout the project (rest are defined in other files too)
 rawset(_G, "SPAWN_RADIUS_MAX", 10)
 --Anything below or equal to this tics counts as pressing a button once instead of holding it
@@ -73,7 +72,7 @@ rawset(_G, "CONCEAL_ACCELERATION_BOOST", 20)
 rawset(_G, "CONCEAL_NORMALSPEED_BOOST",  10*FRACUNIT)
 rawset(_G, "CONCEAL_JUMPFACTOR_BOOST",  FRACUNIT/2)
 --Maximum tics for a player's passive to be active after the player exited the dark area
-rawset(_G, "UNCONCEAL_MAX_TICS", TICRATE)
+rawset(_G, "PROWLER_STATE_BAR_MAX", TICRATE)
 
 --Duration of the night
 rawset(_G, "NIGHT_MAX_TIC", 5*TICRATE)
@@ -237,7 +236,7 @@ rawset(_G, "Conceal", function(mo)
 		return nil
 	end
 
-	mo.unconceal_timer = UNCONCEAL_MAX_TICS
+	mo.prowler_state_bar = PROWLER_STATE_BAR_MAX
 
 	S_StartSound(mo, sfx_hide1)
 	HelcurtSpeak(mo, sfx_mcon1, sfx_mcon1, FRACUNIT/10)
@@ -504,7 +503,7 @@ local function SetUp(player)
 	player.lockon = nil
 	
 	--Time for the conceal to last after leaving the darkness (decreases 'till hits zero to unconceal)
-	player.mo.unconceal_timer = -1
+	player.mo.prowler_state_bar = -1
 	
 	-- if(player.night_timer ~= nil) then
 	-- 	EndHelcurtNightBuff(originplayer)
