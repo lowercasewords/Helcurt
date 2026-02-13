@@ -7,10 +7,8 @@ rawset(_G, "CONCEAL_JUMPFACTOR_BOOST",  FRACUNIT/2)
 --Maximum tics for a player's passive to be active after the player exited the dark area
 rawset(_G, "PROWLER_STATE_BAR_MAX", 3*TICRATE)
 
---How dark the area has to be to activate his passive
-local CONCEAL_SHADOW_DIFFERENCE = 20
---Default time to wait for a single stinger to charge  
-local STINGER_CHARGE_TIMER = 5*TICRATE
+local EXPOSED_RUN_FACTOR = 2*FRACUNIT/3  
+local PROWLER_RUN_FACTOR = 3*FRACUNIT/2
 
 hud.add(function(v, player, camera)
     -- Check if we are in-game and not in a title screen
@@ -99,16 +97,17 @@ rawset(_G, "Unconceal", function(mo)
 	S_StartSound(mo, sfx_hide3)
 
 	-- print("UnConceal!")
+--[[
     mo.player.acceleration = skin.acceleration
     mo.player.normalspeed =  skin.normalspeed
 	mo.player.jumpfactor = skin.jumpfactor
+]]--
 end)
 
 
-local EXPOSED_RUN_FACTOR = 2*FRACUNIT/3
-
-local function WhileProwlerExposed(player)
+local function OnProwlerExposed(player)
 	local skin = skins[player.skin]
+--player.normalspeed = FixedMul(skin.normalspeed, EXPOSED_RUN_FACTOR)
 	player.normalspeed = FixedMul(skin.normalspeed, EXPOSED_RUN_FACTOR)
 end
 
@@ -117,7 +116,7 @@ addHook("PlayerThink", function(p)
 
 	local pb = p.mo.prowler_state_bar
 	if pb == -1 then
-		WhileProwlerExposed(p)
+		OnProwlerExposed(p)
 	end
 
 	-- print("prowler bar: "..pb)
