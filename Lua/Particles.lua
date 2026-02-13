@@ -100,16 +100,3 @@ addHook("PlayerThink", function(player)
 			counter = $ - 1
 	end
 end)
-
-
---[[
-
-addHook("MobjThinker", function(mo)
-	-- if(not Valid(mo)) then
-	-- 	return nil 
-	-- end
-
-end, MT_SHDW)
-
-]]--
-

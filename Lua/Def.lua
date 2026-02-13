@@ -282,31 +282,12 @@ rawset(_G, "StartHelcurtNightBuff", function(originplayer)
     if(not Valid(originplayer.mo, "helcurt") or not PAlive(originplayer)) then
         return nil
     end
-        --[[
-        local skin = skins[originplayer.skin] 
-
-        --Reset attributes to be boosted
-        originplayer.acceleration = skin.acceleration
-        originplayer.normalspeed = skin.normalspeed
-
-        --Boost in attributes
-        originplayer.acceleration = $+CONCEAL_ACCELERATION_BOOST*2
-        originplayer.normalspeed = $+CONCEAL_NORMALSPEED_BOOST*2
-        ]]--
-end)
+ end)
 
 rawset(_G, "EndHelcurtNightBuff", function(originplayer)
     if(not Valid(originplayer.mo, "helcurt") or not PAlive(originplayer)) then
         return nil
     end
-
-    --[[
-    local skin = skins[originplayer.skin]
-    
-    --Changes the speed back
-    originplayer.acceleration = skin.acceleration
-    originplayer.normalspeed = skin.normalspeed
-    ]]--
 end)
 
 rawset(_G, "StartTheNight", function(originplayer) 
@@ -480,155 +461,6 @@ rawset(_G, "CorrectRotationHoriz", function(rotatemo, pivotx, pivoty, desiredx, 
 	P_MoveOrigin(rotatemo, x, y, z)
 	
 end)
-
-
---Rotates the mobject around the pivot, think of a circle with pivot as a center and
---torotate being on the edge of the circle (distance between pivot and torotate is the radius of a circle)
---roll (angle_t): rotation along absolute x-axis
---yaw (angle_t): rotation along absolute z-axis (due to doom's engine coordinate system)
---pitch (angle_t): rotation along absolute y-axis (due to doom's engine coordinate system)
---[[
-rawset(_G, "Rotate", function(torotate, pivotx, pivoty, pivotz, roll, yaw, pitch) 
-
-	-- local radius = torotate.target.radius*2
-	-- local x = FixedMul(FixedMul(radius, cos(torotate.rollcounter)),cos(torotate.yawcounter-(torotate.num-1)*torotate.yawcounter)) + torotate.target.x
-	-- local y = FixedMul(FixedMul(radius, cos(torotate.rollcounter)),sin(torotate.yawcounter-(torotate.num-1)*torotate.yawcounter)) + torotate.target.y
-	-- local z = FixedMul(radius, sin(torotate.rollcounter)) + torotate.target.z
-	-- CorrectRotationHoriz(torotate, pivotx, pivoty, x, y, z, torotate.target.angle)
-
-	--Initial coordinates of the object without the rotation
-	local initx = torotate.x
-	local inity = torotate.y
-	local initz = torotate.z
-	
-	--Distance between the object to be rotated and pivot point
-	local radius = FixedSqrt(
-	FixedMul(torotate.x-pivotx, torotate.x-pivotx) +
-	FixedMul(torotate.y-pivoty, torotate.y-pivoty) +
-	FixedMul(torotate.z-pivotz, torotate.z-pivotz) )
-	
-	--Updated to be around the origin
-	local normx = initx-pivotx
-	local normy = inity-pivoty
-	local normz = initz-pivotz
-
-	local rolledx = FixedMul(radius, cos(roll))
-	local rolledy = FixedMul(y, c) + FixedMul(x, s)
-
-	initx = rolledx + pivotx
-	inity = inity + pivoty
-	initz = initz + pivotz
-
-	P_MoveOrigin(torotate, rolledx, inity, initz)
-
-end)
-]]--
-
---[[
-
-THOSE THREE FUNCTIONS CANNOT BE MIXED AT ALL! Read the answer for this post for more 
-questions: https://stackoverflow.com/questions/14607640/rotating-a-vector-in-3d-space
-"This works perfectly fine for 2D and for simple 3D cases; 
-but when rotation needs to be performed around all three axes at the same time 
-then Euler angles may not be sufficient due to an inherent deficiency in this system 
-which manifests itself as Gimbal lock. People resort to Quaternions in such situations, 
-which is more advanced than this but doesn't suffer from Gimbal locks when used correctly."
-
-
---Rotates around z-axis 
-rawset(_G, "Yaw", function(torotate, pivotx, pivoty, angle)
-
-	--The desired coordinates for rotatemo without rotation 
-	local x = torotate.x
-	local y = torotate.y 
-
-	--The angle of rotation
-	local c = cos(angle)
-	local s = sin(angle)
-
-	--New rotated coordinates
-	local xnew = 0
-	local ynew = 0
-	
-	--Translating coordinates of rotatemo to the desired to perform rotation
-	x = $ - pivotx
-	y = $ - pivoty
-
-	--rotate point
-	xnew = FixedMul(x, c) - FixedMul(y, s)
-	ynew = FixedMul(y, c) + FixedMul(x, s)
-
-	--translate point back:
-	x = xnew + pivotx
-	y = ynew + pivoty
-
-	P_MoveOrigin(torotate, x, y, torotate.z)
-end)
-
---Rotates arounc x-axis
-rawset(_G, "Roll", function(torotate, pivoty, pivotz, angle)
-
-	--The desired coordinates for rotatemo without rotation 
-	local y = torotate.y 
-	local z = torotate.z 
-
-	--The angle of rotation
-	local c = cos(angle)
-	local s = sin(angle)
-
-	--New rotated coordinates
-	local ynew = 0
-	local znew = 0
-	
-	--Translating coordinates of rotatemo to the desired to perform rotation
-	y = $ - pivoty
-	z = $ - pivotz
-
-	--rotate point
-	znew = FixedMul(z, c) - FixedMul(y, s)
-	ynew = FixedMul(y, c) + FixedMul(z, s)
-	
-
-	--translate point back:
-	y = ynew + pivoty
-	z = znew + pivotz
-
-	P_MoveOrigin(torotate, torotate.x, y, z)
-end)
-
-
---Rotates arounc y-axis
-rawset(_G, "Pitch", function(torotate, pivotx, pivotz, angle)
-
-	--The desired coordinates for rotatemo without rotation 
-	local x = torotate.x
-	local z = torotate.z
-
-	--The angle of rotation
-	local c = cos(angle)
-	local s = sin(angle)
-
-	--New rotated coordinates
-	local xnew = 0
-	local znew = 0
-	
-	--Translating coordinates of rotatemo to the desired to perform rotation
-	x = $ - pivotx
-	z = $ - pivotz
-
-	--rotate point
-	xnew = FixedMul(x, c) - FixedMul(z, s)
-	znew = FixedMul(z, c) + FixedMul(x, s)
-	
-
-	--translate point back:
-	x = xnew + pivotx
-	z = znew + pivotz
-
-	P_MoveOrigin(torotate, x, torotate.y, z)
-end)
-
-]]--
 
 --Sets up Helcurts attributes when player switches to him
 local function SetUp(player)
@@ -996,7 +828,6 @@ end
 
 ---------------- PLAYER ACTIONS ---------------- 
 
-
 local function A_NightCharge(actor, par1, par2)
 
 	if(not Valid(actor, "helcurt") or not PAlive(actor.player)) then
@@ -1051,9 +882,6 @@ local function A_Start_Transition(actor, par1, par2)
 	
 	P_SpawnMobj(actor.x, actor.y, actor.z, MT_TRNS)
 
-
-	
-	
 	--Thrusts forward, increased with the nightfall.
 	--NOTE: consider making teleport's speed relative to helcurt's, the faster he moves
 	--the fastere teleport is, but give the teleport the base speed so that Helcurt can teleport
@@ -1073,11 +901,6 @@ local function A_End_Transition(actor, par1, par2)
 	HelcurtSpeak(actor, sfx_mtlp1, sfx_mtlp1, FRACUNIT/3)
 	P_SpawnMobj(actor.x, actor.y, actor.z, MT_TRNS)
 
-
--- 	if(actor.player and actor.player.valid) then
-		-- actor.can_blade = true
--- 	end
-	-- print("end!")
 	--Regular teleport (momentum is decreased)
 	if(actor.enhanced_teleport == 0) then
 		actor.momy = $/TELEPORT_STOP_SPEED
@@ -1096,7 +919,7 @@ local function A_End_Transition(actor, par1, par2)
 	--Recharge the stinger ability (technically just air stinger you're in the air)
 	actor.can_stinger = 1
 	
-
+	
 end
 
 --/--------------------------
@@ -1235,7 +1058,6 @@ sfxinfo[sfx_hide3] = {
 
 ------------ MONOLOGUES ------------
 
-
 sfxinfo[sfx_mbos1] = {
 	singular = true,
 	priority = 60
@@ -1254,9 +1076,6 @@ sfxinfo[sfx_munc1] = {
 	singular = true,
 	priority = 60
 }
-
-
-
 sfxinfo[sfx_mgrn1] = {
 	singular = true,
 	priority = 60
@@ -1355,6 +1174,8 @@ sfxinfo[sfx_mtlp1] = {
 	singular = true,
 	priority = 60
 }
+
+
 --/--------------------------
 --/ STATES
 --/--------------------------
