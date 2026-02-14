@@ -5,6 +5,9 @@
 -- Deadly Stinger ability is the primary way for Helcurt to deal damage,
 -- which is being done automatically if certain conditions are met.
 
+-- More to let the player 'feel' impact of hitting an enemy
+local THRUST_STRENGTH = 5*FRACUNIT
+
 -- Helcurt Auto-Damage Aura
 -- This script searches for enemies and damages them automatically.
 
@@ -17,8 +20,10 @@ local function BladeSlash(player, enemy)
 
     local pm = player.mo
 	if(not Valid(pm, "helcurt") or not PAlive(player)) then return false end
+
     -- P_Damage deals damage, (target, inflictor, source, damage)
     P_DamageMobj(enemy, pm, pm, stinger_damage)
+    P_Thrust(pm, R_PointToAngle2(pm.x, pm.y, enemy.x, enemy.y), THRUST_STRENGTH)
     
     -- 5. Visual Feedback (Spawn a purple "hit" effect)
     local ghost = P_SpawnMobj(enemy.x, enemy.y, enemy.z + (enemy.height/2), MT_THOK)
