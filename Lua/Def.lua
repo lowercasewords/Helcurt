@@ -202,30 +202,6 @@ rawset(_G, "HelcurtSpeak", function(mo, start_sound, end_sound, chance)
 	return monologue
 end)
 
-rawset(_G, "GetDarkArea", function(sector, dark_level, relative_z)
-	local dark_enough = nil
-	--Check for overall lightlevel to conceal if dark enough
-	-- print("S: "..sector.lightlevel)
-	if(sector.lightlevel <= dark_level) then
-		dark_enough = sector
-	--Finds all floor-over-floor to check for lightlevel of shadows under blocks 
-	else
-		for fof in sector.ffloors() do
-			
-			--Check for lightlevel under blocks to conceal if dark enough
-			--Ignore certain fof's since they trigger conceal when it is not dark enough
-			--(standing above water would have triggered this affect)
-			if(relative_z < fof.bottomheight and fof.toplightlevel < dark_level and fof.flags&FF_SWIMMABLE == 0) then
-				dark_enough = fof
-				break
-			end
-			-- print("F	: "..fof.toplightlevel)
-		end
-	end
-
-	return dark_enough
-end)
-
 rawset(_G, "StartHelcurtNightBuff", function(originplayer)
     if(not Valid(originplayer.mo, "helcurt") or not PAlive(originplayer)) then
         return nil
@@ -450,9 +426,9 @@ local function SetUp(player)
 	--resets to zero when the night is summoned by the player
 	player.killnight = 0
 	player.lockon = nil
-	
-	--Time for the conceal to last after leaving the darkness (decreases 'till hits zero to unconceal)
-	player.mo.prowler_state_bar = PROWLER_STATE_BAR_MAX
+
+	player.passive_state_bar = -1
+	player.passive_state = nil
 	
 	-- if(player.night_timer ~= nil) then
 	-- 	EndHelcurtNightBuff(originplayer)

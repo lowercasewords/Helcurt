@@ -54,7 +54,6 @@ addHook("PlayerThink", function(player)
             -- 4. Execute Damage
             if dist <= stinger_range then
                BladeSlash(player, enemy)
-               Conceal(pmo)
             end
         end
     end, pmo, pmo.x - block_search_range, pmo.x + block_search_range, pmo.y - block_search_range, pmo.y + block_search_range)
