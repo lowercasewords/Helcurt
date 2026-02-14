@@ -310,7 +310,7 @@ addHook("PlayerThink", function(player)
 		P_SetObjectMomZ(particle, FRACUNIT/2, false)
 	end
 
-	if(counter <= 0) then
+	if(counter <= 0 and player.night_timer <= 0) then
 		counter = MAX_TICS
 		searchBlockmap("lines", function(playmo, line)
 			
