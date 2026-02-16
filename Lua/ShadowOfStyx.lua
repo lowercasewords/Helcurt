@@ -72,21 +72,30 @@ hud.add(function(v, player, camera)
 	if not HelcurtAlive(player) then return nil end
 
 	-- The Prowler State vignette effects
-	if player.passive_state == PassiveState.PROWLER then
-
+	if player.passive_state_bar > PassiveBar.EXPOSED_THRESHOLD then
+		local patch = nil
 		-- v.fadeScreen(0xFF00, 20)
-		local patch = v.cachePatch("VIGNETTE")
-
-		local ratio = FixedDiv(PassiveBar.PROWLER_THRESHOLD*FRACUNIT, player.passive_state_bar*FRACUNIT)/FRACUNIT
 		
-		local trans = min(max(V_10TRANS*ratio, V_10TRANS), V_10TRANS)
-
-		local flags = V_NOSCALESTART|trans
+		if player.passive_state == PassiveState.PROWLER then
+			patch = v.cachePatch("VIGNETTE_PROWLER")
 		
-		local scale_width = FixedDiv(v.width()*FRACUNIT, patch.width*FRACUNIT) / v.dupx()
-		local scale_height = FixedDiv(v.height()*FRACUNIT, (patch.height)*FRACUNIT) / v.dupy()
+		elseif player.passive_state == PassiveState.AMBUSH then
+			patch = v.cachePatch("VIGNETTE_AMBUSH")
+		end
 
-		v.drawStretched(0, 0, scale_width, scale_height, patch, flags)
+
+		if patch ~= nil then
+			local ratio = FixedDiv(PassiveBar.PROWLER_THRESHOLD*FRACUNIT, player.passive_state_bar*FRACUNIT)/FRACUNIT
+			
+			local trans = min(max(V_10TRANS*ratio, V_10TRANS), V_10TRANS)
+
+			local flags = V_NOSCALESTART|trans
+			
+			local scale_width = FixedDiv(v.width()*FRACUNIT, patch.width*FRACUNIT) / v.dupx()
+			local scale_height = FixedDiv(v.height()*FRACUNIT, (patch.height)*FRACUNIT) / v.dupy()
+
+			v.drawStretched(0, 0, scale_width, scale_height, patch, flags)
+		end
 	-- The Ambush State vignette effects
 	elseif player.passive_state == PassiveState.AMBUSH then
 		-- ...
