@@ -16,7 +16,7 @@
 - Stealth mode is not removed while in the dark sectors, even if attacking
 - During the Dark Night Falls, only decrease the sector light ever so slightly to prevent not being able to see anything by Helcurt. Other player's however will have darker HUD all over the screen instead.
 - To avoid slugging stop-move-stop combat, make it so that the ambush actually increases speed sligtly or gives a slight burst of speed. While doing do in the ambush, helcurt will perform rapid AOE slashes damaging nearby enemies while not slowing down his momentum.
-- The map has a 'fog' effect on the ground, allowing Helcurt to stay in prowler mode on the ground even in non-dark sectors. Note that they don't allow Helcurt to transition into prowler state, they only keep him in prowler state if he's already in it.
+- The map has a 'fog' effect on the ground, allowing Helcurt to stay in prowler mode on the ground even in non-dark sectors. Note that they don't allow Helcurt to transition into prowler state, they only keep him in prowler state if he's already in it. So being in the air, or jumping out of the for for more than a second will trigger the exposed effect.
 - Dark Night Falls can be awarded for killing enough enemies in a row.
 - Hidden Terror teleport should not be strictly horizontal. Let it also be vertical, thrusting upward or downward, maybe even give two charges of teleport which first do upward and then downward teleport.
 
