@@ -62,7 +62,7 @@ COM_AddCommand("hel_particlecolor", function(player, color)
 		print("Incorrect color!")
 	else
 		print("Setting particle to color"..color)
-		player.particlecolor = color
+		player.helcurt.particlecolor = color
 	end
 end, COM_LOCAL)
 
@@ -403,7 +403,7 @@ addHook("PlayerThink", function(player)
 		P_SetObjectMomZ(particle, FRACUNIT/2, false)
 	end
 
-	if(counter <= 0 and player.night_timer <= 0) then
+	if(counter <= 0 and player.helcurt.night_timer <= 0) then
 		counter = MAX_TICS
 		searchBlockmap("lines", function(playmo, line)
 			

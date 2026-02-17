@@ -393,7 +393,6 @@ end)
 local function InitializeHelcurt(player)
 	if(not Valid(player.mo, "helcurt")) then return false end
 	
-	HelcurtSpeakOverride(player.mo, sfx_mrwn1, sfx_mrwn2)
 
 	player.helcurt = {
 		-- Starts after leaving the fog in prowler mode, if not entered the fog by the time this timer ends, the player is forced into exposed passive state.
@@ -413,41 +412,29 @@ local function InitializeHelcurt(player)
 	player.helcurt.monologue_timer = MONOLOGUE_TIC_MAX
 
 	player.helcurt.can_teleport = 0
-	player.mo.teleported = 0
-	player.mo.enhanced_teleport = 0
+	player.helcurt.teleported = 0
+	player.helcurt.enhanced_teleport = 0
 
-	player.mo.can_blade = 1
-
-	player.mo.can_stinger = 0
-	--Cooldown for a ground stinger cooldown
-	player.mo.ground_tic_cd = 0 
-	player.mo.stung = 0
-	--Amount of extra stingers Helcurt has currently (not counting the current one)
-	player.mo.stingers = 0
-	player.mo.stinger_charge_countdown = -1
-	player.mo.hudstingers = {} --keeping track of HUD elements that represent the string
-
-	player.killcount = 0
+	player.helcurt.killcount = 0
 	--Separate kill count to summon the night,
 	--resets to zero when the night is summoned by the player
-	player.killnight = 0
-	player.lockon = nil
+	player.helcurt.killnight = 0
 
 	player.passive_state_bar = -1
 	player.passive_state = nil
 	
-	-- if(player.night_timer ~= nil) then
+	-- if(player.helcurt.night_timer ~= nil) then
 	-- 	EndHelcurtNightBuff(originplayer)
 	-- end
 	
-	if(player.night_timer ~= nil and player.night_timer ~= 0) then
+	if(player.helcurt.night_timer ~= nil and player.helcurt.night_timer ~= 0) then
 		SPEED_BUG_PREVENTION(player)
 	end
-	player.night_timer = 0
+	player.helcurt.night_timer = 0
 	
 	--DEPRECATED - Prevent changing to default particle color each time player respawns
-	if(player.particlecolor == nil) then
-		player.particlecolor = SKINCOLOR_DUSK
+	if(player.helcurt.particlecolor == nil) then
+		player.helcurt.particlecolor = SKINCOLOR_DUSK
 	end
 
 	-- Unconceal(player.mo)
@@ -455,6 +442,8 @@ local function InitializeHelcurt(player)
 	-- P_SpawnMobj(player.mo.x, player.mo.y, player.mo.z, MT_FOLLOW)
 	-- player.mo.tail.flags2 = MF2_LINKDRAW
 	
+	--HelcurtSpeakOverride(player.mo, sfx_mrwn1, sfx_mrwn2)
+
 	return true
 end
 local function CleanUp(player)
@@ -462,39 +451,7 @@ local function CleanUp(player)
 		return false
 	end
 
-	player.helcurt.spinheld = nil 
-	player.helcurt.jumpheld = nil 
-	player.helcurt.prevjumpheld = nil 
-	player.helcurt.prevspinheld = nil
-	player.helcurt.hasjumped = nil
 
-	player.helcurt.monologue_timer = -1
-
-	player.helcurt.can_teleport = nil
-	player.mo.teleported = nil
-	player.mo.enhanced_teleport = nil
-
-	player.mo.can_stinger = nil
-	player.mo.ground_tic_cd = nil 
-	player.mo.stung = nil
-	player.mo.stingers = nil
-	player.mo.stinger_charge_countdown = nil
-
-	for i = 0, #hudstingers-1, 1 do
-		P_KillMobj(player.mo.hudstingers[i])
-	end
-
-	player.mo.hudstingers = nil 
-
-	player.killcount = nil
-	player.killnight = nil
-	player.lockon = nil
-	
-	player.night_timer = nil
-
-	player.particlecolor = nil
-	
-	-- Unconceal(player.mo)
 
 	return true
 end
@@ -536,12 +493,7 @@ addHook("PreThinkFrame", function()
 		if(P_IsObjectOnGround(player.mo) and (player.powers[pw_justsprung] ~= 0 or player.powers[pw_carry] ~= 0)) then
 			player.helcurt.hasjumped = 1
 			-- player.helcurt.can_teleport = 1
-			-- player.mo.teleported = 0
-
-			-- player.mo.can_blade = 1
-
-			-- player.mo.stung = 0
-			-- player.mo.can_stinger = 1
+			-- player.helcurt.teleported = 0
 		end 
 		]]--
 		
@@ -573,9 +525,7 @@ addHook("PreThinkFrame", function()
 
 		-- print(player.helcurt.hasjumped)
 		-- print(player.helcurt.prevcarried.." vs "..player.powers[pw_carry])
-		-- print("tpan"..player.mo.can_teleport.."	tped"..player.mo.teleported)
-		-- print("sted"..player.mo.stung.."	stcn"..player.mo.can_stinger)
-		-- print("blcn"..player.mo.can_blade)
+		-- print("tpan"..player.mo.can_teleport.."	tped"..player.helcurt.teleported)
 		-- Detect voluntery jumping
 		if(((P_IsObjectOnGround(player.mo) and player.helcurt.jumpheld == 1) or player.powers[pw_justsprung] ~= 0) and player.helcurt.hasjumped == 0) then
 		-- if(not P_IsObjectOnGround(player.mo) and ) then
@@ -686,8 +636,8 @@ addHook("MobjDeath", function(target, inflictor, source, dmgtype)
 
 	-- print(source.skin)
 	if(target.flags & TARGET_DMG_RANGE ~= 0) then
-		source.player.killcount = $+1
-		source.player.killnight = $+1
+		source.player.helcurt.killcount = $+1
+		source.player.helcurt.killnight = $+1
 		HelcurtSpeak(inflictor, sfx_mkil1, sfx_mkil4, FRACUNIT)
 	-- elseif(target.flags & TARGET_DMG_RANGE|MF_BOSS and target.) then
 	-- 	HelcurtSpeakOverride(target, sfx_mbos1, sfx_mbos2, FRACUNIT)
@@ -766,7 +716,6 @@ local function A_NightCharge(actor, par1, par2)
 
 	--Prevents activation of other abilities during and after
 	actor.can_teleport = 0
-	actor.can_blade = 0
 	
 	--Visual effect that look like "eyes" while summoning the night
 	local styx_eyes = P_SpawnMobj(actor.x, actor.y, actor.z, MT_EYES)
@@ -781,7 +730,7 @@ local function A_NightActivate(actor, par1, par2)
 		return nil
 	end
 	
-	actor.player.night_timer = NIGHT_MAX_TIC
+	actor.player.helcurt.night_timer = NIGHT_MAX_TIC
 
 	P_Thrust(actor, actor.angle, 50*FRACUNIT)
 	
@@ -794,7 +743,7 @@ local function A_Pre_Transition(actor, par1, par2)
 	end
 
 	actor.can_teleport = 0
-	actor.teleported = 1
+	actor.player.helcurt.teleported = 1
 
 	S_StartSound(actor, sfx_trns1)
 
@@ -816,7 +765,7 @@ local function A_Start_Transition(actor, par1, par2)
 	--NOTE: consider making teleport's speed relative to helcurt's, the faster he moves
 	--the fastere teleport is, but give the teleport the base speed so that Helcurt can teleport
 	--from stand still
-	P_InstaThrust(actor, actor.angle, (actor.player.night_timer == 0 and TELEPORT_SPEED or TELEPORT_SPEED + TELEPORT_SPEED/3))
+	P_InstaThrust(actor, actor.angle, (actor.player.helcurt.night_timer == 0 and TELEPORT_SPEED or TELEPORT_SPEED + TELEPORT_SPEED/3))
 	P_SetObjectMomZ(actor, 0, false)
 
 end
@@ -832,23 +781,13 @@ local function A_End_Transition(actor, par1, par2)
 	P_SpawnMobj(actor.x, actor.y, actor.z, MT_TRNS)
 
 	--Regular teleport (momentum is decreased)
-	if(actor.enhanced_teleport == 0) then
+	if(actor.player.helcurt.enhanced_teleport == 0) then
 		actor.momy = $/TELEPORT_STOP_SPEED
 		actor.momx = $/TELEPORT_STOP_SPEED
 	--Enhanced teleport
 	else
-		actor.enhanced_teleport = 0
+		actor.player.helcurt.enhanced_teleport = 0
 	end
-
-	--Add a stinger only if already stung (to avoid teleport spamming to get free stacks)
-	if(actor.stung == 1) then
-		--Add a stinger for a teleport
-		AddStingers(actor, 1)
-	end
-
-	--Recharge the stinger ability (technically just air stinger you're in the air)
-	actor.can_stinger = 1
-	
 	
 end
 

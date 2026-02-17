@@ -17,7 +17,7 @@ end)
 --     if(not player or not player.mo or player.mo.skin ~= "helcurt") then
 -- 		return
 -- 	end
---     if(player.night_timer ~= 0) then
+--     if(player.helcurt.night_timer ~= 0) then
 --         -- EndHelcurtNightBuff(player)
 --         EndTheNight(player, server.og_skybox, server.current_mapinfo.skynum)
 --     end
@@ -29,12 +29,12 @@ addHook("PlayerThink", function(player)
 	end
     
     --Start charging the night
-    --player.killnight > KILLS_FOR_NIGHT
+    --player.helcurt.killnight > KILLS_FOR_NIGHT
     if(player.cmd.buttons & BT_SPIN and player.cmd.buttons & BT_JUMP 
             and not (P_IsObjectOnGround(player.mo)) and
             player.mo.state ~= S_NIGHT_CHARGE 
-            and player.night_timer == 0) then
-        player.killnight = 0
+            and player.helcurt.night_timer == 0) then
+        player.helcurt.killnight = 0
         player.mo.prevstate = player.mo.state
         player.mo.state = S_NIGHT_CHARGE 
     end
@@ -49,16 +49,16 @@ addHook("PlayerThink", function(player)
 
 
     --Proceeding with the countdown
-    if(player.night_timer > 1) then
-            player.night_timer = $-1
+    if(player.helcurt.night_timer > 1) then
+            player.helcurt.night_timer = $-1
             --Keep playing the repeating night sound 
             if(not S_SoundPlaying(player.mo, sfx_nght1) and not S_SoundPlaying(player.mo, sfx_nght2)) then
                 S_StartSound(player.mo, sfx_nght2)
             end
             
     --Clearing up after the night ends
-    elseif(player.night_timer == 1) then
-        player.night_timer = $-1
+    elseif(player.helcurt.night_timer == 1) then
+        player.helcurt.night_timer = $-1
         EndTheNight(player, server.og_skybox, server.current_mapinfo.skynum)
     end
 end)

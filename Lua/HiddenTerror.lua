@@ -17,7 +17,7 @@ addHook("PlayerThink",
 			end
 
 			--Recharge teleport only when holding jumpbutton in the air
-			if(player.helcurt.can_teleport == 0 and player.mo.teleported == 0 and player.helcurt.hasjumped == 1 and player.helcurt.jumpheld == 0) then
+			if(player.helcurt.can_teleport == 0 and player.helcurt.teleported == 0 and player.helcurt.hasjumped == 1 and player.helcurt.jumpheld == 0) then
 				player.helcurt.can_teleport = 1
 			end
 
@@ -34,7 +34,7 @@ addHook("PlayerThink",
 			--Reset when hit the floor
 			if(player.helcurt.hasjumped == 0) then
 				player.helcurt.can_teleport = 0
-				player.mo.teleported = 0
-				player.mo.enhanced_teleport = 0
+				player.helcurt.teleported = 0
+				player.helcurt.enhanced_teleport = 0
 			end
 		end)
