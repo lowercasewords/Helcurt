@@ -396,7 +396,7 @@ local function SetUp(player)
 
 	player.helcurt = {
 		-- Starts after leaving the fog in prowler mode, if not entered the fog by the time this timer ends, the player is forced into exposed passive state.
-		groundfog_coyote_timer = 0
+		groundfog_coyote_timer = nil
 	}
 
 	print(player.helcurt.groundfog_coyote_timer)

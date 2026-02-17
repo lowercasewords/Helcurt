@@ -26,7 +26,7 @@ rawset(_G, "CONCEAL_JUMPFACTOR_BOOST",  FRACUNIT/2)
 --/ Seen to this file
 --------------------------
 
-local GROUNDFOG_COYOTE_TIME_MAX = TICRATE
+local GROUNDFOG_COYOTE_TIME_MAX = TICRATE/4
 
 local EXPOSED_RUN_FACTOR = 2*FRACUNIT/3
 local PROWLER_RUN_FACTOR = 3*FRACUNIT/2
@@ -251,7 +251,7 @@ local function TryOverrideState(player)
 	-- Returns true if the player is currently in the ground fog, false otherwise
 	--@return boolean
 	local function InsideGroundFog()
-		return player.helcurt.groundfog_coyote_timer > 0 
+		return player.helcurt.groundfog_coyote_timer > 1
 	end
 
 
@@ -279,19 +279,21 @@ local function PassiveThinker(player)
 
 	-- Sets the coyote timer for the ground fog, which allows the player to be considered as in the ground fog for a few tics after leaving it, which makes the transition smoother and prevents the player from being considered as exposed for a few tics when leaving the ground fog, which would be weird
 	--@type integer
-	local function GroundfogTimer()
+	local function GroundfogTimer(current_timer)
 
 		-- Failsafe for the coyote timer, should never happen
-		if player.helcurt.groundfog_coyote_timer == nil then
-			player.helcurt.groundfog_coyote_timer = 0
+		if current_timer == nil then
+			current_timer = GROUNDFOG_COYOTE_TIME_MAX
 		end
 		-- Time to me assigned to groundfog timer
-		local time = 0
+		local time = current_timer
 		-- Reset the in-the-fog timer when entering the ground fog (meaning hitting the ground)
 		if player.mo.eflags & MFE_JUSTHITFLOOR then
+			print("switch to prowler and reset groundfog timer because player just hit the floor")
 			time = GROUNDFOG_COYOTE_TIME_MAX
-		elseif player.helcurt.groundfog_coyote_timer > 0 and not P_IsObjectOnGround(player.mo) then
-			time = player.helcurt.groundfog_coyote_timer - 1
+		-- Decrease the timer by 1 tic if it's above 0 and the player is not on the ground, meaning that he left the ground fog, but we are still in the coyote time
+		elseif current_timer > 0 and not P_IsObjectOnGround(player.mo) then
+			time = current_timer - 1
 		end
 		return time
 	end
@@ -339,7 +341,7 @@ local function PassiveThinker(player)
 	end
 
 	-- Update ground fog coyote timer every tic
-	player.helcurt.groundfog_coyote_timer = GroundfogTimer()
+	player.helcurt.groundfog_coyote_timer = GroundfogTimer($)
 
 	-- The state that the player should be in based on events, nil if no event is overriding the state.
 	-- Note that this has higher priority than bar state.
@@ -362,12 +364,11 @@ local function PassiveThinker(player)
 	end
 
 	local applied_ps = ApplyState(to_apply_ps)
-	print("Applied: " .. tostring(applied_ps)		.. " | Event requested for now: " .. tostring(event_requested_ps) 
+	print("Event requested for now: " .. tostring(event_requested_ps) 
 		.. " | Bar requested for now: " .. tostring(bar_requested_ps)
 		.. " | State applied now: " .. tostring(to_apply_ps)
-		.. " | Current state now: " .. tostring(player.passive_state)
 		.. " | Passive bar: " .. tostring(player.passive_state_bar)
-		.. " | Groundfog coyote timer: " .. tostring(player.helcurt.groundfog_coyote_timer)
+		.. " | GFCT: " .. tostring(player.helcurt.groundfog_coyote_timer)
 	)
 
 	-- Passive state thinker
