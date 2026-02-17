@@ -19,6 +19,7 @@
 - The map has a 'fog' effect on the ground, allowing Helcurt to stay in prowler mode on the ground even in non-dark sectors. Note that they don't allow Helcurt to transition into prowler state, they only keep him in prowler state if he's already in it. So being in the air, or jumping out of the for for more than a second will trigger the exposed effect.
 - Dark Night Falls can be awarded for killing enough enemies in a row.
 - Hidden Terror teleport should not be strictly horizontal. Let it also be vertical, thrusting upward or downward, maybe even give two charges of teleport which first do upward and then downward teleport.
+- During the Hidden Terror teleport, your height is decreases to the spin height to fit behind the walls
 
 ## Integration of Abilities From MLBB to SRB2
 
