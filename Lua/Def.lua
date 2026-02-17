@@ -393,6 +393,13 @@ local function SetUp(player)
 	end
 	
 	HelcurtSpeakOverride(player.mo, sfx_mrwn1, sfx_mrwn2)
+
+	player.helcurt = {
+		-- Starts after leaving the fog in prowler mode, if not entered the fog by the time this timer ends, the player is forced into exposed passive state.
+		groundfog_coyote_timer = 0
+	}
+
+	print(player.helcurt.groundfog_coyote_timer)
 	
 	player.spinheld = 0 --Increments each tic it's held IN PRETHINK, use PF_SPINDOWN to get previous update
 	player.jumpheld = 0 --Increments each tic it's held IN PRETHINK, use PF_JUMPDOWN to get previous update

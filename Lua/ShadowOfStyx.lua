@@ -26,6 +26,8 @@ rawset(_G, "CONCEAL_JUMPFACTOR_BOOST",  FRACUNIT/2)
 --/ Seen to this file
 --------------------------
 
+local GROUNDFOG_COYOTE_TIME_MAX = TICRATE
+
 local EXPOSED_RUN_FACTOR = 2*FRACUNIT/3
 local PROWLER_RUN_FACTOR = 3*FRACUNIT/2
 -- Particle related
@@ -217,76 +219,156 @@ local function SwitchToExposed(player)
 	return true
 end
 
+-- Returns the passive state if it's being overrided by an event, because usually the passive state is decided by the bar, but in some cases it can be overridden by an event (like entering a dark area),
+--@return PassiveState
+local function TryOverrideState(player)
+	if not HelcurtAlive(player) then return nil end
+
+	-- The helcurt state that will be returned
+	--@type PassiveState
+	local return_helcurt_state = nil
+
+	-- Returns true if the player is in a dark sector or under a block that is dark enough to conceal him, false otherwise
+	--@return boolean
+	local function InsideDarkSector() 
+		--Try to find a sector dark enough to be concealed in
+		if(player.mo.subsector ~= nil and player.mo.subsector.sector ~= nil) then
+			-- Sector player is currently in which is dark enough to be hidden in.
+			-- If not dark enough, the value is nil
+			local concealing_sector = GetDarkArea(
+													player.mo.subsector.sector, 
+													CONCEAL_DARKNESS_LEVEL, 
+													player.mo.z
+												)
+
+			if concealing_sector ~= nil then
+				return true
+			end
+		end
+		return false
+	end
+
+	-- Returns true if the player is currently in the ground fog, false otherwise
+	--@return boolean
+	local function InsideGroundFog()
+		return player.helcurt.groundfog_coyote_timer > 0 
+	end
+
+
+	-- Returns true after coyote timer expires, meaning that the player has left the ground fog for more than the coyote time, false otherwise
+	--@return boolean
+	local function ExitedGroundFog()
+		return player.helcurt.groundfog_coyote_timer == 1
+	end
+
+	-- Decides the passive state based on the events, if the player is in a dark sector or in the ground fog, he should be in prowler, if he just left the ground fog, he should be in exposed, otherwise, no override
+	if InsideDarkSector() or InsideGroundFog() then
+		return_helcurt_state = PassiveState.PROWLER
+	elseif ExitedGroundFog() then
+		return_helcurt_state = PassiveState.EXPOSED
+	end
+
+	return return_helcurt_state
+end
+
+-- If hiden, go to prowler
+-- If left the hidden posiition, ambush
+-- If in ambush position for too long, exposed
 local function PassiveThinker(player)
 	if not HelcurtAlive(player) then return false end
 
-	-- If hiden, go to prowler
-	-- If left the hidden posiition, ambush
-	-- If in ambush position for too long, exposed
-	
-	-- Checks if helcurt is currently in circumnstances where he is surely hidden
-	local is_helcurt_hidden = false
+	-- Sets the coyote timer for the ground fog, which allows the player to be considered as in the ground fog for a few tics after leaving it, which makes the transition smoother and prevents the player from being considered as exposed for a few tics when leaving the ground fog, which would be weird
+	--@type integer
+	local function GroundfogTimer()
 
-	--[[
-	-- Nil checks
-	if player.passive_state_bar == nil or player.passive_state == nil then
-		SwitchToExposed(player)
-		player.passive_state_bar = PassiveBar.EXPOSED_THRESHOLD
-		player.passive_state = PassiveState.EXPOSED
-	end
-	]]--
-
-	--Try to find a sector dark enough to be concealed in
-	if(player.mo.subsector ~= nil and player.mo.subsector.sector ~= nil) then
-		-- Sector player is currently in which is dark enough to be hidden in.
-		-- If not dark enough, the value is nil
-		local concealing_sector = GetDarkArea(
-												player.mo.subsector.sector, 
-												CONCEAL_DARKNESS_LEVEL, 
-												player.mo.z
-											)
-		-- 
-		if concealing_sector ~= nil then
-			is_helcurt_hidden = true
+		-- Failsafe for the coyote timer, should never happen
+		if player.helcurt.groundfog_coyote_timer == nil then
+			player.helcurt.groundfog_coyote_timer = 0
 		end
+		-- Time to me assigned to groundfog timer
+		local time = 0
+		-- Reset the in-the-fog timer when entering the ground fog (meaning hitting the ground)
+		if player.mo.eflags & MFE_JUSTHITFLOOR then
+			time = GROUNDFOG_COYOTE_TIME_MAX
+		elseif player.helcurt.groundfog_coyote_timer > 0 and not P_IsObjectOnGround(player.mo) then
+			time = player.helcurt.groundfog_coyote_timer - 1
+		end
+		return time
 	end
 
-
-
-	-- Switches the passive thinker by monitoring state bar
+	-- Switches the passive thinker based on the state bar. 
+	-- Returns PassiveState if the state was switched, nil otherwise
 	local function SwitchPassiveThinker()
 
-		local switched = false	
-		
-		if player.passive_state == nil then
-			if is_helcurt_hidden then
-				switched = SwitchToProwler(player)
-			else
-				switched = SwitchToExposed(player)
-			end
-		else
-			if(is_helcurt_hidden and 
-			player.passive_state ~= PassiveState.PROWLER and
-			player.passive_state_bar < PassiveBar.PROWLER_THRESHOLD) then
-				switched = SwitchToProwler(player)
-			elseif(player.passive_state == PassiveState.PROWLER
-			and player.passive_state_bar < PassiveBar.AMBUSH_THRESHOLD) then
-				switched = SwitchToAmbush(player)
-			elseif(player.passive_state == PassiveState.AMBUSH and
-			player.passive_state_bar < PassiveBar.EXPOSED_THRESHOLD) then
-				switched = SwitchToExposed(player)
-			end
+		--@type PassiveState
+		local to_switch_state = nil
+
+		-- If the bar is below 0, it is most likely that the player has just been spawned and has the default bar value of -1, in this case, switch to prowler state without checking the thresholds
+		if player.passive_state_bar < 0 then
+			print("Switching to prowler because bar is under 0, probably just spawned")
+			to_switch_state = PassiveState.PROWLER
+		elseif(player.passive_state_bar <= PassiveBar.EXPOSED_THRESHOLD) then
+			print("Switching to exposed because bar is under " .. PassiveBar.EXPOSED_THRESHOLD)
+			to_switch_state = PassiveState.EXPOSED
+		elseif(player.passive_state_bar <= PassiveBar.AMBUSH_THRESHOLD) then
+			print("Switching to ambush because bar is under " .. PassiveBar.AMBUSH_THRESHOLD)
+			to_switch_state = PassiveState.AMBUSH
+		elseif(player.passive_state_bar <= PassiveBar.PROWLER_THRESHOLD) then
+			print("Switching to prowler because bar is under " .. PassiveBar.PROWLER_THRESHOLD)
+			to_switch_state = PassiveState.PROWLER
 		end
-		return switched
+		return to_switch_state
 	end	
 
-	-- Was the state switched this tic?
-	local has_switched_state = SwitchPassiveThinker()
 
-	-- Deplete the bar if not hidden
-	if not is_helcurt_hidden and player.passive_state_bar > PassiveBar.MIN_BAR_VALUE then
-		player.passive_state_bar = $-1
+	-- Switches the passive thinker based on the events and the state bar. Event overrides have higher priority than bar overrides, meaning that if an event is overriding the state, the bar will not be able to switch the state until there is no event overriding it.
+	local function ApplyState(passive_state_to_apply)
+
+		local was_state_applied = false
+		-- If there is a state to switch to and it's different from the current state, switch to it
+		if passive_state_to_apply ~= nil and passive_state_to_apply ~= player.passive_state then
+			if passive_state_to_apply == PassiveState.PROWLER then
+				was_state_applied = SwitchToProwler(player)
+			elseif passive_state_to_apply == PassiveState.AMBUSH then
+				was_state_applied = SwitchToAmbush(player)
+			elseif passive_state_to_apply == PassiveState.EXPOSED then
+				was_state_applied = SwitchToExposed(player)
+			end
+		end
+		return was_state_applied
 	end
+
+	-- Update ground fog coyote timer every tic
+	player.helcurt.groundfog_coyote_timer = GroundfogTimer()
+
+	-- The state that the player should be in based on events, nil if no event is overriding the state.
+	-- Note that this has higher priority than bar state.
+	local event_requested_ps = TryOverrideState(player)
+
+	-- The state that the player should be in based on the passive bar, nil if no switch is needed
+	local bar_requested_ps = SwitchPassiveThinker()
+
+	-- Deplete the passive state bar if the state is affected only by the bar depletion and NOT the events such as helcurt being hidden in fog or dark sectors
+	if event_requested_ps == nil then
+		if player.passive_state_bar > PassiveBar.MIN_BAR_VALUE then
+			player.passive_state_bar = $ - 1
+		end
+	end
+
+	-- The state that will be applied, event requested state has higher priority than bar requested state
+	local to_apply_ps = event_requested_ps
+	if to_apply_ps == nil then
+		to_apply_ps = bar_requested_ps
+	end
+
+	local applied_ps = ApplyState(to_apply_ps)
+	print("Applied: " .. tostring(applied_ps)		.. " | Event requested for now: " .. tostring(event_requested_ps) 
+		.. " | Bar requested for now: " .. tostring(bar_requested_ps)
+		.. " | State applied now: " .. tostring(to_apply_ps)
+		.. " | Current state now: " .. tostring(player.passive_state)
+		.. " | Passive bar: " .. tostring(player.passive_state_bar)
+		.. " | Groundfog coyote timer: " .. tostring(player.helcurt.groundfog_coyote_timer)
+	)
 
 	-- Passive state thinker
 	if player.passive_state == PassiveState.PROWLER then
