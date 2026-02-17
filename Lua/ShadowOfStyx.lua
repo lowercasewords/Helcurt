@@ -26,7 +26,8 @@ rawset(_G, "CONCEAL_JUMPFACTOR_BOOST",  FRACUNIT/2)
 --/ Seen to this file
 --------------------------
 
-local GROUNDFOG_COYOTE_TIME_MAX = TICRATE/4
+-- The maximum time in tics that the player can be considered hidden by the ground fog after leaving it, which allows for smoother transitions and prevents the player from being considered exposed for a few tics when leaving the ground fog, which would be weird
+local GROUNDFOG_COYOTE_TIME_MAX = TICRATE
 
 local EXPOSED_RUN_FACTOR = 2*FRACUNIT/3
 local PROWLER_RUN_FACTOR = 3*FRACUNIT/2

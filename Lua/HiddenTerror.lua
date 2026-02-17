@@ -11,20 +11,20 @@ addHook("PlayerThink",
 			end
 			
 			--Perform a teleport when one is available by HOLDING the jump button
-			if(player.mo.can_teleport == 1 and player.jumpheld > TICS_PRESS_RANGE and player.spinheld == 0) then
+			if(player.helcurt.can_teleport == 1 and player.helcurt.jumpheld > TICS_PRESS_RANGE and player.helcurt.spinheld == 0) then
 				player.mo.prevstate = player.mo.state
 				player.mo.state = S_PRE_TRANSITION
 			end
 
 			--Recharge teleport only when holding jumpbutton in the air
-			if(player.mo.can_teleport == 0 and player.mo.teleported == 0 and player.mo.hasjumped == 1 and player.jumpheld == 0) then
-				player.mo.can_teleport = 1
+			if(player.helcurt.can_teleport == 0 and player.mo.teleported == 0 and player.helcurt.hasjumped == 1 and player.helcurt.jumpheld == 0) then
+				player.helcurt.can_teleport = 1
 			end
 
 			if(player.mo.state == S_IN_TRANSITION) then
 				P_SetObjectMomZ(player.mo, 0, false)
 				--End transition when stopped holding the jump button
-				if(player.jumpheld == 0) then
+				if(player.helcurt.jumpheld == 0) then
 					player.mo.prevstate = player.mo.state
 					player.mo.state = S_END_TRANSITION
 					
@@ -32,8 +32,8 @@ addHook("PlayerThink",
 			end
 
 			--Reset when hit the floor
-			if(player.mo.hasjumped == 0) then
-				player.mo.can_teleport = 0
+			if(player.helcurt.hasjumped == 0) then
+				player.helcurt.can_teleport = 0
 				player.mo.teleported = 0
 				player.mo.enhanced_teleport = 0
 			end

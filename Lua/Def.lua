@@ -183,7 +183,7 @@ rawset(_G, "HelcurtSpeakOverride", function(mo, start_sound, end_sound, chance)
 
 	--Reset the random monologue timer
 	if(mo.player ~= nil) then
-		mo.player.monologue_timer = MONOLOGUE_TIC_MAX
+		mo.player.helcurt.monologue_timer = MONOLOGUE_TIC_MAX
 	end
 
 	local monologue = TrySoundInRange(mo, start_sound, end_sound, chance)
@@ -399,21 +399,19 @@ local function SetUp(player)
 		groundfog_coyote_timer = nil
 	}
 
-	print(player.helcurt.groundfog_coyote_timer)
-	
-	player.spinheld = 0 --Increments each tic it's held IN PRETHINK, use PF_SPINDOWN to get previous update
-	player.jumpheld = 0 --Increments each tic it's held IN PRETHINK, use PF_JUMPDOWN to get previous update
-	player.prevjumpheld = 0 --Value of jumpheld in previous tic
-	player.prevspinheld = 0
+	player.helcurt.spinheld = 0 --Increments each tic it's held IN PRETHINK, use PF_SPINDOWN to get previous update
+	player.helcurt.jumpheld = 0 --Increments each tic it's held IN PRETHINK, use PF_JUMPDOWN to get previous update
+	player.helcurt.prevjumpheld = 0 --Value of jumpheld in previous tic
+	player.helcurt.prevspinheld = 0
 	--Did player jump? Resets to 0 when hits the floor
-	player.mo.hasjumped = 0
+	player.helcurt.hasjumped = 0
 	--Carried by anything last tic
-	player.mo.prevcarried = 0
+	player.helcurt.prevcarried= 0
 
 	--Timer on which Helcurt says a random monologue phrase
-	player.monologue_timer = MONOLOGUE_TIC_MAX
+	player.helcurt.monologue_timer = MONOLOGUE_TIC_MAX
 
-	player.mo.can_teleport = 0
+	player.helcurt.can_teleport = 0
 	player.mo.teleported = 0
 	player.mo.enhanced_teleport = 0
 
@@ -463,15 +461,15 @@ local function CleanUp(player)
 		return false
 	end
 
-	player.spinheld = nil 
-	player.jumpheld = nil 
-	player.prevjumpheld = nil 
-	player.prevspinheld = nil
-	player.mo.hasjumped = nil
+	player.helcurt.spinheld = nil 
+	player.helcurt.jumpheld = nil 
+	player.helcurt.prevjumpheld = nil 
+	player.helcurt.prevspinheld = nil
+	player.helcurt.hasjumped = nil
 
-	player.monologue_timer = -1
+	player.helcurt.monologue_timer = -1
 
-	player.mo.can_teleport = nil
+	player.helcurt.can_teleport = nil
 	player.mo.teleported = nil
 	player.mo.enhanced_teleport = nil
 
@@ -535,8 +533,8 @@ addHook("PreThinkFrame", function()
 
 		--[[
 		if(P_IsObjectOnGround(player.mo) and (player.powers[pw_justsprung] ~= 0 or player.powers[pw_carry] ~= 0)) then
-			player.mo.hasjumped = 1
-			-- player.mo.can_teleport = 1
+			player.helcurt.hasjumped = 1
+			-- player.helcurt.can_teleport = 1
 			-- player.mo.teleported = 0
 
 			-- player.mo.can_blade = 1
@@ -556,14 +554,14 @@ addHook("PreThinkFrame", function()
 
 		--Retrieves the current input
 		if(player.cmd.buttons & BT_SPIN) then
-			player.spinheld = $+1
-		elseif(player.spinheld ~= 0 and player.cmd.buttons ~= BT_SPIN) then
-			player.spinheld = 0
+			player.helcurt.spinheld = $+1
+		elseif(player.helcurt.spinheld ~= 0 and player.cmd.buttons ~= BT_SPIN) then
+			player.helcurt.spinheld = 0
 		end
 		if(player.cmd.buttons & BT_JUMP) then
-			player.jumpheld = $+1
-		elseif(player.jumpheld ~= 0 and player.cmd.buttons ~= BT_JUMP) then
-			player.jumpheld = 0
+			player.helcurt.jumpheld = $+1
+		elseif(player.helcurt.jumpheld ~= 0 and player.cmd.buttons ~= BT_JUMP) then
+			player.helcurt.jumpheld = 0
 		end
 
 
@@ -572,17 +570,17 @@ addHook("PreThinkFrame", function()
 	-- 	player.mo.x = player.mo.x*cos(player.mo.angle) - player.mo.y*sin(player.mo.angle)
 	-- 	player.mo.y = player.mo.y*cos(player.mo.angle) + player.mo.x*sin(player.mo.angle)
 
-		-- print(player.mo.hasjumped)
-		-- print(player.mo.prevcarried.." vs "..player.powers[pw_carry])
+		-- print(player.helcurt.hasjumped)
+		-- print(player.helcurt.prevcarried.." vs "..player.powers[pw_carry])
 		-- print("tpan"..player.mo.can_teleport.."	tped"..player.mo.teleported)
 		-- print("sted"..player.mo.stung.."	stcn"..player.mo.can_stinger)
 		-- print("blcn"..player.mo.can_blade)
 		-- Detect voluntery jumping
-		if(((P_IsObjectOnGround(player.mo) and player.jumpheld == 1) or player.powers[pw_justsprung] ~= 0) and player.mo.hasjumped == 0) then
+		if(((P_IsObjectOnGround(player.mo) and player.helcurt.jumpheld == 1) or player.powers[pw_justsprung] ~= 0) and player.helcurt.hasjumped == 0) then
 		-- if(not P_IsObjectOnGround(player.mo) and ) then
-			player.mo.hasjumped = 1
+			player.helcurt.hasjumped = 1
 		elseif(player.mo.eflags&MFE_JUSTHITFLOOR ~= 0 or player.powers[pw_carry] ~= 0) then
-			player.mo.hasjumped = 0
+			player.helcurt.hasjumped = 0
 		end
 
 	end
@@ -594,15 +592,15 @@ addHook("PlayerThink", function(p)
 	end
 
 	--Detect when the player has left the carry in order to allow to perform the abilities
-	if((p.mo.prevcarried ~= 0 and p.powers[pw_carry] == 0)) then
-		p.mo.hasjumped = 1
+	if((p.helcurt.prevcarried ~= 0 and p.powers[pw_carry] == 0)) then
+		p.helcurt.hasjumped = 1
 	end
 
-	if(p.monologue_timer ~= nil and p.monologue_timer > 0*TICRATE) then
-		p.monologue_timer = $-1
+	if(p.helcurt.monologue_timer ~= nil and p.helcurt.monologue_timer > 0*TICRATE) then
+		p.helcurt.monologue_timer = $-1
 	else 
 		HelcurtSpeak(p.mo, sfx_mnl01, sfx_mnl03, FRACUNIT/3) 
-		p.monologue_timer = P_RandomRange(MONOLOGUE_TIC_MAX/2, 3*MONOLOGUE_TIC_MAX/2)
+		p.helcurt.monologue_timer = P_RandomRange(MONOLOGUE_TIC_MAX/2, 3*MONOLOGUE_TIC_MAX/2)
 	end
 
 	
@@ -628,11 +626,11 @@ addHook("PostThinkFrame", function()
 
 
 
-				player.prevjumpheld = player.jumpheld
-				player.prevspinheld = player.spinheld
+				player.helcurt.prevjumpheld = player.helcurt.jumpheld
+				player.helcurt.prevspinheld = player.helcurt.spinheld
 				player.mo.prevstate = player.mo.state
-				-- print("prev: "..player.mo.prevcarried.." vs "..player.powers[pw_carry])
-				player.mo.prevcarried = player.powers[pw_carry]
+				-- print("prev: "..player.helcurt.prevcarried.." vs "..player.powers[pw_carry])
+				player.helcurt.prevcarried = player.powers[pw_carry]
 
 				--Charging shadow particles during the ultimate
 				if(player.mo.state == S_NIGHT_CHARGE) then
