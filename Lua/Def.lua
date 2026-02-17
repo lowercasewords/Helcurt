@@ -386,11 +386,12 @@ rawset(_G, "CorrectRotationHoriz", function(rotatemo, pivotx, pivoty, desiredx, 
 	
 end)
 
---Sets up Helcurts attributes when player switches to him
-local function SetUp(player)
-	if(not Valid(player.mo, "helcurt")) then
-		return false
-	end
+--Sets up Helcurts attributes when player switches to him.
+-- Called immediately when the player switches to helcurt.
+-- Returns true if Helcurt was correctly initialized, false if the player is not valid or not helcurt
+--@returns boolean
+local function InitializeHelcurt(player)
+	if(not Valid(player.mo, "helcurt")) then return false end
 	
 	HelcurtSpeakOverride(player.mo, sfx_mrwn1, sfx_mrwn2)
 
@@ -508,7 +509,7 @@ addHook("PlayerSpawn", function(player)
 	--Set up if the player is helcurt, but doesn't work if the host player starts the server as helcurt
 	--because skin is set to helcurt AFTER player spawns
 	if(Valid(player.mo, "helcurt")) then
-		SetUp(player)
+		InitializeHelcurt(player)
 	end
 	
 
