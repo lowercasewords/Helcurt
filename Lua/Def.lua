@@ -393,66 +393,50 @@ end)
 local function InitializeHelcurt(player)
 	if(not Valid(player.mo, "helcurt")) then return false end
 	
-
+	-- Helcurt specified attributes
 	player.helcurt = {
+		--Increments each tic it's held IN PRETHINK, use PF_SPINDOWN to get previous update
+		spinheld = 0, 
+		--Increments each tic it's held IN PRETHINK, use PF_JUMPDOWN to get previous update
+		jumpheld = 0, 
+		--Value of jumpheld in previous tic
+		prevjumpheld = 0, 
+		prevspinheld = 0,
+		--Did player jump? Resets to 0 when hits the floor
+		hasjumped = 0,
+		--Carried by anything last tic
+		prevcarried= 0,
+
+		--Timer on which Helcurt says a random monologue phrase
+		monologue_timer = MONOLOGUE_TIC_MAX,
+
+		can_teleport = 0,
+		teleported = 0,
+		enhanced_teleport = 0,
+
+		killcount = 0,
+		--Separate kill count to summon the night,
+		--resets to zero when the night is summoned by the player
+		killnight = 0,
+
+		passive_state_bar = -1,
+		passive_state = nil,
+
 		-- Starts after leaving the fog in prowler mode, if not entered the fog by the time this timer ends, the player is forced into exposed passive state.
-		groundfog_coyote_timer = nil
+		groundfog_coyote_timer = nil,
+
+		night_timer = 0,
+
+		particlecolor = SKINCOLOR_DUSK
 	}
-
-	player.helcurt.spinheld = 0 --Increments each tic it's held IN PRETHINK, use PF_SPINDOWN to get previous update
-	player.helcurt.jumpheld = 0 --Increments each tic it's held IN PRETHINK, use PF_JUMPDOWN to get previous update
-	player.helcurt.prevjumpheld = 0 --Value of jumpheld in previous tic
-	player.helcurt.prevspinheld = 0
-	--Did player jump? Resets to 0 when hits the floor
-	player.helcurt.hasjumped = 0
-	--Carried by anything last tic
-	player.helcurt.prevcarried= 0
-
-	--Timer on which Helcurt says a random monologue phrase
-	player.helcurt.monologue_timer = MONOLOGUE_TIC_MAX
-
-	player.helcurt.can_teleport = 0
-	player.helcurt.teleported = 0
-	player.helcurt.enhanced_teleport = 0
-
-	player.helcurt.killcount = 0
-	--Separate kill count to summon the night,
-	--resets to zero when the night is summoned by the player
-	player.helcurt.killnight = 0
-
-	player.passive_state_bar = -1
-	player.passive_state = nil
-	
-	-- if(player.helcurt.night_timer ~= nil) then
-	-- 	EndHelcurtNightBuff(originplayer)
-	-- end
-	
-	if(player.helcurt.night_timer ~= nil and player.helcurt.night_timer ~= 0) then
-		SPEED_BUG_PREVENTION(player)
-	end
-	player.helcurt.night_timer = 0
-	
-	--DEPRECATED - Prevent changing to default particle color each time player respawns
-	if(player.helcurt.particlecolor == nil) then
-		player.helcurt.particlecolor = SKINCOLOR_DUSK
-	end
-
-	-- Unconceal(player.mo)
-
-	-- P_SpawnMobj(player.mo.x, player.mo.y, player.mo.z, MT_FOLLOW)
-	-- player.mo.tail.flags2 = MF2_LINKDRAW
-	
-	--HelcurtSpeakOverride(player.mo, sfx_mrwn1, sfx_mrwn2)
-
 	return true
+
 end
 local function CleanUp(player)
 	if(not Valid(player.mo)) then
 		return false
 	end
-
-
-
+	player.helcurt = nil
 	return true
 end
 --------------------------

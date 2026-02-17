@@ -75,20 +75,20 @@ hud.add(function(v, player, camera)
 	if not HelcurtAlive(player) then return nil end
 
 	-- The Prowler State vignette effects
-	if player.passive_state_bar > PassiveBar.EXPOSED_THRESHOLD then
+	if player.helcurt.passive_state_bar > PassiveBar.EXPOSED_THRESHOLD then
 		local patch = nil
 		-- v.fadeScreen(0xFF00, 20)
 		
-		if player.passive_state == PassiveState.PROWLER then
+		if player.helcurt.passive_state == PassiveState.PROWLER then
 			patch = v.cachePatch("VIGNETTE_PROWLER")
 		
-		elseif player.passive_state == PassiveState.AMBUSH then
+		elseif player.helcurt.passive_state == PassiveState.AMBUSH then
 			patch = v.cachePatch("VIGNETTE_AMBUSH")
 		end
 
 
 		if patch ~= nil then
-			local ratio = FixedDiv(PassiveBar.PROWLER_THRESHOLD*FRACUNIT, player.passive_state_bar*FRACUNIT)/FRACUNIT
+			local ratio = FixedDiv(PassiveBar.PROWLER_THRESHOLD*FRACUNIT, player.helcurt.passive_state_bar*FRACUNIT)/FRACUNIT
 			
 			local trans = min(max(V_10TRANS*ratio, V_10TRANS), V_10TRANS)
 
@@ -100,7 +100,7 @@ hud.add(function(v, player, camera)
 			v.drawStretched(0, 0, scale_width, scale_height, patch, flags)
 		end
 	-- The Ambush State vignette effects
-	elseif player.passive_state == PassiveState.AMBUSH then
+	elseif player.helcurt.passive_state == PassiveState.AMBUSH then
 		-- ...
 	end
 
@@ -159,8 +159,8 @@ local function SwitchToProwler(player)
 
 	local skin = skins[player.skin]
 
-	player.passive_state = PassiveState.PROWLER
-	player.passive_state_bar = PassiveBar.PROWLER_THRESHOLD
+	player.helcurt.passive_state = PassiveState.PROWLER
+	player.helcurt.passive_state_bar = PassiveBar.PROWLER_THRESHOLD
 
 	S_StartSound(player.cmo, sfx_hide1)
 	HelcurtSpeak(player.cmo, sfx_mcon1, sfx_mcon1, FRACUNIT/10)
@@ -189,8 +189,8 @@ local function SwitchToAmbush(player)
 	if not HelcurtAlive(player) then return false end
 	local skin = skins[player.skin]
 
-	player.passive_state = PassiveState.AMBUSH
-	player.passive_state_bar = PassiveBar.AMBUSH_THRESHOLD
+	player.helcurt.passive_state = PassiveState.AMBUSH
+	player.helcurt.passive_state_bar = PassiveBar.AMBUSH_THRESHOLD
 
 	HelcurtSpeak(player.mo, sfx_munc1, sfx_munc1, FRACUNIT/10)
 	S_StopSound(player.mo, sfx_hide1)
@@ -210,8 +210,8 @@ end
 local function SwitchToExposed(player)
 	if not HelcurtAlive(player) then return false end
 
-	player.passive_state = PassiveState.EXPOSED
-	player.passive_state_bar = PassiveBar.EXPOSED_THRESHOLD
+	player.helcurt.passive_state = PassiveState.EXPOSED
+	player.helcurt.passive_state_bar = PassiveBar.EXPOSED_THRESHOLD
 
 	local skin = skins[player.skin]
 	--player.normalspeed = FixedMul(skin.normalspeed, EXPOSED_RUN_FACTOR)
@@ -290,7 +290,7 @@ local function PassiveThinker(player)
 		local time = current_timer
 		-- Reset the in-the-fog timer when entering the ground fog (meaning hitting the ground)
 		if player.mo.eflags & MFE_JUSTHITFLOOR then
-			print("switch to prowler and reset groundfog timer because player just hit the floor")
+			--print("switch to prowler and reset groundfog timer because player just hit the floor")
 			time = GROUNDFOG_COYOTE_TIME_MAX
 		-- Decrease the timer by 1 tic if it's above 0 and the player is not on the ground, meaning that he left the ground fog, but we are still in the coyote time
 		elseif current_timer > 0 and not P_IsObjectOnGround(player.mo) then
@@ -307,17 +307,17 @@ local function PassiveThinker(player)
 		local to_switch_state = nil
 
 		-- If the bar is below 0, it is most likely that the player has just been spawned and has the default bar value of -1, in this case, switch to prowler state without checking the thresholds
-		if player.passive_state_bar < 0 then
-			print("Switching to prowler because bar is under 0, probably just spawned")
+		if player.helcurt.passive_state_bar < 0 then
+			--print("Switching to prowler because bar is under 0, probably just spawned")
 			to_switch_state = PassiveState.PROWLER
-		elseif(player.passive_state_bar <= PassiveBar.EXPOSED_THRESHOLD) then
-			print("Switching to exposed because bar is under " .. PassiveBar.EXPOSED_THRESHOLD)
+		elseif(player.helcurt.passive_state_bar <= PassiveBar.EXPOSED_THRESHOLD) then
+			--print("Switching to exposed because bar is under " .. PassiveBar.EXPOSED_THRESHOLD)
 			to_switch_state = PassiveState.EXPOSED
-		elseif(player.passive_state_bar <= PassiveBar.AMBUSH_THRESHOLD) then
-			print("Switching to ambush because bar is under " .. PassiveBar.AMBUSH_THRESHOLD)
+		elseif(player.helcurt.passive_state_bar <= PassiveBar.AMBUSH_THRESHOLD) then
+			--print("Switching to ambush because bar is under " .. PassiveBar.AMBUSH_THRESHOLD)
 			to_switch_state = PassiveState.AMBUSH
-		elseif(player.passive_state_bar <= PassiveBar.PROWLER_THRESHOLD) then
-			print("Switching to prowler because bar is under " .. PassiveBar.PROWLER_THRESHOLD)
+		elseif(player.helcurt.passive_state_bar <= PassiveBar.PROWLER_THRESHOLD) then
+			--print("Switching to prowler because bar is under " .. PassiveBar.PROWLER_THRESHOLD)
 			to_switch_state = PassiveState.PROWLER
 		end
 		return to_switch_state
@@ -329,7 +329,7 @@ local function PassiveThinker(player)
 
 		local was_state_applied = false
 		-- If there is a state to switch to and it's different from the current state, switch to it
-		if passive_state_to_apply ~= nil and passive_state_to_apply ~= player.passive_state then
+		if passive_state_to_apply ~= nil and passive_state_to_apply ~= player.helcurt.passive_state then
 			if passive_state_to_apply == PassiveState.PROWLER then
 				was_state_applied = SwitchToProwler(player)
 			elseif passive_state_to_apply == PassiveState.AMBUSH then
@@ -353,8 +353,8 @@ local function PassiveThinker(player)
 
 	-- Deplete the passive state bar if the state is affected only by the bar depletion and NOT the events such as helcurt being hidden in fog or dark sectors
 	if event_requested_ps == nil then
-		if player.passive_state_bar > PassiveBar.MIN_BAR_VALUE then
-			player.passive_state_bar = $ - 1
+		if player.helcurt.passive_state_bar > PassiveBar.MIN_BAR_VALUE then
+			player.helcurt.passive_state_bar = $ - 1
 		end
 	end
 
@@ -365,19 +365,21 @@ local function PassiveThinker(player)
 	end
 
 	local applied_ps = ApplyState(to_apply_ps)
+	--[[
 	print("Event requested for now: " .. tostring(event_requested_ps) 
 		.. " | Bar requested for now: " .. tostring(bar_requested_ps)
 		.. " | State applied now: " .. tostring(to_apply_ps)
-		.. " | Passive bar: " .. tostring(player.passive_state_bar)
+		.. " | Passive bar: " .. tostring(player.helcurt.passive_state_bar)
 		.. " | GFCT: " .. tostring(player.helcurt.groundfog_coyote_timer)
 	)
+	]]--
 
 	-- Passive state thinker
-	if player.passive_state == PassiveState.PROWLER then
+	if player.helcurt.passive_state == PassiveState.PROWLER then
 		ProwlerEffectThinker(player.mo)
-	elseif player.passive_state == PassiveState.AMBUSH then
+	elseif player.helcurt.passive_state == PassiveState.AMBUSH then
 		-- ...
-	elseif player.passive_state == PassiveState.EXPOSED then
+	elseif player.helcurt.passive_state == PassiveState.EXPOSED then
 		-- ...
 	end
 
@@ -392,7 +394,7 @@ addHook("PlayerThink", function(player)
 	if not HelcurtAlive(player) then return nil end 
 	
 	--Concealment particles
-	if(player.passive_state_bar > 0) then
+	if(player.helcurt.passive_state_bar > 0) then
 		local particle = P_SpawnMobj(player.mo.x+P_RandomRange(SPAWN_RADIUS_MAX, -SPAWN_RADIUS_MAX)*FRACUNIT, 
 									player.mo.y+P_RandomRange(SPAWN_RADIUS_MAX, -SPAWN_RADIUS_MAX)*FRACUNIT,  
 									player.mo.z+P_RandomRange(0, player.mo.height/(2*FRACUNIT))*FRACUNIT,
